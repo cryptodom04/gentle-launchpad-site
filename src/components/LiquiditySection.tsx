@@ -1,92 +1,123 @@
 import { Button } from '@/components/ui/button';
-import { ArrowRight, TrendingUp, Lock, Coins } from 'lucide-react';
+import { ArrowRight, TrendingUp, Lock, Coins, ArrowUpRight, Droplets } from 'lucide-react';
 
-const features = [
-  {
-    icon: TrendingUp,
-    title: 'Create Liquidity Pool',
-    description: 'Set up liquidity pools for your tokens with just a few clicks.',
-  },
-  {
-    icon: Lock,
-    title: 'Lock Liquidity',
-    description: 'Lock your liquidity to build investor trust and ensure stability.',
-  },
-  {
-    icon: Coins,
-    title: 'Manage Positions',
-    description: 'Track and manage your liquidity positions across multiple pools.',
-  },
+const pools = [
+  { pair: 'SOL/USDC', tvl: '$2.4M', apy: '127%', change: '+12.4%' },
+  { pair: 'NEBULA/SOL', tvl: '$856K', apy: '89%', change: '+8.2%' },
+  { pair: 'BONK/SOL', tvl: '$1.2M', apy: '156%', change: '+24.1%' },
 ];
 
 const LiquiditySection = () => {
   return (
-    <section id="liquidity" className="py-24 relative overflow-hidden">
-      <div className="absolute inset-0 stars-bg opacity-20" />
-      <div className="absolute -right-40 top-1/2 -translate-y-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+    <section id="liquidity" className="py-32 relative overflow-hidden">
+      <div className="absolute inset-0 aurora-bg opacity-40" />
+      <div className="absolute inset-0 grid-bg opacity-20" />
+      
+      {/* Large decorative orb */}
+      <div className="absolute -left-64 top-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-accent/20 to-primary/10 rounded-full blur-[150px]" />
       
       <div className="container mx-auto px-4 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          {/* Left side - Content */}
           <div>
-            <h2 className="font-display text-3xl md:text-5xl font-bold mb-6">
-              Enhance Your
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6">
+              <Droplets className="w-4 h-4 text-accent" />
+              <span className="text-sm font-medium">Liquidity Pools</span>
+            </div>
+            
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+              Maximize Your
               <br />
-              <span className="text-primary">Solana Token</span>
-              <br />
-              Experience
+              <span className="gradient-text">Token's Potential</span>
             </h2>
-            <p className="text-muted-foreground mb-8 text-lg">
-              Create, manage, and control your tokens effortlessly with secure
-              transactions, instant deployment, and zero coding required.
+            
+            <p className="text-lg text-muted-foreground mb-10 max-w-md">
+              Create and manage liquidity pools with ease. Lock liquidity to build trust and attract investors.
             </p>
 
-            <div className="space-y-4 mb-8">
-              {features.map((feature) => (
-                <div key={feature.title} className="flex items-start gap-4 p-4 rounded-xl glass">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <feature.icon className="w-5 h-5 text-primary" />
+            {/* Feature cards */}
+            <div className="space-y-4 mb-10">
+              {[
+                { icon: TrendingUp, title: 'Create Pools', desc: 'Launch liquidity pools with custom parameters' },
+                { icon: Lock, title: 'Lock Liquidity', desc: 'Build investor trust with time-locked LP tokens' },
+                { icon: Coins, title: 'Earn Rewards', desc: 'Collect fees from every swap in your pool' },
+              ].map((item) => (
+                <div key={item.title} className="flex items-start gap-4 p-5 rounded-2xl glass group hover:glow-accent transition-all duration-300">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent/20 to-primary/10 flex items-center justify-center shrink-0">
+                    <item.icon className="w-5 h-5 text-accent" />
                   </div>
                   <div>
-                    <h3 className="font-semibold mb-1">{feature.title}</h3>
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                    <h3 className="font-semibold mb-1">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground">{item.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
 
-            <Button size="lg" className="glow group">
-              Manage Liquidity
+            <Button 
+              size="lg" 
+              className="px-8 py-6 rounded-2xl bg-gradient-to-r from-accent to-primary hover:opacity-90 transition-all glow-accent font-semibold group"
+            >
+              Start Providing Liquidity
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
 
+          {/* Right side - Pool Dashboard */}
           <div className="relative">
-            <div className="glass rounded-3xl p-8 glow animate-float">
-              <div className="text-center mb-6">
-                <div className="w-20 h-20 mx-auto rounded-full bg-primary/20 flex items-center justify-center mb-4">
-                  <Coins className="w-10 h-10 text-primary" />
+            {/* Main card */}
+            <div className="glass-strong rounded-3xl p-8 gradient-border">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-2xl font-bold">Top Pools</h3>
+                  <p className="text-sm text-muted-foreground">Highest APY pools</p>
                 </div>
-                <h3 className="font-display text-xl font-bold">Liquidity Pool</h3>
-                <p className="text-sm text-muted-foreground">SOL / STELLAR</p>
+                <Button variant="ghost" size="sm" className="text-accent hover:text-accent">
+                  View All <ArrowUpRight className="w-4 h-4 ml-1" />
+                </Button>
               </div>
 
+              {/* Pool list */}
               <div className="space-y-4">
-                <div className="flex justify-between items-center p-3 rounded-lg bg-secondary/50">
-                  <span className="text-sm text-muted-foreground">Total Value Locked</span>
-                  <span className="font-semibold text-primary">$503,372.32</span>
-                </div>
-                <div className="flex justify-between items-center p-3 rounded-lg bg-secondary/50">
-                  <span className="text-sm text-muted-foreground">APY</span>
-                  <span className="font-semibold text-primary">127.4%</span>
-                </div>
-                <div className="flex justify-between items-center p-3 rounded-lg bg-secondary/50">
-                  <span className="text-sm text-muted-foreground">Your Position</span>
-                  <span className="font-semibold">$12,450.00</span>
-                </div>
+                {pools.map((pool, index) => (
+                  <div 
+                    key={pool.pair}
+                    className="flex items-center justify-between p-4 rounded-2xl bg-secondary/30 hover:bg-secondary/50 transition-colors group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent" />
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-primary absolute -right-3 top-0 border-2 border-card" />
+                      </div>
+                      <div className="ml-2">
+                        <p className="font-semibold">{pool.pair}</p>
+                        <p className="text-xs text-muted-foreground">TVL: {pool.tvl}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-accent">{pool.apy}</p>
+                      <p className="text-xs text-green-500">{pool.change}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              <Button className="w-full mt-6">Add Liquidity</Button>
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-4 mt-8 pt-8 border-t border-border/50">
+                <div className="text-center">
+                  <p className="text-3xl font-bold gradient-text">$12.4M</p>
+                  <p className="text-sm text-muted-foreground">Total Value Locked</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-3xl font-bold gradient-text">2,847</p>
+                  <p className="text-sm text-muted-foreground">Active Pools</p>
+                </div>
+              </div>
             </div>
+
+            {/* Floating decorative elements */}
+            <div className="absolute -top-8 -right-8 w-24 h-24 bg-gradient-to-br from-accent/30 to-transparent rounded-2xl rotate-12 blur-sm" />
+            <div className="absolute -bottom-6 -left-6 w-20 h-20 bg-gradient-to-br from-primary/30 to-transparent rounded-full blur-sm" />
           </div>
         </div>
       </div>

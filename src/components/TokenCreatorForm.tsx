@@ -3,14 +3,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Upload, Rocket, Info } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Slider } from '@/components/ui/slider';
+import { Upload, Rocket, Sparkles, Check, Copy, Image as ImageIcon } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const TokenCreatorForm = () => {
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     symbol: '',
-    decimals: '9',
+    decimals: 9,
     supply: '1000000000',
     metadataUrl: '',
     freezeAuthority: false,
@@ -30,127 +32,78 @@ const TokenCreatorForm = () => {
     }
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast({
+      title: "Connect Wallet",
+      description: "Please connect your wallet to create a token",
+    });
+  };
+
   return (
-    <section id="create" className="py-24 relative">
-      <div className="absolute inset-0 stars-bg opacity-30" />
+    <section id="create" className="py-32 relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 aurora-bg opacity-50" />
+      <div className="absolute inset-0 grid-bg opacity-20" />
       
       <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-12">
-          <h2 className="font-display text-3xl md:text-5xl font-bold mb-4">
-            The world's most powerful
-            <br />
-            <span className="text-primary">Solana Launcher</span> ever.
-          </h2>
-        </div>
-
-        <div className="max-w-3xl mx-auto">
-          <div className="glass rounded-2xl p-6 md:p-8 glow">
-            {/* Window Controls */}
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-3 h-3 rounded-full bg-destructive/80" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-              <div className="w-3 h-3 rounded-full bg-primary/80" />
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          {/* Left side - Text */}
+          <div className="reveal-left">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6">
+              <Sparkles className="w-4 h-4 text-accent" />
+              <span className="text-sm font-medium">Token Creator</span>
             </div>
-
-            <h3 className="font-display text-xl md:text-2xl font-bold text-center mb-2">
-              Solana Token Creator
-            </h3>
-            <p className="text-muted-foreground text-center mb-8 text-sm md:text-base">
-              Create and deploy your Solana token effortlessly in seconds.
+            
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+              Design Your
+              <br />
+              <span className="gradient-text">Perfect Token</span>
+            </h2>
+            
+            <p className="text-lg text-muted-foreground mb-8 max-w-md">
+              Customize every aspect of your Solana token. From supply to authorities — you have complete control.
             </p>
 
-            <form className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Token Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="flex items-center gap-2">
-                    Token Name *
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Info className="w-4 h-4 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Max 32 characters</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </Label>
-                  <Input
-                    id="name"
-                    placeholder="My Token"
-                    maxLength={32}
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="bg-secondary/50"
-                  />
-                  <p className="text-xs text-muted-foreground">Max 32 characters</p>
+            {/* Feature list */}
+            <div className="space-y-4">
+              {[
+                'Instant deployment on Solana mainnet',
+                'Full metadata support with images',
+                'Configurable mint & freeze authorities',
+                'Compatible with all major wallets',
+              ].map((feature) => (
+                <div key={feature} className="flex items-center gap-3">
+                  <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center">
+                    <Check className="w-4 h-4 text-accent" />
+                  </div>
+                  <span className="text-sm text-muted-foreground">{feature}</span>
                 </div>
+              ))}
+            </div>
+          </div>
 
-                {/* Token Symbol */}
-                <div className="space-y-2">
-                  <Label htmlFor="symbol">Token Symbol *</Label>
-                  <Input
-                    id="symbol"
-                    placeholder="Ex: SOL"
-                    maxLength={10}
-                    value={formData.symbol}
-                    onChange={(e) => setFormData({ ...formData, symbol: e.target.value.toUpperCase() })}
-                    className="bg-secondary/50"
-                  />
-                </div>
-
-                {/* Decimals */}
-                <div className="space-y-2">
-                  <Label htmlFor="decimals" className="flex items-center gap-2">
-                    Decimals *
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Info className="w-4 h-4 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Usually 9 for Solana tokens</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </Label>
-                  <Input
-                    id="decimals"
-                    type="number"
-                    min="0"
-                    max="18"
-                    value={formData.decimals}
-                    onChange={(e) => setFormData({ ...formData, decimals: e.target.value })}
-                    className="bg-secondary/50"
-                  />
-                </div>
-
-                {/* Supply */}
-                <div className="space-y-2">
-                  <Label htmlFor="supply">Supply *</Label>
-                  <Input
-                    id="supply"
-                    type="text"
-                    placeholder="1,000,000,000"
-                    value={formData.supply}
-                    onChange={(e) => setFormData({ ...formData, supply: e.target.value.replace(/\D/g, '') })}
-                    className="bg-secondary/50"
-                  />
-                  <p className="text-xs text-muted-foreground">Initial token supply</p>
-                </div>
-              </div>
-
-              {/* Logo Upload */}
-              <div className="space-y-2">
-                <Label>Logo *</Label>
-                <div className="flex items-center gap-4">
-                  <label className="flex-1 cursor-pointer">
-                    <div className="flex items-center justify-center gap-3 p-4 border-2 border-dashed border-border rounded-xl hover:border-primary/50 hover:bg-secondary/30 transition-all">
+          {/* Right side - Form */}
+          <div className="reveal-right">
+            <div className="glass-strong rounded-3xl p-8 gradient-border relative overflow-hidden">
+              {/* Decorative corner */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/20 to-transparent rounded-bl-[100px]" />
+              
+              <form onSubmit={handleSubmit} className="space-y-6 relative">
+                {/* Logo Upload */}
+                <div className="flex justify-center mb-8">
+                  <label className="cursor-pointer group">
+                    <div className={`w-28 h-28 rounded-2xl border-2 border-dashed transition-all duration-300 flex items-center justify-center overflow-hidden ${
+                      logoPreview ? 'border-accent' : 'border-border hover:border-primary/50'
+                    }`}>
                       {logoPreview ? (
-                        <img src={logoPreview} alt="Token logo" className="w-12 h-12 rounded-full object-cover" />
+                        <img src={logoPreview} alt="Token logo" className="w-full h-full object-cover" />
                       ) : (
-                        <Upload className="w-6 h-6 text-muted-foreground" />
+                        <div className="text-center">
+                          <ImageIcon className="w-8 h-8 mx-auto text-muted-foreground mb-2 group-hover:text-primary transition-colors" />
+                          <span className="text-xs text-muted-foreground">Upload Logo</span>
+                        </div>
                       )}
-                      <span className="text-sm text-muted-foreground">
-                        {logoPreview ? 'Change logo' : 'Upload token logo'}
-                      </span>
                     </div>
                     <input
                       type="file"
@@ -160,54 +113,118 @@ const TokenCreatorForm = () => {
                     />
                   </label>
                 </div>
-              </div>
 
-              {/* Metadata URL */}
-              <div className="space-y-2">
-                <Label htmlFor="metadata">Metadata URL (optional)</Label>
-                <Input
-                  id="metadata"
-                  placeholder="https://..."
-                  value={formData.metadataUrl}
-                  onChange={(e) => setFormData({ ...formData, metadataUrl: e.target.value })}
-                  className="bg-secondary/50"
-                />
-              </div>
-
-              {/* Authority Toggles */}
-              <div className="grid md:grid-cols-2 gap-6 pt-4 border-t border-border">
-                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30">
-                  <div>
-                    <p className="font-medium text-sm">Freeze Authority</p>
-                    <p className="text-xs text-muted-foreground">Allow freezing token accounts</p>
+                {/* Token Name & Symbol */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-sm font-medium">Token Name</Label>
+                    <Input
+                      id="name"
+                      placeholder="My Token"
+                      maxLength={32}
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="bg-secondary/50 border-border/50 rounded-xl h-12 focus:ring-2 focus:ring-primary/50"
+                    />
                   </div>
-                  <Switch
-                    checked={formData.freezeAuthority}
-                    onCheckedChange={(checked) => setFormData({ ...formData, freezeAuthority: checked })}
-                  />
-                </div>
-                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30">
-                  <div>
-                    <p className="font-medium text-sm">Mint Authority</p>
-                    <p className="text-xs text-muted-foreground">Keep ability to mint more</p>
+                  <div className="space-y-2">
+                    <Label htmlFor="symbol" className="text-sm font-medium">Symbol</Label>
+                    <Input
+                      id="symbol"
+                      placeholder="TKN"
+                      maxLength={10}
+                      value={formData.symbol}
+                      onChange={(e) => setFormData({ ...formData, symbol: e.target.value.toUpperCase() })}
+                      className="bg-secondary/50 border-border/50 rounded-xl h-12 focus:ring-2 focus:ring-primary/50"
+                    />
                   </div>
-                  <Switch
-                    checked={formData.mintAuthority}
-                    onCheckedChange={(checked) => setFormData({ ...formData, mintAuthority: checked })}
-                  />
                 </div>
-              </div>
 
-              {/* Submit Button */}
-              <Button type="submit" size="lg" className="w-full text-lg py-6 glow group">
-                <Rocket className="w-5 h-5 mr-2 group-hover:animate-bounce" />
-                Create Token
-              </Button>
+                {/* Decimals Slider */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <Label className="text-sm font-medium">Decimals</Label>
+                    <span className="text-2xl font-bold gradient-text">{formData.decimals}</span>
+                  </div>
+                  <Slider
+                    value={[formData.decimals]}
+                    onValueChange={([value]) => setFormData({ ...formData, decimals: value })}
+                    max={18}
+                    min={0}
+                    step={1}
+                    className="py-2"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>0</span>
+                    <span>9 (default)</span>
+                    <span>18</span>
+                  </div>
+                </div>
 
-              <p className="text-center text-xs text-muted-foreground">
-                Fee: 0.05 SOL • Instant deployment
-              </p>
-            </form>
+                {/* Supply */}
+                <div className="space-y-2">
+                  <Label htmlFor="supply" className="text-sm font-medium">Total Supply</Label>
+                  <div className="relative">
+                    <Input
+                      id="supply"
+                      type="text"
+                      placeholder="1,000,000,000"
+                      value={Number(formData.supply).toLocaleString()}
+                      onChange={(e) => setFormData({ ...formData, supply: e.target.value.replace(/\D/g, '') })}
+                      className="bg-secondary/50 border-border/50 rounded-xl h-12 pr-12 focus:ring-2 focus:ring-primary/50"
+                    />
+                    <button 
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg hover:bg-secondary transition-colors"
+                      onClick={() => {
+                        navigator.clipboard.writeText(formData.supply);
+                        toast({ title: "Copied!", description: "Supply copied to clipboard" });
+                      }}
+                    >
+                      <Copy className="w-4 h-4 text-muted-foreground" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Authority Toggles */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30 border border-border/30">
+                    <div>
+                      <p className="font-medium text-sm">Freeze</p>
+                      <p className="text-xs text-muted-foreground">Authority</p>
+                    </div>
+                    <Switch
+                      checked={formData.freezeAuthority}
+                      onCheckedChange={(checked) => setFormData({ ...formData, freezeAuthority: checked })}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30 border border-border/30">
+                    <div>
+                      <p className="font-medium text-sm">Mint</p>
+                      <p className="text-xs text-muted-foreground">Authority</p>
+                    </div>
+                    <Switch
+                      checked={formData.mintAuthority}
+                      onCheckedChange={(checked) => setFormData({ ...formData, mintAuthority: checked })}
+                    />
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <Button 
+                  type="submit" 
+                  size="lg" 
+                  className="w-full text-lg py-7 rounded-2xl bg-gradient-to-r from-primary via-pink-500 to-accent hover:opacity-90 transition-all duration-300 glow-multi font-semibold group"
+                >
+                  <Rocket className="w-5 h-5 mr-2 group-hover:animate-bounce" />
+                  Create Token
+                </Button>
+
+                <p className="text-center text-xs text-muted-foreground">
+                  Creation fee: <span className="text-foreground font-medium">0.05 SOL</span> • Instant deployment
+                </p>
+              </form>
+            </div>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Sparkles, Zap, ChevronDown } from 'lucide-react';
+import { ArrowRight, Sparkles, Zap } from 'lucide-react';
 
 const HeroSection = () => {
   return (
@@ -100,11 +100,6 @@ const HeroSection = () => {
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <ChevronDown className="w-6 h-6 text-muted-foreground" />
         </div>
       </div>
 

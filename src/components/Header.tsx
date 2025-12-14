@@ -3,11 +3,11 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Hexagon } from 'lucide-react';
 
 const navLinks = [
-  { name: 'Home', href: '/#home' },
-  { name: 'Create', href: '/#create' },
-  { name: 'Liquidity', href: '/#liquidity' },
-  { name: 'Features', href: '/#features' },
-  { name: 'FAQ', href: '/#faq' },
+  { name: 'Home', href: '/#home', isPage: false },
+  { name: 'Create', href: '/create', isPage: true },
+  { name: 'Liquidity', href: '/#liquidity', isPage: false },
+  { name: 'Features', href: '/#features', isPage: false },
+  { name: 'FAQ', href: '/#faq', isPage: false },
 ];
 
 const Header = () => {
@@ -24,8 +24,14 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string, isPage: boolean) => {
     e.preventDefault();
+    
+    if (isPage) {
+      navigate(href);
+      return;
+    }
+    
     const hash = href.replace('/', '');
     
     if (location.pathname !== '/') {
@@ -47,7 +53,7 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <a href="/" onClick={(e) => handleNavClick(e, '/#home')} className="flex items-center gap-3 group">
+          <a href="/" onClick={(e) => handleNavClick(e, '/#home', false)} className="flex items-center gap-3 group">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-xl blur-lg opacity-50 group-hover:opacity-80 transition-opacity" />
               <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
@@ -69,7 +75,7 @@ const Header = () => {
                 <a
                   key={link.name}
                   href={link.href}
-                  onClick={(e) => handleNavClick(e, link.href)}
+                  onClick={(e) => handleNavClick(e, link.href, link.isPage)}
                   className="px-5 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all duration-300"
                 >
                   {link.name}
@@ -95,7 +101,7 @@ const Header = () => {
                 key={link.name}
                 href={link.href}
                 onClick={(e) => {
-                  handleNavClick(e, link.href);
+                  handleNavClick(e, link.href, link.isPage);
                   setIsMenuOpen(false);
                 }}
                 className="block px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"

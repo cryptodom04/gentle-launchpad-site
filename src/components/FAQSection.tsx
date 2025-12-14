@@ -91,26 +91,6 @@ const FAQSection = () => {
               </div>
             ))}
           </div>
-
-          {/* Contact CTA */}
-          <div className="mt-16 text-center glass-strong rounded-3xl p-10 gradient-border">
-            <h3 className="text-2xl font-bold mb-3">Still have questions?</h3>
-            <p className="text-muted-foreground mb-6">Our team is here to help you 24/7</p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a 
-                href="#" 
-                className="px-8 py-4 rounded-xl bg-gradient-to-r from-primary to-accent font-semibold hover:opacity-90 transition-opacity"
-              >
-                Join Discord
-              </a>
-              <a 
-                href="#" 
-                className="px-8 py-4 rounded-xl glass font-medium hover:bg-secondary/50 transition-colors"
-              >
-                Read Docs
-              </a>
-            </div>
-          </div>
         </div>
       </div>
     </section>

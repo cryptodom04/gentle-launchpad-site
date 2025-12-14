@@ -5,26 +5,12 @@ import solanaLogo from '@/assets/solana-logo.png';
 const HeroSection = () => {
   return <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Effects */}
-      <div className="absolute inset-0 grid-bg opacity-30" />
+      <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
       
-      {/* Animated orbs */}
-      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-primary/30 to-accent/20 rounded-full blur-[120px] animate-pulse-glow" />
-      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-gradient-to-r from-accent/20 to-primary/30 rounded-full blur-[100px] animate-pulse-glow" style={{
+      {/* Animated orbs - hidden on mobile */}
+      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-primary/30 to-accent/20 rounded-full blur-[120px] animate-pulse-glow pointer-events-none hidden md:block" />
+      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-gradient-to-r from-accent/20 to-primary/30 rounded-full blur-[100px] animate-pulse-glow pointer-events-none hidden md:block" style={{
       animationDelay: '1.5s'
-    }} />
-      
-      {/* Floating geometric shapes */}
-      <div className="absolute top-32 left-[10%] w-24 h-24 border border-primary/30 rounded-2xl rotate-12 animate-float opacity-40" style={{
-      animationDelay: '0s'
-    }} />
-      <div className="absolute top-48 right-[15%] w-16 h-16 border border-accent/40 rounded-full animate-float opacity-50" style={{
-      animationDelay: '1s'
-    }} />
-      <div className="absolute bottom-40 left-[20%] w-20 h-20 border border-primary/20 rounded-3xl -rotate-12 animate-float opacity-30" style={{
-      animationDelay: '2s'
-    }} />
-      <div className="absolute bottom-32 right-[10%] w-12 h-12 bg-gradient-to-br from-accent/20 to-transparent rounded-xl rotate-45 animate-float" style={{
-      animationDelay: '0.5s'
     }} />
       
       <div className="container mx-auto px-4 relative z-10 pt-8 sm:pt-20">

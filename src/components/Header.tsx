@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Wallet, Menu, X, Hexagon } from 'lucide-react';
+import { Menu, X, Hexagon } from 'lucide-react';
 
 const navLinks = [
   { name: 'Home', href: '#home' },
@@ -61,23 +60,13 @@ const Header = () => {
             </div>
           </nav>
 
-          {/* Connect Wallet Button */}
-          <div className="flex items-center gap-3">
-            <Button 
-              className="hidden md:flex items-center gap-2 px-6 py-5 rounded-xl bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all duration-300 glow-primary font-semibold"
-            >
-              <Wallet className="w-4 h-4" />
-              Connect
-            </Button>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-2.5 rounded-xl glass hover:bg-secondary/80 transition-colors"
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="lg:hidden p-2.5 rounded-xl glass hover:bg-secondary/80 transition-colors"
+          >
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
 
         {/* Mobile Navigation */}
@@ -94,10 +83,6 @@ const Header = () => {
                 {link.name}
               </a>
             ))}
-            <Button className="w-full mt-4 flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-accent">
-              <Wallet className="w-4 h-4" />
-              Connect Wallet
-            </Button>
           </nav>
         )}
       </div>

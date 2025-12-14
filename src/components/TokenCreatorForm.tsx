@@ -1,45 +1,6 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
-import { Upload, Rocket, Sparkles, Check, Copy, Image as ImageIcon } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Rocket, Sparkles, Check, Copy, Image as ImageIcon } from 'lucide-react';
 
 const TokenCreatorForm = () => {
-  const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    name: '',
-    symbol: '',
-    decimals: 9,
-    supply: '1000000000',
-    metadataUrl: '',
-    freezeAuthority: false,
-    mintAuthority: true,
-  });
-
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
-
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setLogoPreview(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast({
-      title: "Connect Wallet",
-      description: "Please connect your wallet to create a token",
-    });
-  };
-
   return (
     <section id="create" className="py-32 relative overflow-hidden">
       {/* Background */}
@@ -83,10 +44,10 @@ const TokenCreatorForm = () => {
             </div>
           </div>
 
-          {/* Right side - MacBook Mockup */}
+          {/* Right side - MacBook Mockup (Static Presentation) */}
           <div className="reveal-right">
             {/* MacBook Frame */}
-            <div className="relative">
+            <div className="relative pointer-events-none select-none">
               {/* MacBook Screen */}
               <div className="bg-[#1a1a1a] rounded-2xl p-2 shadow-2xl shadow-black/50">
                 {/* Screen bezel */}
@@ -102,71 +63,44 @@ const TokenCreatorForm = () => {
                       {/* Decorative corner */}
                       <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-primary/20 to-transparent rounded-bl-[80px]" />
                       
-                      <form onSubmit={handleSubmit} className="space-y-4 relative">
-                        {/* Logo Upload */}
+                      <div className="space-y-4 relative">
+                        {/* Logo Upload - Static */}
                         <div className="flex justify-center mb-4">
-                          <label className="cursor-pointer group">
-                            <div className={`w-20 h-20 rounded-xl border-2 border-dashed transition-all duration-300 flex items-center justify-center overflow-hidden ${
-                              logoPreview ? 'border-accent' : 'border-border hover:border-primary/50'
-                            }`}>
-                              {logoPreview ? (
-                                <img src={logoPreview} alt="Token logo" className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="text-center">
-                                  <ImageIcon className="w-6 h-6 mx-auto text-muted-foreground mb-1 group-hover:text-primary transition-colors" />
-                                  <span className="text-[10px] text-muted-foreground">Upload Logo</span>
-                                </div>
-                              )}
+                          <div className="w-20 h-20 rounded-xl border-2 border-dashed border-border flex items-center justify-center">
+                            <div className="text-center">
+                              <ImageIcon className="w-6 h-6 mx-auto text-muted-foreground mb-1" />
+                              <span className="text-[10px] text-muted-foreground">Upload Logo</span>
                             </div>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={handleLogoUpload}
-                            />
-                          </label>
+                          </div>
                         </div>
 
-                        {/* Token Name & Symbol */}
+                        {/* Token Name & Symbol - Static */}
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1">
-                            <Label htmlFor="name" className="text-xs font-medium">Token Name</Label>
-                            <Input
-                              id="name"
-                              placeholder="My Token"
-                              maxLength={32}
-                              value={formData.name}
-                              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                              className="bg-secondary/50 border-border/50 rounded-lg h-10 text-sm focus:ring-2 focus:ring-primary/50"
-                            />
+                            <p className="text-xs font-medium text-foreground">Token Name</p>
+                            <div className="bg-secondary/50 border border-border/50 rounded-lg h-10 px-3 flex items-center">
+                              <span className="text-sm text-muted-foreground">My Token</span>
+                            </div>
                           </div>
                           <div className="space-y-1">
-                            <Label htmlFor="symbol" className="text-xs font-medium">Symbol</Label>
-                            <Input
-                              id="symbol"
-                              placeholder="TKN"
-                              maxLength={10}
-                              value={formData.symbol}
-                              onChange={(e) => setFormData({ ...formData, symbol: e.target.value.toUpperCase() })}
-                              className="bg-secondary/50 border-border/50 rounded-lg h-10 text-sm focus:ring-2 focus:ring-primary/50"
-                            />
+                            <p className="text-xs font-medium text-foreground">Symbol</p>
+                            <div className="bg-secondary/50 border border-border/50 rounded-lg h-10 px-3 flex items-center">
+                              <span className="text-sm text-muted-foreground">TKN</span>
+                            </div>
                           </div>
                         </div>
 
-                        {/* Decimals Slider */}
+                        {/* Decimals - Static */}
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
-                            <Label className="text-xs font-medium">Decimals</Label>
-                            <span className="text-lg font-bold gradient-text">{formData.decimals}</span>
+                            <p className="text-xs font-medium text-foreground">Decimals</p>
+                            <span className="text-lg font-bold gradient-text">9</span>
                           </div>
-                          <Slider
-                            value={[formData.decimals]}
-                            onValueChange={([value]) => setFormData({ ...formData, decimals: value })}
-                            max={18}
-                            min={0}
-                            step={1}
-                            className="py-1"
-                          />
+                          {/* Static slider representation */}
+                          <div className="relative h-2 bg-secondary rounded-full">
+                            <div className="absolute left-0 top-0 h-full w-1/2 bg-gradient-to-r from-primary to-accent rounded-full" />
+                            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-foreground rounded-full shadow-lg" />
+                          </div>
                           <div className="flex justify-between text-[10px] text-muted-foreground">
                             <span>0</span>
                             <span>9 (default)</span>
@@ -174,69 +108,49 @@ const TokenCreatorForm = () => {
                           </div>
                         </div>
 
-                        {/* Supply */}
+                        {/* Supply - Static */}
                         <div className="space-y-1">
-                          <Label htmlFor="supply" className="text-xs font-medium">Total Supply</Label>
-                          <div className="relative">
-                            <Input
-                              id="supply"
-                              type="text"
-                              placeholder="1,000,000,000"
-                              value={Number(formData.supply).toLocaleString()}
-                              onChange={(e) => setFormData({ ...formData, supply: e.target.value.replace(/\D/g, '') })}
-                              className="bg-secondary/50 border-border/50 rounded-lg h-10 pr-10 text-sm focus:ring-2 focus:ring-primary/50"
-                            />
-                            <button 
-                              type="button"
-                              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-secondary transition-colors"
-                              onClick={() => {
-                                navigator.clipboard.writeText(formData.supply);
-                                toast({ title: "Copied!", description: "Supply copied to clipboard" });
-                              }}
-                            >
-                              <Copy className="w-3.5 h-3.5 text-muted-foreground" />
-                            </button>
+                          <p className="text-xs font-medium text-foreground">Total Supply</p>
+                          <div className="relative bg-secondary/50 border border-border/50 rounded-lg h-10 px-3 flex items-center justify-between">
+                            <span className="text-sm text-foreground">1,000,000,000</span>
+                            <Copy className="w-3.5 h-3.5 text-muted-foreground" />
                           </div>
                         </div>
 
-                        {/* Authority Toggles */}
+                        {/* Authority Toggles - Static */}
                         <div className="grid grid-cols-2 gap-3">
                           <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 border border-border/30">
                             <div>
                               <p className="font-medium text-xs">Freeze</p>
                               <p className="text-[10px] text-muted-foreground">Authority</p>
                             </div>
-                            <Switch
-                              checked={formData.freezeAuthority}
-                              onCheckedChange={(checked) => setFormData({ ...formData, freezeAuthority: checked })}
-                            />
+                            {/* Static toggle OFF */}
+                            <div className="w-9 h-5 bg-secondary rounded-full relative">
+                              <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-muted-foreground rounded-full" />
+                            </div>
                           </div>
                           <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 border border-border/30">
                             <div>
                               <p className="font-medium text-xs">Mint</p>
                               <p className="text-[10px] text-muted-foreground">Authority</p>
                             </div>
-                            <Switch
-                              checked={formData.mintAuthority}
-                              onCheckedChange={(checked) => setFormData({ ...formData, mintAuthority: checked })}
-                            />
+                            {/* Static toggle ON */}
+                            <div className="w-9 h-5 bg-gradient-to-r from-primary to-accent rounded-full relative">
+                              <div className="absolute right-0.5 top-0.5 w-4 h-4 bg-foreground rounded-full" />
+                            </div>
                           </div>
                         </div>
 
-                        {/* Submit Button */}
-                        <Button 
-                          type="submit" 
-                          size="lg" 
-                          className="w-full text-sm py-5 rounded-xl bg-gradient-to-r from-primary via-pink-500 to-accent hover:opacity-90 transition-all duration-300 glow-multi font-semibold group"
-                        >
-                          <Rocket className="w-4 h-4 mr-2 group-hover:animate-bounce" />
+                        {/* Create Button - Static */}
+                        <div className="w-full text-sm py-4 rounded-xl bg-gradient-to-r from-primary via-pink-500 to-accent text-center font-semibold flex items-center justify-center gap-2 glow-multi">
+                          <Rocket className="w-4 h-4" />
                           Create Token
-                        </Button>
+                        </div>
 
                         <p className="text-center text-[10px] text-muted-foreground">
                           Creation fee: <span className="text-foreground font-medium">0.05 SOL</span> • Instant deployment
                         </p>
-                      </form>
+                      </div>
                     </div>
                   </div>
                 </div>

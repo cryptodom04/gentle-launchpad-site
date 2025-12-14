@@ -64,7 +64,7 @@ const HeroSection = () => {
             label: 'Tokens Created',
             icon: '🚀'
           }, {
-            value: '$12M+',
+            value: '$1M+',
             label: 'Total Volume',
             icon: '💎'
           }, {

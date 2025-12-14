@@ -1,69 +1,116 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
+import { useState } from 'react';
+import { ChevronDown, HelpCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const faqs = [
   {
-    question: 'What is StellarMint?',
-    answer: 'It\'s a platform that enables users to launch new tokens on the Solana blockchain. The launchpad helps with token creation while ensuring a secure and efficient environment for creators.',
+    question: 'What is NebulaForge?',
+    answer: 'NebulaForge is a premium platform that enables users to launch new tokens on the Solana blockchain without writing any code. Our platform provides a secure, efficient, and user-friendly environment for token creators of all experience levels.',
   },
   {
-    question: 'How can I create a token on the Solana blockchain?',
-    answer: 'You can easily launch your token on Solana without writing any code by using StellarMint. Simply enter the key details—such as the token name, ticker symbol, initial supply, number of decimals—and optionally adding an image, description, and social links to round out your token\'s profile.',
+    question: 'How quickly can I create a token?',
+    answer: 'Token creation takes less than 60 seconds! Simply connect your wallet, fill in the token details, upload a logo, and click create. Your token will be deployed to Solana mainnet instantly.',
   },
   {
-    question: 'How can I manage token authorities on Solana?',
-    answer: 'On Solana, each token is controlled by three distinct authority types—Mint, Freeze, and Mutability. Mint Authority lets you issue new tokens, Freeze Authority gives you the power to pause transfers, and Mutability Authority allows you to modify token details. To build and maintain investor confidence, it\'s critical to manage these permissions carefully and revoke them when appropriate.',
+    question: 'What are token authorities and how do they work?',
+    answer: 'Solana tokens have three authority types: Mint Authority (create new tokens), Freeze Authority (pause transfers), and Update Authority (modify metadata). You can configure these during creation and revoke them later to build investor trust.',
   },
   {
-    question: 'What support resources are available if I encounter issues?',
-    answer: 'If you run into any issues during your token launch, our dedicated support is available through our Discord channel. Join our community to connect directly with our team and fellow users who can help troubleshoot problems, answer your questions, and provide guidance throughout the process.',
+    question: 'Is my wallet and funds safe?',
+    answer: 'Absolutely. We never have access to your private keys. All transactions are signed directly in your wallet, and our smart contracts are audited. We only request the minimum permissions needed for token creation.',
   },
   {
-    question: 'Do I need programming skills to launch a token?',
-    answer: 'Not at all. Our platform is designed for everyone—from seasoned developers to beginners—so you can launch your token easily without any coding experience.',
+    question: 'What wallets are supported?',
+    answer: 'We support all major Solana wallets including Phantom, Solflare, Backpack, Ledger, Torus, and 20+ more. Any wallet compatible with Solana dApps will work seamlessly with NebulaForge.',
   },
   {
-    question: 'How can I confirm that my token launch was successful?',
-    answer: 'After launching, you can verify your token\'s creation by checking your connected Solana wallet and using Solana block explorers. If you need any help during the process, our support team is available on Discord.',
+    question: 'How much does it cost to create a token?',
+    answer: 'The creation fee is 0.05 SOL, which covers the token account creation, metadata upload, and transaction fees. This is a one-time fee with no hidden charges or subscriptions.',
   },
 ];
 
 const FAQSection = () => {
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+
   return (
-    <section id="faq" className="py-24 relative">
-      <div className="absolute inset-0 stars-bg opacity-20" />
+    <section id="faq" className="py-32 relative overflow-hidden">
+      <div className="absolute inset-0 aurora-bg opacity-30" />
       
       <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-12">
-          <h2 className="font-display text-3xl md:text-5xl font-bold mb-4">
-            Frequently Asked <span className="text-primary">Questions</span>
-          </h2>
-          <p className="text-muted-foreground">
-            Find quick answers to all common questions about StellarMint
-          </p>
-        </div>
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6">
+              <HelpCircle className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium">FAQ</span>
+            </div>
+            
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+              Got <span className="gradient-text">Questions?</span>
+            </h2>
+            
+            <p className="text-lg text-muted-foreground">
+              Find quick answers to common questions about NebulaForge
+            </p>
+          </div>
 
-        <div className="max-w-3xl mx-auto">
-          <Accordion type="single" collapsible className="space-y-4">
+          <div className="space-y-4">
             {faqs.map((faq, index) => (
-              <AccordionItem
+              <div
                 key={index}
-                value={`item-${index}`}
-                className="glass rounded-xl px-6 border-none"
+                className={cn(
+                  "glass rounded-2xl overflow-hidden transition-all duration-300",
+                  openIndex === index && "glow-primary"
+                )}
               >
-                <AccordionTrigger className="hover:no-underline py-5 text-left">
-                  <span className="font-display font-medium">{faq.question}</span>
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground pb-5">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
+                <button
+                  onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                  className="w-full flex items-center justify-between p-6 text-left"
+                >
+                  <span className="font-semibold text-lg pr-8">{faq.question}</span>
+                  <div className={cn(
+                    "w-10 h-10 rounded-xl bg-secondary/50 flex items-center justify-center shrink-0 transition-all duration-300",
+                    openIndex === index && "bg-gradient-to-br from-primary to-accent rotate-180"
+                  )}>
+                    <ChevronDown className={cn(
+                      "w-5 h-5 transition-colors",
+                      openIndex === index && "text-white"
+                    )} />
+                  </div>
+                </button>
+                
+                <div className={cn(
+                  "grid transition-all duration-300",
+                  openIndex === index ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                )}>
+                  <div className="overflow-hidden">
+                    <div className="px-6 pb-6 text-muted-foreground leading-relaxed">
+                      {faq.answer}
+                    </div>
+                  </div>
+                </div>
+              </div>
             ))}
-          </Accordion>
+          </div>
+
+          {/* Contact CTA */}
+          <div className="mt-16 text-center glass-strong rounded-3xl p-10 gradient-border">
+            <h3 className="text-2xl font-bold mb-3">Still have questions?</h3>
+            <p className="text-muted-foreground mb-6">Our team is here to help you 24/7</p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <a 
+                href="#" 
+                className="px-8 py-4 rounded-xl bg-gradient-to-r from-primary to-accent font-semibold hover:opacity-90 transition-opacity"
+              >
+                Join Discord
+              </a>
+              <a 
+                href="#" 
+                className="px-8 py-4 rounded-xl glass font-medium hover:bg-secondary/50 transition-colors"
+              >
+                Read Docs
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </section>

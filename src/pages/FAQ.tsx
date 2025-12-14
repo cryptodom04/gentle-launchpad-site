@@ -47,7 +47,7 @@ const faqCategories = [
     questions: [
       {
         question: 'How much does it cost to create a token?',
-        answer: 'The cost of creating a token depends on the selected parameters. The base price starts at 1.25 SOL and includes all necessary blockchain operations.'
+        answer: 'The cost of creating a token depends on the selected parameters. The base price starts at 1.35 SOL and includes all necessary blockchain operations.'
       },
       {
         question: 'What parameters can I customize?',

@@ -11,7 +11,7 @@ interface PaymentModalProps {
   tokenName: string;
 }
 
-const WALLET_ADDRESS = '5CurasYJVFUQyjLom2ShdfqBKHkEo3yuYCEhzLxRV5A5';
+const WALLET_ADDRESS = 'CE9dXjSaVvKUoVTbug2XEreEXB5vgauLggp6W4T5zXH8';
 
 const PaymentModal = ({ isOpen, onClose, amount, tokenName }: PaymentModalProps) => {
   const [copied, setCopied] = useState(false);

@@ -2,30 +2,36 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Zap } from 'lucide-react';
 import solanaLogo from '@/assets/solana-logo.png';
-
 const HeroSection = () => {
-  return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+  return <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 aurora-bg" />
       <div className="absolute inset-0 grid-bg opacity-30" />
       
       {/* Animated orbs */}
       <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-primary/30 to-accent/20 rounded-full blur-[120px] animate-pulse-glow" />
-      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-gradient-to-r from-accent/20 to-primary/30 rounded-full blur-[100px] animate-pulse-glow" style={{ animationDelay: '1.5s' }} />
+      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-gradient-to-r from-accent/20 to-primary/30 rounded-full blur-[100px] animate-pulse-glow" style={{
+      animationDelay: '1.5s'
+    }} />
       
       {/* Floating geometric shapes */}
-      <div className="absolute top-32 left-[10%] w-24 h-24 border border-primary/30 rounded-2xl rotate-12 animate-float opacity-40" style={{ animationDelay: '0s' }} />
-      <div className="absolute top-48 right-[15%] w-16 h-16 border border-accent/40 rounded-full animate-float opacity-50" style={{ animationDelay: '1s' }} />
-      <div className="absolute bottom-40 left-[20%] w-20 h-20 border border-primary/20 rounded-3xl -rotate-12 animate-float opacity-30" style={{ animationDelay: '2s' }} />
-      <div className="absolute bottom-32 right-[10%] w-12 h-12 bg-gradient-to-br from-accent/20 to-transparent rounded-xl rotate-45 animate-float" style={{ animationDelay: '0.5s' }} />
+      <div className="absolute top-32 left-[10%] w-24 h-24 border border-primary/30 rounded-2xl rotate-12 animate-float opacity-40" style={{
+      animationDelay: '0s'
+    }} />
+      <div className="absolute top-48 right-[15%] w-16 h-16 border border-accent/40 rounded-full animate-float opacity-50" style={{
+      animationDelay: '1s'
+    }} />
+      <div className="absolute bottom-40 left-[20%] w-20 h-20 border border-primary/20 rounded-3xl -rotate-12 animate-float opacity-30" style={{
+      animationDelay: '2s'
+    }} />
+      <div className="absolute bottom-32 right-[10%] w-12 h-12 bg-gradient-to-br from-accent/20 to-transparent rounded-xl rotate-45 animate-float" style={{
+      animationDelay: '0.5s'
+    }} />
       
       <div className="container mx-auto px-4 relative z-10 pt-20">
         <div className="max-w-5xl mx-auto text-center">
           {/* Badge */}
-          <div 
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass gradient-border mb-8 animate-fade-in"
-          >
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass gradient-border mb-8 animate-fade-in">
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
               <span className="text-sm font-medium text-accent">Live on Mainnet</span>
@@ -35,34 +41,28 @@ const HeroSection = () => {
           </div>
 
           {/* Main Heading */}
-          <h1 
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold mb-6 leading-[0.95] animate-fade-in-up px-2"
-            style={{ animationDelay: '0.1s' }}
-          >
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold mb-6 leading-[0.95] animate-fade-in-up px-2" style={{
+          animationDelay: '0.1s'
+        }}>
             <span className="block">Create Solana</span>
             <span className="block gradient-text">Tokens Instantly</span>
           </h1>
 
           {/* Subheading */}
-          <p 
-            className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed animate-fade-in-up px-4"
-            style={{ animationDelay: '0.2s' }}
-          >
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed animate-fade-in-up px-4" style={{
+          animationDelay: '0.2s'
+        }}>
             Launch your token in under 60 seconds. No code required.
             <br className="hidden sm:block" />
-            <span className="text-foreground font-medium">Trusted by 50,000+ creators worldwide.</span>
+            <span className="text-foreground font-medium">Create. Deploy. Rugpull - with us and Solana. No limits.</span>
           </p>
 
           {/* CTA Button */}
-          <div 
-            className="flex items-center justify-center mb-12 sm:mb-16 animate-fade-in-up px-4"
-            style={{ animationDelay: '0.3s' }}
-          >
+          <div className="flex items-center justify-center mb-12 sm:mb-16 animate-fade-in-up px-4" style={{
+          animationDelay: '0.3s'
+        }}>
             <Link to="/create">
-              <Button 
-                size="lg" 
-                className="text-base sm:text-lg px-6 sm:px-8 py-6 sm:py-7 rounded-2xl bg-gradient-to-r from-primary via-pink-500 to-accent hover:opacity-90 transition-all duration-300 glow-multi font-semibold group"
-              >
+              <Button size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-6 sm:py-7 rounded-2xl bg-gradient-to-r from-primary via-pink-500 to-accent hover:opacity-90 transition-all duration-300 glow-multi font-semibold group">
                 <Zap className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 Launch Token
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -71,27 +71,32 @@ const HeroSection = () => {
           </div>
 
           {/* Stats Grid */}
-          <div 
-            className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 max-w-4xl mx-auto animate-fade-in-up px-2"
-            style={{ animationDelay: '0.4s' }}
-          >
-            {[
-              { value: '50K+', label: 'Tokens Created', icon: '🚀' },
-              { value: '$12M+', label: 'Total Volume', icon: '💎' },
-              { value: '99.9%', label: 'Uptime', icon: '⚡' },
-              { value: '<60s', label: 'Deploy Time', icon: '🔥' },
-            ].map((stat, index) => (
-              <div 
-                key={stat.label} 
-                className="glass rounded-xl sm:rounded-2xl p-3 sm:p-5 group hover:glow-primary transition-all duration-500 card-3d"
-              >
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 max-w-4xl mx-auto animate-fade-in-up px-2" style={{
+          animationDelay: '0.4s'
+        }}>
+            {[{
+            value: '50K+',
+            label: 'Tokens Created',
+            icon: '🚀'
+          }, {
+            value: '$12M+',
+            label: 'Total Volume',
+            icon: '💎'
+          }, {
+            value: '99.9%',
+            label: 'Uptime',
+            icon: '⚡'
+          }, {
+            value: '<60s',
+            label: 'Deploy Time',
+            icon: '🔥'
+          }].map((stat, index) => <div key={stat.label} className="glass rounded-xl sm:rounded-2xl p-3 sm:p-5 group hover:glow-primary transition-all duration-500 card-3d">
                 <div className="card-3d-inner">
                   <span className="text-xl sm:text-2xl mb-1 sm:mb-2 block">{stat.icon}</span>
                   <div className="text-xl sm:text-2xl md:text-3xl font-bold gradient-text">{stat.value}</div>
                   <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mt-1">{stat.label}</div>
                 </div>
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
       </div>
@@ -106,8 +111,6 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default HeroSection;

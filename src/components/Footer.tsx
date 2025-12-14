@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Hexagon, Twitter, MessageCircle, Github, ArrowUpRight } from 'lucide-react';
+import { Hexagon, ArrowUpRight } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -25,32 +25,16 @@ const Footer = () => {
                 </span>
               </div>
             </a>
-            <p className="text-muted-foreground max-w-md mb-8 leading-relaxed">
+            <p className="text-muted-foreground max-w-md leading-relaxed">
               The most powerful token launcher on Solana. Create, deploy, and manage your tokens with zero code and maximum control.
             </p>
-            <div className="flex items-center gap-3">
-              {[
-                { icon: Twitter, href: '#', label: 'Twitter' },
-                { icon: MessageCircle, href: '#', label: 'Discord' },
-                { icon: Github, href: '#', label: 'GitHub' },
-              ].map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  className="w-12 h-12 rounded-xl glass flex items-center justify-center hover:glow-primary transition-all duration-300 group"
-                  aria-label={social.label}
-                >
-                  <social.icon className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-                </a>
-              ))}
-            </div>
           </div>
 
           {/* Links */}
           <div>
             <h4 className="font-bold text-lg mb-6">Product</h4>
             <ul className="space-y-4">
-              {['Create Token', 'Liquidity Pools', 'Token Manager', 'Documentation', 'API'].map((item) => (
+              {['Create Token', 'Liquidity Pools', 'Documentation', 'API'].map((item) => (
                 <li key={item}>
                   <a href="#" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
                     {item}
@@ -94,10 +78,6 @@ const Footer = () => {
             <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Terms of Service
             </a>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Built on</span>
-            <span className="gradient-text font-semibold">Solana</span>
           </div>
         </div>
       </div>

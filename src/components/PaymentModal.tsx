@@ -41,9 +41,14 @@ const PaymentModal = ({ isOpen, onClose, amount, tokenName }: PaymentModalProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md glass-strong border-border/50 bg-background/95 backdrop-blur-xl">
-        {/* Glow effect */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 rounded-2xl blur-xl opacity-50 -z-10" />
+      <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur-xl border-0 p-0 overflow-hidden rounded-2xl">
+        {/* Gradient border */}
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-primary via-accent/50 to-primary/30 p-[1px]">
+          <div className="w-full h-full bg-background rounded-2xl" />
+        </div>
+        
+        {/* Content */}
+        <div className="relative z-10 p-6">
         
         <DialogHeader className="text-center space-y-3">
           <div className="flex justify-center mb-2">
@@ -162,6 +167,7 @@ const PaymentModal = ({ isOpen, onClose, amount, tokenName }: PaymentModalProps)
         <p className="text-center text-xs text-muted-foreground pt-2 border-t border-border/30">
           After successful transaction click "Check Transaction" to verify payment.
         </p>
+        </div>
       </DialogContent>
     </Dialog>
   );

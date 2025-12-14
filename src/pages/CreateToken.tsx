@@ -13,13 +13,13 @@ import {
   Sparkles,
   Image as ImageIcon,
   Link as LinkIcon,
-  Droplets,
   Shield,
   Coins,
   FileEdit
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
+import PaymentModal from '@/components/PaymentModal';
 
 const CreateToken = () => {
   const navigate = useNavigate();
@@ -42,6 +42,7 @@ const CreateToken = () => {
 
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -91,10 +92,7 @@ const CreateToken = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Connect Wallet",
-      description: "Please connect your wallet to launch the token",
-    });
+    setIsPaymentModalOpen(true);
   };
 
   return (
@@ -410,6 +408,14 @@ const CreateToken = () => {
           </form>
         </div>
       </main>
+
+      {/* Payment Modal */}
+      <PaymentModal 
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        amount={calculateFees()}
+        tokenName={formData.name || 'Your Token'}
+      />
     </div>
   );
 };

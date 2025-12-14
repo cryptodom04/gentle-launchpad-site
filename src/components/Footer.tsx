@@ -64,12 +64,12 @@ const Footer = () => {
             © 2024 NebulaForge. All rights reserved.
           </p>
           <div className="flex items-center gap-4 sm:gap-6">
-            <a href="#" className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link to="/privacy" className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors">
               Privacy Policy
-            </a>
-            <a href="#" className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors">
+            </Link>
+            <Link to="/terms" className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors">
               Terms of Service
-            </a>
+            </Link>
           </div>
         </div>
       </div>

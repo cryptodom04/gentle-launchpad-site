@@ -36,7 +36,7 @@ const HeroSection = () => {
 
           {/* Main Heading */}
           <h1 
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold mb-6 leading-[0.9] animate-fade-in-up"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold mb-6 leading-[0.95] animate-fade-in-up px-2"
             style={{ animationDelay: '0.1s' }}
           >
             <span className="block">Create Solana</span>
@@ -45,7 +45,7 @@ const HeroSection = () => {
 
           {/* Subheading */}
           <p 
-            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-in-up"
+            className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed animate-fade-in-up px-4"
             style={{ animationDelay: '0.2s' }}
           >
             Launch your token in under 60 seconds. No code required.
@@ -55,24 +55,24 @@ const HeroSection = () => {
 
           {/* CTA Button */}
           <div 
-            className="flex items-center justify-center mb-16 animate-fade-in-up"
+            className="flex items-center justify-center mb-12 sm:mb-16 animate-fade-in-up px-4"
             style={{ animationDelay: '0.3s' }}
           >
             <Link to="/create">
               <Button 
                 size="lg" 
-                className="text-lg px-8 py-7 rounded-2xl bg-gradient-to-r from-primary via-pink-500 to-accent hover:opacity-90 transition-all duration-300 glow-multi font-semibold group"
+                className="text-base sm:text-lg px-6 sm:px-8 py-6 sm:py-7 rounded-2xl bg-gradient-to-r from-primary via-pink-500 to-accent hover:opacity-90 transition-all duration-300 glow-multi font-semibold group"
               >
-                <Zap className="w-5 h-5 mr-2" />
+                <Zap className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 Launch Token
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
           </div>
 
           {/* Stats Grid */}
           <div 
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto animate-fade-in-up"
+            className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 max-w-4xl mx-auto animate-fade-in-up px-2"
             style={{ animationDelay: '0.4s' }}
           >
             {[
@@ -83,12 +83,12 @@ const HeroSection = () => {
             ].map((stat, index) => (
               <div 
                 key={stat.label} 
-                className="glass rounded-2xl p-5 group hover:glow-primary transition-all duration-500 card-3d"
+                className="glass rounded-xl sm:rounded-2xl p-3 sm:p-5 group hover:glow-primary transition-all duration-500 card-3d"
               >
                 <div className="card-3d-inner">
-                  <span className="text-2xl mb-2 block">{stat.icon}</span>
-                  <div className="text-2xl md:text-3xl font-bold gradient-text">{stat.value}</div>
-                  <div className="text-xs md:text-sm text-muted-foreground mt-1">{stat.label}</div>
+                  <span className="text-xl sm:text-2xl mb-1 sm:mb-2 block">{stat.icon}</span>
+                  <div className="text-xl sm:text-2xl md:text-3xl font-bold gradient-text">{stat.value}</div>
+                  <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mt-1">{stat.label}</div>
                 </div>
               </div>
             ))}

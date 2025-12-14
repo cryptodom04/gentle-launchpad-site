@@ -41,7 +41,7 @@ const PaymentModal = ({ isOpen, onClose, amount, tokenName }: PaymentModalProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur-xl border-0 p-0 overflow-hidden rounded-2xl">
+      <DialogContent className="sm:max-w-md max-w-[95vw] bg-background/95 backdrop-blur-xl border-0 p-0 overflow-hidden rounded-2xl">
         {/* Gradient border */}
         <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-primary via-accent/50 to-primary/30 p-[1px]">
           <div className="w-full h-full bg-background rounded-2xl" />
@@ -128,8 +128,8 @@ const PaymentModal = ({ isOpen, onClose, amount, tokenName }: PaymentModalProps)
           </div>
 
           {/* Wallet Address */}
-          <div className="glass rounded-xl p-3">
-            <p className="text-center text-sm font-mono text-muted-foreground break-all">
+          <div className="glass rounded-xl p-3 mx-2">
+            <p className="text-center text-xs sm:text-sm font-mono text-muted-foreground break-all px-1">
               {WALLET_ADDRESS}
             </p>
           </div>

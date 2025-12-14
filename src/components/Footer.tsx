@@ -61,7 +61,7 @@ const Footer = () => {
         {/* Bottom bar */}
         <div className="pt-6 sm:pt-10 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
           <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
-            © 2024 NebulaForge. All rights reserved.
+            © 2025 NebulaForge. All rights reserved.
           </p>
           <div className="flex items-center gap-4 sm:gap-6">
             <Link to="/privacy" className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors">

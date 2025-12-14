@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Hexagon } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 const navLinks = [
   { name: 'Home', href: '/#home', isPage: false },
@@ -53,13 +53,7 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <a href="/" onClick={(e) => handleNavClick(e, '/#home', false)} className="flex items-center gap-3 group">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-xl blur-lg opacity-50 group-hover:opacity-80 transition-opacity" />
-              <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Hexagon className="w-6 h-6 text-white" strokeWidth={2.5} />
-              </div>
-            </div>
+          <a href="/" onClick={(e) => handleNavClick(e, '/#home', false)} className="flex items-center group">
             <div className="flex flex-col">
               <span className="font-bold text-xl tracking-tight">
                 Nebula<span className="gradient-text">Forge</span>

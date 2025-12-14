@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Hexagon, ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
+import logo from '@/assets/logo.png';
 
 const Footer = () => {
   return (
@@ -15,9 +16,7 @@ const Footer = () => {
             <a href="#home" className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-lg sm:rounded-xl blur-lg opacity-50" />
-                <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                  <Hexagon className="w-5 h-5 sm:w-6 sm:h-6 text-white" strokeWidth={2.5} />
-                </div>
+                <img src={logo} alt="NebulaForge Logo" className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl object-cover" />
               </div>
               <div>
                 <span className="font-bold text-xl sm:text-2xl tracking-tight">

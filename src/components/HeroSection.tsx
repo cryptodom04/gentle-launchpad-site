@@ -13,7 +13,7 @@ const HeroSection = () => {
       animationDelay: '1.5s'
     }} />
       
-      <div className="container mx-auto px-4 relative z-10 pt-2 sm:pt-20">
+      <div className="container mx-auto px-4 relative z-10 pt-0 sm:pt-20">
         <div className="max-w-5xl mx-auto text-center">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass gradient-border mb-8 animate-fade-in">

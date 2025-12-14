@@ -31,7 +31,7 @@ const HeroSection = () => {
               <span className="text-sm font-medium text-accent">Live on Mainnet</span>
             </div>
             <span className="text-muted-foreground">•</span>
-            <span className="text-sm text-muted-foreground">#1 Token Launcher</span>
+            <span className="text-sm text-muted-foreground">Token Launcher & Booster</span>
           </div>
 
           {/* Main Heading */}

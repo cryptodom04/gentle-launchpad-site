@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Hexagon, Twitter, MessageCircle, Github, ArrowUpRight } from 'lucide-react';
 
 const Footer = () => {
@@ -63,7 +64,13 @@ const Footer = () => {
           <div>
             <h4 className="font-bold text-lg mb-6">Resources</h4>
             <ul className="space-y-4">
-              {['Blog', 'Status', 'Contact'].map((item) => (
+              <li>
+                <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
+                  Blog
+                  <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Link>
+              </li>
+              {['Status', 'Contact'].map((item) => (
                 <li key={item}>
                   <a href="#" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
                     {item}

@@ -101,19 +101,6 @@ const TermsOfService = () => {
             </p>
           </div>
 
-          {/* Contact */}
-          <div className="glass rounded-3xl p-6 sm:p-8 mt-8 text-center">
-            <h3 className="text-xl font-bold mb-4">Questions About Terms?</h3>
-            <p className="text-muted-foreground mb-4">
-              If you have any questions about these Terms of Service, please contact us at:
-            </p>
-            <a 
-              href="mailto:legal@nebulaforge.io"
-              className="text-primary hover:underline"
-            >
-              legal@nebulaforge.io
-            </a>
-          </div>
         </div>
       </section>
 

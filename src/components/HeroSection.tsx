@@ -5,7 +5,6 @@ import solanaLogo from '@/assets/solana-logo.png';
 const HeroSection = () => {
   return <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Effects */}
-      <div className="absolute inset-0 aurora-bg" />
       <div className="absolute inset-0 grid-bg opacity-30" />
       
       {/* Animated orbs */}

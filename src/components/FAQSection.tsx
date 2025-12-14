@@ -33,46 +33,46 @@ const FAQSection = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="py-32 relative overflow-hidden">
+    <section id="faq" className="py-16 sm:py-24 md:py-32 relative overflow-hidden">
       <div className="absolute inset-0 aurora-bg opacity-30" />
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6">
+          <div className="text-center mb-10 sm:mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4 sm:mb-6">
               <HelpCircle className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium">FAQ</span>
             </div>
             
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
               Got <span className="gradient-text">Questions?</span>
             </h2>
             
-            <p className="text-lg text-muted-foreground">
+            <p className="text-base sm:text-lg text-muted-foreground px-4">
               Find quick answers to common questions about NebulaForge
             </p>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {faqs.map((faq, index) => (
               <div
                 key={index}
                 className={cn(
-                  "glass rounded-2xl overflow-hidden transition-all duration-300",
+                  "glass rounded-xl sm:rounded-2xl overflow-hidden transition-all duration-300",
                   openIndex === index && "glow-primary"
                 )}
               >
                 <button
                   onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                  className="w-full flex items-center justify-between p-6 text-left"
+                  className="w-full flex items-center justify-between p-4 sm:p-6 text-left"
                 >
-                  <span className="font-semibold text-lg pr-8">{faq.question}</span>
+                  <span className="font-semibold text-sm sm:text-lg pr-4 sm:pr-8">{faq.question}</span>
                   <div className={cn(
-                    "w-10 h-10 rounded-xl bg-secondary/50 flex items-center justify-center shrink-0 transition-all duration-300",
+                    "w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-secondary/50 flex items-center justify-center shrink-0 transition-all duration-300",
                     openIndex === index && "bg-gradient-to-br from-primary to-accent rotate-180"
                   )}>
                     <ChevronDown className={cn(
-                      "w-5 h-5 transition-colors",
+                      "w-4 h-4 sm:w-5 sm:h-5 transition-colors",
                       openIndex === index && "text-white"
                     )} />
                   </div>
@@ -83,7 +83,7 @@ const FAQSection = () => {
                   openIndex === index ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
                 )}>
                   <div className="overflow-hidden">
-                    <div className="px-6 pb-6 text-muted-foreground leading-relaxed">
+                    <div className="px-4 sm:px-6 pb-4 sm:pb-6 text-sm sm:text-base text-muted-foreground leading-relaxed">
                       {faq.answer}
                     </div>
                   </div>

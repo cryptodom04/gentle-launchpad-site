@@ -6,70 +6,70 @@ import { cn } from '@/lib/utils';
 
 const faqCategories = [
   {
-    title: 'Начало работы',
+    title: 'Getting Started',
     icon: Zap,
     questions: [
       {
-        question: 'Что такое NebulaForge?',
-        answer: 'NebulaForge — это платформа для создания токенов на блокчейне Solana. Мы позволяем любому пользователю создать свой собственный SPL токен без необходимости писать код или разбираться в технических деталях.'
+        question: 'What is NebulaForge?',
+        answer: 'NebulaForge is a platform for creating tokens on the Solana blockchain. We allow anyone to create their own SPL token without needing to write code or understand technical details.'
       },
       {
-        question: 'Как начать создавать токены?',
-        answer: 'Просто перейдите на страницу Create, заполните форму с параметрами вашего токена (название, символ, количество), подключите кошелёк Solana и оплатите комиссию. Токен будет создан автоматически.'
+        question: 'How do I start creating tokens?',
+        answer: 'Simply go to the Create page, fill out the form with your token parameters (name, symbol, supply), connect your Solana wallet and pay the fee. The token will be created automatically.'
       },
       {
-        question: 'Нужны ли технические знания?',
-        answer: 'Нет! Наша платформа разработана так, чтобы любой человек мог создать токен. Интуитивно понятный интерфейс проведёт вас через весь процесс шаг за шагом.'
+        question: 'Do I need technical knowledge?',
+        answer: 'No! Our platform is designed so anyone can create a token. The intuitive interface will guide you through the entire process step by step.'
       }
     ]
   },
   {
-    title: 'Безопасность',
+    title: 'Security',
     icon: Shield,
     questions: [
       {
-        question: 'Безопасна ли платформа?',
-        answer: 'Да, мы используем проверенные смарт-контракты и следуем лучшим практикам безопасности. Все транзакции происходят напрямую в блокчейне Solana, что гарантирует прозрачность и неизменяемость.'
+        question: 'Is the platform secure?',
+        answer: 'Yes, we use verified smart contracts and follow security best practices. All transactions happen directly on the Solana blockchain, ensuring transparency and immutability.'
       },
       {
-        question: 'Как защищены мои средства?',
-        answer: 'Мы никогда не храним ваши приватные ключи. Все операции подписываются в вашем кошельке. Платформа только формирует транзакции, но не имеет доступа к вашим средствам.'
+        question: 'How are my funds protected?',
+        answer: 'We never store your private keys. All operations are signed in your wallet. The platform only creates transactions but has no access to your funds.'
       },
       {
-        question: 'Могу ли я потерять токены?',
-        answer: 'После создания токены принадлежат только вам и хранятся в вашем кошельке. Потерять их можно только при утере доступа к кошельку, поэтому храните seed-фразу в безопасном месте.'
+        question: 'Can I lose my tokens?',
+        answer: 'After creation, tokens belong only to you and are stored in your wallet. You can only lose them by losing access to your wallet, so keep your seed phrase in a safe place.'
       }
     ]
   },
   {
-    title: 'Токены и комиссии',
+    title: 'Tokens & Fees',
     icon: Coins,
     questions: [
       {
-        question: 'Сколько стоит создание токена?',
-        answer: 'Стоимость создания токена зависит от выбранных параметров. Базовая цена начинается от 0.5 SOL и включает все необходимые операции в блокчейне.'
+        question: 'How much does it cost to create a token?',
+        answer: 'The cost of creating a token depends on the selected parameters. The base price starts at 0.5 SOL and includes all necessary blockchain operations.'
       },
       {
-        question: 'Какие параметры можно настроить?',
-        answer: 'Вы можете настроить: название токена, символ (тикер), общее количество, количество десятичных знаков, описание, иконку и метаданные.'
+        question: 'What parameters can I customize?',
+        answer: 'You can customize: token name, symbol (ticker), total supply, decimal places, description, icon and metadata.'
       },
       {
-        question: 'Можно ли изменить токен после создания?',
-        answer: 'Некоторые параметры (метаданные, иконка) могут быть изменены, если вы сохранили права администратора. Основные параметры (supply, decimals) неизменяемы.'
+        question: 'Can I modify the token after creation?',
+        answer: 'Some parameters (metadata, icon) can be changed if you kept admin rights. Core parameters (supply, decimals) are immutable.'
       }
     ]
   },
   {
-    title: 'Сообщество',
+    title: 'Community',
     icon: Users,
     questions: [
       {
-        question: 'Есть ли поддержка?',
-        answer: 'Да! Мы предоставляем поддержку через Telegram и Discord. Наша команда готова ответить на любые вопросы и помочь с созданием токенов.'
+        question: 'Is there support available?',
+        answer: 'Yes! We provide support via Telegram and Discord. Our team is ready to answer any questions and help with token creation.'
       },
       {
-        question: 'Как связаться с командой?',
-        answer: 'Вы можете написать нам в Telegram @nebulaforge_support или присоединиться к нашему Discord серверу. Также доступна email поддержка.'
+        question: 'How can I contact the team?',
+        answer: 'You can message us on Telegram @nebulaforge_support or join our Discord server. Email support is also available.'
       }
     ]
   }
@@ -100,24 +100,24 @@ const FAQ = () => {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6">
               <HelpCircle className="w-4 h-4 text-primary" />
-              <span className="text-sm text-muted-foreground">Центр поддержки</span>
+              <span className="text-sm text-muted-foreground">Support Center</span>
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6">
-              Часто задаваемые{' '}
-              <span className="gradient-text">вопросы</span>
+              Frequently Asked{' '}
+              <span className="gradient-text">Questions</span>
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Найдите ответы на популярные вопросы о создании токенов на Solana
+              Find answers to popular questions about creating tokens on Solana
             </p>
           </div>
 
           {/* Quick Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
             {[
-              { value: '24/7', label: 'Поддержка' },
-              { value: '< 5s', label: 'Время создания' },
+              { value: '24/7', label: 'Support' },
+              { value: '< 5s', label: 'Creation Time' },
               { value: '99.9%', label: 'Uptime' },
-              { value: '10K+', label: 'Токенов создано' }
+              { value: '10K+', label: 'Tokens Created' }
             ].map((stat) => (
               <div key={stat.label} className="glass rounded-2xl p-4 text-center">
                 <div className="text-2xl sm:text-3xl font-bold gradient-text mb-1">{stat.value}</div>
@@ -183,16 +183,16 @@ const FAQ = () => {
             <div className="relative z-10">
               <Clock className="w-12 h-12 text-primary mx-auto mb-4" />
               <h3 className="text-2xl sm:text-3xl font-bold mb-4">
-                Не нашли ответ?
+                Didn't find an answer?
               </h3>
               <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                Свяжитесь с нашей командой поддержки, и мы ответим в течение 24 часов
+                Contact our support team and we'll respond within 24 hours
               </p>
               <a 
                 href="mailto:support@nebulaforge.io"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-primary to-accent text-white font-medium hover:opacity-90 transition-opacity"
               >
-                Написать в поддержку
+                Contact Support
                 <ArrowRight className="w-4 h-4" />
               </a>
             </div>

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Zap } from 'lucide-react';
+import solanaLogo from '@/assets/solana-logo.png';
 
 const HeroSection = () => {
   return (
@@ -101,7 +102,7 @@ const HeroSection = () => {
           <div className="absolute inset-0 bg-gradient-to-br from-primary/40 to-accent/30 rounded-full blur-3xl" />
           <div className="absolute inset-8 morph-blob bg-gradient-to-br from-primary/60 to-accent/50" />
           <div className="absolute inset-16 rounded-full bg-gradient-to-br from-background to-card border border-border/50 flex items-center justify-center">
-            <span className="text-6xl">💫</span>
+            <img src={solanaLogo} alt="Solana" className="w-24 h-24 object-contain" />
           </div>
         </div>
       </div>

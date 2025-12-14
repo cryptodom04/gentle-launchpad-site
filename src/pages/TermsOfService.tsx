@@ -60,7 +60,7 @@ const TermsOfService = () => {
               Please read these terms carefully before using our token creation platform.
             </p>
             <p className="text-sm text-muted-foreground mt-4">
-              Last updated: December 14, 2024
+              Last updated: June 10, 2025
             </p>
           </div>
         </div>

@@ -60,7 +60,7 @@ const HeroSection = () => {
           animationDelay: '0.4s'
         }}>
             {[{
-            value: '50K+',
+            value: '2K+',
             label: 'Tokens Created',
             icon: '🚀'
           }, {

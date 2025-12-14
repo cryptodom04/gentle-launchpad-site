@@ -16,13 +16,13 @@ const HeroSection = () => {
       <div className="container mx-auto px-4 relative z-10 pt-0 sm:pt-20">
         <div className="max-w-5xl mx-auto text-center">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass gradient-border mb-8 animate-fade-in">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-              <span className="text-sm font-medium text-accent">Live on Mainnet</span>
+          <div className="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-full glass gradient-border mb-6 sm:mb-8 animate-fade-in">
+            <div className="flex items-center gap-1 sm:gap-1.5">
+              <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-accent animate-pulse" />
+              <span className="text-xs sm:text-sm font-medium text-accent">Live on Mainnet</span>
             </div>
-            <span className="text-muted-foreground">•</span>
-            <span className="text-sm text-muted-foreground">Token Launcher & Booster</span>
+            <span className="text-muted-foreground text-xs sm:text-sm">•</span>
+            <span className="text-xs sm:text-sm text-muted-foreground">Token Launcher & Booster</span>
           </div>
 
           {/* Main Heading */}

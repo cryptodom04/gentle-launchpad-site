@@ -7,7 +7,7 @@ const navLinks = [
   { name: 'Create', href: '/create', isPage: true },
   { name: 'Liquidity', href: '/#liquidity', isPage: false },
   { name: 'Features', href: '/#features', isPage: false },
-  { name: 'FAQ', href: '/#faq', isPage: false },
+  { name: 'FAQ', href: '/faq', isPage: true },
 ];
 
 const Header = () => {

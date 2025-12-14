@@ -297,24 +297,6 @@ const CreateToken = () => {
                 </div>
                 <span className="text-sm text-accent">+0.1 SOL</span>
               </div>
-
-              {/* Liquidity Pool */}
-              <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30 border border-border/30">
-                <div className="flex items-center gap-3">
-                  <Switch
-                    checked={formData.liquidityPool}
-                    onCheckedChange={(checked) => setFormData({ ...formData, liquidityPool: checked })}
-                  />
-                  <div>
-                    <p className="font-medium text-sm text-pink-400 flex items-center gap-2">
-                      <Droplets className="w-4 h-4" />
-                      Luna Liquidity Pool
-                    </p>
-                    <p className="text-xs text-muted-foreground">Full access to the <span className="text-accent underline cursor-pointer">liquidity pool</span>.</p>
-                  </div>
-                </div>
-                <span className="text-sm text-accent">+0 SOL (FREE)</span>
-              </div>
             </div>
 
             {/* Revoke Authorities */}

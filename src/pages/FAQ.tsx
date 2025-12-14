@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, HelpCircle, Zap, Shield, Coins, Users, Clock, ArrowRight } from 'lucide-react';
+import { ChevronDown, HelpCircle, Zap, Shield, Coins, Users } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { cn } from '@/lib/utils';
@@ -47,7 +47,7 @@ const faqCategories = [
     questions: [
       {
         question: 'How much does it cost to create a token?',
-        answer: 'The cost of creating a token depends on the selected parameters. The base price starts at 0.5 SOL and includes all necessary blockchain operations.'
+        answer: 'The cost of creating a token depends on the selected parameters. The base price starts at 1.25 SOL and includes all necessary blockchain operations.'
       },
       {
         question: 'What parameters can I customize?',
@@ -175,27 +175,6 @@ const FAQ = () => {
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* CTA Section */}
-          <div className="mt-16 glass rounded-3xl p-8 sm:p-12 text-center relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-accent/10" />
-            <div className="relative z-10">
-              <Clock className="w-12 h-12 text-primary mx-auto mb-4" />
-              <h3 className="text-2xl sm:text-3xl font-bold mb-4">
-                Didn't find an answer?
-              </h3>
-              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                Contact our support team and we'll respond within 24 hours
-              </p>
-              <a 
-                href="mailto:support@nebulaforge.io"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-primary to-accent text-white font-medium hover:opacity-90 transition-opacity"
-              >
-                Contact Support
-                <ArrowRight className="w-4 h-4" />
-              </a>
-            </div>
           </div>
         </div>
       </section>

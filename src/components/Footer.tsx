@@ -63,7 +63,7 @@ const Footer = () => {
           <div>
             <h4 className="font-bold text-lg mb-6">Resources</h4>
             <ul className="space-y-4">
-              {['Help Center', 'Community', 'Blog', 'Status', 'Contact'].map((item) => (
+              {['Community', 'Blog', 'Status', 'Contact'].map((item) => (
                 <li key={item}>
                   <a href="#" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
                     {item}

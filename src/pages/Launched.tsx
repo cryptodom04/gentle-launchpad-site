@@ -88,7 +88,7 @@ const Launched = () => {
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Real-time view of fresh token launches through SolFerno. 
-              Only tokens less than 30 minutes old with 50K+ market cap.
+              Only tokens less than 2 hours old with 50K+ market cap.
             </p>
             
             <div className="flex items-center justify-center gap-4 mt-6">
@@ -231,7 +231,7 @@ const Launched = () => {
                 <Clock className="w-4 h-4 text-muted-foreground" />
                 <span className="text-muted-foreground">Watching for new launches...</span>
               </div>
-              <p className="text-muted-foreground">No tokens found under 30 minutes old with 50K+ market cap</p>
+              <p className="text-muted-foreground">No tokens found under 2 hours old with 50K+ market cap</p>
               <p className="text-xs text-muted-foreground mt-2">Auto-refreshing every 5 seconds</p>
             </div>
           )}

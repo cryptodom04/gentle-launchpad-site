@@ -6,6 +6,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { 
   Upload, 
   Zap, 
@@ -16,7 +22,8 @@ import {
   Shield,
   Coins,
   FileEdit,
-  Droplets
+  Droplets,
+  Info
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
@@ -334,6 +341,7 @@ const CreateToken = () => {
             </div>
 
             {/* Optional Features */}
+            <TooltipProvider>
             <div className="space-y-4">
               {/* Creator's Info */}
               <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30 border border-border/30">
@@ -342,9 +350,19 @@ const CreateToken = () => {
                     checked={formData.creatorsInfo}
                     onCheckedChange={(checked) => setFormData({ ...formData, creatorsInfo: checked })}
                   />
-                  <div>
-                    <p className="font-medium text-sm text-accent">Creator's Info (Optional)</p>
-                    <p className="text-xs text-muted-foreground">Change the information of the creator in the metadata. By default, it is Luna Launch.</p>
+                  <div className="flex items-center gap-2">
+                    <div>
+                      <p className="font-medium text-sm text-accent">Creator's Info (Optional)</p>
+                      <p className="text-xs text-muted-foreground">Change the information of the creator in the metadata. By default, it is Luna Launch.</p>
+                    </div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-4 h-4 text-muted-foreground hover:text-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <p>Allows you to set custom creator information that will be visible in token metadata on explorers like Solscan. Useful for branding your project.</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
                 <span className="text-sm text-accent">+0.1 SOL</span>
@@ -357,12 +375,22 @@ const CreateToken = () => {
                     checked={formData.socialLinks}
                     onCheckedChange={(checked) => setFormData({ ...formData, socialLinks: checked })}
                   />
-                  <div>
-                    <p className="font-medium text-sm text-accent flex items-center gap-2">
-                      <LinkIcon className="w-4 h-4" />
-                      Add Social Links & Tags
-                    </p>
-                    <p className="text-xs text-muted-foreground">Add links to your token metadata.</p>
+                  <div className="flex items-center gap-2">
+                    <div>
+                      <p className="font-medium text-sm text-accent flex items-center gap-2">
+                        <LinkIcon className="w-4 h-4" />
+                        Add Social Links & Tags
+                      </p>
+                      <p className="text-xs text-muted-foreground">Add links to your token metadata.</p>
+                    </div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-4 h-4 text-muted-foreground hover:text-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <p>Add Twitter, Telegram, website and other social links to your token. These appear on DEX aggregators and help build community trust.</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
                 <span className="text-sm text-accent">+0.1 SOL</span>
@@ -371,12 +399,22 @@ const CreateToken = () => {
               {/* Add Liquidity - Required */}
               <div className="p-4 rounded-xl border transition-all bg-emerald-500/10 border-emerald-500">
                 <div className="flex items-center gap-3">
-                  <div>
-                    <p className="font-medium text-sm text-emerald-400 flex items-center gap-2">
-                      <Droplets className="w-4 h-4" />
-                      Add Liquidity (SOL) <span className="text-destructive">*</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground">Add initial liquidity to your token on Raydium. Minimum 1 SOL.</p>
+                  <div className="flex items-center gap-2">
+                    <div>
+                      <p className="font-medium text-sm text-emerald-400 flex items-center gap-2">
+                        <Droplets className="w-4 h-4" />
+                        Add Liquidity (SOL) <span className="text-destructive">*</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground">Add initial liquidity to your token on Raydium. Minimum 1 SOL.</p>
+                    </div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-4 h-4 text-muted-foreground hover:text-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <p>Liquidity allows users to trade your token. Higher liquidity = less price slippage. Your SOL will be paired with tokens in a Raydium AMM pool.</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
                 
@@ -426,6 +464,14 @@ const CreateToken = () => {
                     <div className="flex items-center gap-2">
                       <Shield className="w-4 h-4 text-primary" />
                       <span className="font-medium text-sm text-primary">Revoke Freeze</span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p>Freeze authority can lock token accounts, preventing transfers. Revoking this increases investor confidence as funds cannot be frozen.</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                     <Checkbox
                       checked={formData.revokeFreeze}
@@ -448,6 +494,14 @@ const CreateToken = () => {
                     <div className="flex items-center gap-2">
                       <Coins className="w-4 h-4 text-accent" />
                       <span className="font-medium text-sm text-accent">Revoke Mint</span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p>Mint authority can create new tokens, diluting supply. Revoking this guarantees fixed supply and prevents inflation.</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                     <Checkbox
                       checked={formData.revokeMint}
@@ -470,6 +524,14 @@ const CreateToken = () => {
                     <div className="flex items-center gap-2">
                       <FileEdit className="w-4 h-4 text-blue-400" />
                       <span className="font-medium text-sm text-blue-400">Revoke Update</span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p>Update authority can change token name, symbol, and image. Revoking this ensures token identity cannot be altered.</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                     <Checkbox
                       checked={formData.revokeUpdate}
@@ -483,6 +545,7 @@ const CreateToken = () => {
                 </div>
               </div>
             </div>
+            </TooltipProvider>
 
             {/* Token Recipient */}
             <div className="space-y-2">

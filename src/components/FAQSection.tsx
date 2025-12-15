@@ -17,7 +17,7 @@ const faqs = [
   },
   {
     question: 'Is my wallet and funds safe?',
-    answer: 'Absolutely. We never have access to your private keys. All transactions are signed directly in your wallet, and our smart contracts are audited. We only request the minimum permissions needed for token creation.',
+    answer: 'Absolutely. We never have access to your private keys. All transactions are signed directly in your wallet. You do not need to sign any smart contracts.',
   },
   {
     question: 'What wallets are supported?',

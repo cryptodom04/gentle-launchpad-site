@@ -127,7 +127,7 @@ const PotentialSection = () => {
               </div>
               
               {/* Stat card 2 - Profit */}
-              <div className="absolute -right-2 sm:-right-8 bottom-24 sm:bottom-32 bg-gradient-to-br from-primary to-accent rounded-2xl p-4 sm:p-6 shadow-xl">
+              <div className="absolute -right-2 sm:-right-8 bottom-4 sm:bottom-8 bg-gradient-to-br from-primary to-accent rounded-2xl p-4 sm:p-6 shadow-xl">
                 <p className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">3.2x</p>
                 <p className="text-xs sm:text-sm text-white/80 mt-1">Average Profit</p>
               </div>

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
-import { Rocket, TrendingUp, TrendingDown, ExternalLink, RefreshCw } from 'lucide-react';
+import { Rocket, TrendingUp, TrendingDown, ExternalLink, RefreshCw, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Token {
@@ -13,9 +13,10 @@ interface Token {
   marketCap: number;
   liquidity: string;
   imageUri?: string;
-  createdAt?: string;
+  createdAt?: number;
   priceChange24h?: number;
   volume24h?: number;
+  ageMinutes?: number;
 }
 
 const Launched = () => {
@@ -86,8 +87,8 @@ const Launched = () => {
               Tokens <span className="gradient-text">Launched</span>
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Real-time view of successful token launches through SolFerno. 
-              Only showing tokens with 50K+ market cap.
+              Real-time view of fresh token launches through SolFerno. 
+              Only tokens less than 30 minutes old with 50K+ market cap.
             </p>
             
             <div className="flex items-center justify-center gap-4 mt-6">
@@ -159,15 +160,33 @@ const Launched = () => {
                         </span>
                       </div>
                       
-                      <div className="flex items-center gap-2 text-sm">
-                        <TrendingUp className="w-3 h-3 text-green-400" />
-                        <span className="text-green-400 font-medium">
-                          {formatMarketCap(token.marketCap)}
-                        </span>
-                        <span className="text-muted-foreground">MCap</span>
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="flex items-center gap-1">
+                          <TrendingUp className="w-3 h-3 text-green-400" />
+                          <span className="text-green-400 font-medium">
+                            {formatMarketCap(token.marketCap)}
+                          </span>
+                        </div>
+                        
+                        {/* Age indicator */}
+                        <div className="flex items-center gap-1 text-cyan-400">
+                          <Clock className="w-3 h-3" />
+                          <span className="font-medium">
+                            {token.ageMinutes !== undefined && token.ageMinutes !== null 
+                              ? `${token.ageMinutes}m ago`
+                              : 'New'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Created Time */}
+                  {token.createdAt && (
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      Created: {new Date(token.createdAt).toLocaleTimeString()}
+                    </div>
+                  )}
                   
                   {/* Price, Change & Actions */}
                   <div className="mt-4 pt-4 border-t border-border/30 flex items-center justify-between gap-3">
@@ -208,7 +227,12 @@ const Launched = () => {
 
           {tokens.length === 0 && !loading && !error && (
             <div className="text-center py-20">
-              <p className="text-muted-foreground">No tokens with 50K+ market cap at the moment</p>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+                <Clock className="w-4 h-4 text-muted-foreground" />
+                <span className="text-muted-foreground">Watching for new launches...</span>
+              </div>
+              <p className="text-muted-foreground">No tokens found under 30 minutes old with 50K+ market cap</p>
+              <p className="text-xs text-muted-foreground mt-2">Auto-refreshing every 5 seconds</p>
             </div>
           )}
         </div>

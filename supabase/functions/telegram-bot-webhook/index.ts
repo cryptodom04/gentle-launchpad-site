@@ -6,6 +6,13 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Admin user IDs who can reply to messages
+const ADMIN_IDS = [7511015070, 1696569523];
+
+const isAdmin = (userId: number): boolean => {
+  return ADMIN_IDS.includes(userId);
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -31,9 +38,25 @@ serve(async (req) => {
     if (update.callback_query) {
       const callbackData = update.callback_query.data;
       const chatId = update.callback_query.message.chat.id;
-      const messageId = update.callback_query.message.message_id;
+      const userId = update.callback_query.from.id;
       
-      console.log('Callback data:', callbackData);
+      console.log('Callback data:', callbackData, 'User ID:', userId);
+      
+      // Check if user is admin
+      if (!isAdmin(userId)) {
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/answerCallbackQuery`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            callback_query_id: update.callback_query.id,
+            text: '⛔ У вас нет доступа к этой функции',
+            show_alert: true,
+          }),
+        });
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
       
       if (callbackData.startsWith('reply_')) {
         const conversationId = callbackData.replace('reply_', '');
@@ -87,9 +110,25 @@ serve(async (req) => {
       const replyToText = update.message.reply_to_message.text;
       const adminMessage = update.message.text;
       const chatId = update.message.chat.id;
+      const userId = update.message.from?.id;
       
-      console.log('Reply detected. Reply to:', replyToText);
+      console.log('Reply detected. User ID:', userId, 'Reply to:', replyToText);
       console.log('Admin message:', adminMessage);
+      
+      // Check if user is admin
+      if (!userId || !isAdmin(userId)) {
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: '⛔ У вас нет доступа к этой функции',
+          }),
+        });
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
       
       // Check if this is a reply to our prompt message (contains conversation ID)
       const uuidMatch = replyToText.match(/🔑 _([a-f0-9-]{36})_/);
@@ -148,8 +187,24 @@ serve(async (req) => {
     if (update.message?.text && update.message.text.startsWith('/r ')) {
       const text = update.message.text;
       const chatId = update.message.chat.id;
+      const userId = update.message.from?.id;
       
-      console.log('Reply command received:', text);
+      console.log('Reply command received. User ID:', userId, 'Text:', text);
+      
+      // Check if user is admin
+      if (!userId || !isAdmin(userId)) {
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: '⛔ У вас нет доступа к этой функции',
+          }),
+        });
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
       
       const match = text.match(/^\/r\s+([a-f0-9-]{36})\s+(.+)$/is);
       

@@ -16,7 +16,7 @@ const sections = [
   {
     icon: Ban,
     title: 'Prohibited Activities',
-    content: 'You agree not to use SolFerno for: creating tokens intended for fraud or scams; impersonating other projects or entities; money laundering or terrorist financing; violating any applicable laws or regulations; attempting to exploit or harm our platform or users; creating tokens with misleading or deceptive information; any activity that could damage our reputation or operations.'
+    content: 'You agree not to use SolFerno for: impersonating other projects or entities; money laundering or terrorist financing; violating any applicable laws or regulations; attempting to exploit or harm our platform or users; creating tokens with misleading or deceptive information; any activity that could damage our reputation or operations.'
   }
 ];
 

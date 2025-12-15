@@ -2,6 +2,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Code, Zap, Shield, Key, Copy, Check } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const endpoints = [
   {
@@ -114,9 +115,9 @@ const API = () => {
             <button className="px-8 py-4 rounded-2xl font-semibold bg-gradient-to-r from-primary to-accent text-primary-foreground hover:opacity-90 transition-all">
               Get API Key
             </button>
-            <button className="px-8 py-4 rounded-2xl font-semibold glass hover:bg-secondary/50 transition-all">
+            <Link to="/docs" className="px-8 py-4 rounded-2xl font-semibold glass hover:bg-secondary/50 transition-all">
               View Documentation
-            </button>
+            </Link>
           </div>
         </section>
 

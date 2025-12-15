@@ -4,6 +4,7 @@ import { ArrowRight, Rocket, TrendingUp, Wallet, Send, ArrowUpDown, DollarSign }
 import solLogo from '@/assets/sol-logo.png';
 import usdcLogo from '@/assets/usdc-logo.png';
 import pepeLogo from '@/assets/pepe-logo.png';
+import phantomGhost from '@/assets/phantom-ghost.jpg';
 
 const PotentialSection = () => {
   return (
@@ -53,11 +54,7 @@ const PotentialSection = () => {
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-2">
                             {/* Phantom ghost icon */}
-                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-[#ab9ff2] to-[#534bb1] flex items-center justify-center">
-                              <svg viewBox="0 0 128 128" className="w-5 h-5 sm:w-6 sm:h-6">
-                                <path fill="white" d="M64 8C33.1 8 8 33.1 8 64s25.1 56 56 56 56-25.1 56-56S94.9 8 64 8zm-5.5 89.5c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6zm22 0c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6zm10-32.5c0 13.8-11.2 25-25 25H58c-13.8 0-25-11.2-25-25V55c0-17.1 13.9-31 31-31s31 13.9 31 31v10z"/>
-                              </svg>
-                            </div>
+                            <img src={phantomGhost} alt="SolFerno" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full" />
                             <div>
                               <p className="text-[10px] sm:text-xs text-[#ab9ff2]">SolFerno</p>
                               <p className="text-[10px] sm:text-xs font-medium text-white/90">Wallet 1</p>

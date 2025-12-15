@@ -59,7 +59,7 @@ const PotentialSection = () => {
                               </svg>
                             </div>
                             <div>
-                              <p className="text-[10px] sm:text-xs text-[#ab9ff2]">Phantom</p>
+                              <p className="text-[10px] sm:text-xs text-[#ab9ff2]">SolFerno</p>
                               <p className="text-[10px] sm:text-xs font-medium text-white/90">Wallet 1</p>
                             </div>
                           </div>

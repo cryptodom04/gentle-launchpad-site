@@ -30,10 +30,10 @@ Terminal Chart Simulation.</p>
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
+                <Link to="/api" className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
                   API
                   <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

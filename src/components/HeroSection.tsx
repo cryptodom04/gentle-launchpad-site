@@ -37,8 +37,8 @@ const HeroSection = () => {
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed animate-fade-in-up px-4" style={{
           animationDelay: '0.2s'
         }}>
-            Launch & Take it to the Moon in under 60 seconds! 
-            <br className="hidden sm:block" />
+            Launch & Take it to the Moon in under 60 seconds!
+            <br />
             <span className="text-foreground font-medium">Create. Deploy. Rugpull - with us and Solana. No limits.</span>
           </p>
 

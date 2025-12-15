@@ -43,6 +43,7 @@ const CreateToken = () => {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [errors, setErrors] = useState<{[key: string]: boolean}>({});
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -50,6 +51,7 @@ const CreateToken = () => {
       const reader = new FileReader();
       reader.onload = (event) => {
         setLogoPreview(event.target?.result as string);
+        clearError('logo');
       };
       reader.readAsDataURL(file);
     }
@@ -90,9 +92,40 @@ const CreateToken = () => {
     return total;
   };
 
+  const validateForm = () => {
+    const newErrors: {[key: string]: boolean} = {};
+    
+    if (!formData.name.trim()) newErrors.name = true;
+    if (!formData.symbol.trim()) newErrors.symbol = true;
+    if (!formData.decimals) newErrors.decimals = true;
+    if (!formData.supply) newErrors.supply = true;
+    if (!formData.description.trim()) newErrors.description = true;
+    if (!formData.recipientAddress.trim()) newErrors.recipientAddress = true;
+    if (!logoPreview) newErrors.logo = true;
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      toast({
+        title: "Required fields missing",
+        description: "Please fill in all required fields highlighted in red",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsPaymentModalOpen(true);
+  };
+
+  const clearError = (field: string) => {
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: false }));
+    }
   };
 
   return (
@@ -141,8 +174,11 @@ const CreateToken = () => {
                   placeholder="Ex: Trump Coin"
                   maxLength={32}
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="bg-secondary/50 border-border/50 rounded-xl h-12"
+                  onChange={(e) => {
+                    setFormData({ ...formData, name: e.target.value });
+                    clearError('name');
+                  }}
+                  className={`bg-secondary/50 rounded-xl h-12 ${errors.name ? 'border-2 border-destructive' : 'border-border/50'}`}
                 />
                 <p className="text-xs text-muted-foreground">Max 32 characters in your name</p>
               </div>
@@ -155,8 +191,11 @@ const CreateToken = () => {
                   placeholder="Ex: SOL"
                   maxLength={10}
                   value={formData.symbol}
-                  onChange={(e) => setFormData({ ...formData, symbol: e.target.value.toUpperCase() })}
-                  className="bg-secondary/50 border-border/50 rounded-xl h-12"
+                  onChange={(e) => {
+                    setFormData({ ...formData, symbol: e.target.value.toUpperCase() });
+                    clearError('symbol');
+                  }}
+                  className={`bg-secondary/50 rounded-xl h-12 ${errors.symbol ? 'border-2 border-destructive' : 'border-border/50'}`}
                 />
               </div>
             </div>
@@ -173,8 +212,11 @@ const CreateToken = () => {
                   min={0}
                   max={18}
                   value={formData.decimals}
-                  onChange={(e) => setFormData({ ...formData, decimals: e.target.value })}
-                  className="bg-secondary/50 border-border/50 rounded-xl h-12"
+                  onChange={(e) => {
+                    setFormData({ ...formData, decimals: e.target.value });
+                    clearError('decimals');
+                  }}
+                  className={`bg-secondary/50 rounded-xl h-12 ${errors.decimals ? 'border-2 border-destructive' : 'border-border/50'}`}
                 />
                 <p className="text-xs text-muted-foreground">Change the number of decimals for your token</p>
               </div>
@@ -187,8 +229,11 @@ const CreateToken = () => {
                   type="text"
                   placeholder="1000000"
                   value={formData.supply}
-                  onChange={(e) => setFormData({ ...formData, supply: e.target.value.replace(/\D/g, '') })}
-                  className="bg-secondary/50 border-border/50 rounded-xl h-12"
+                  onChange={(e) => {
+                    setFormData({ ...formData, supply: e.target.value.replace(/\D/g, '') });
+                    clearError('supply');
+                  }}
+                  className={`bg-secondary/50 rounded-xl h-12 ${errors.supply ? 'border-2 border-destructive' : 'border-border/50'}`}
                 />
                 <p className="text-xs text-muted-foreground">The initial number of available tokens that will be created in your wallet</p>
               </div>
@@ -208,7 +253,7 @@ const CreateToken = () => {
                   onDrop={handleDrop}
                 >
                   <div className={`border-2 border-dashed rounded-xl p-8 transition-all duration-300 ${
-                    dragActive ? 'border-accent bg-accent/10' : 'border-border hover:border-primary/50'
+                    dragActive ? 'border-accent bg-accent/10' : errors.logo ? 'border-destructive bg-destructive/5' : 'border-border hover:border-primary/50'
                   } ${logoPreview ? 'border-accent' : ''}`}>
                     {logoPreview ? (
                       <div className="flex justify-center">
@@ -256,8 +301,11 @@ const CreateToken = () => {
                 id="description"
                 placeholder="Here you can describe your token"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="bg-secondary/50 border-border/50 rounded-xl min-h-[120px] resize-none"
+                onChange={(e) => {
+                  setFormData({ ...formData, description: e.target.value });
+                  clearError('description');
+                }}
+                className={`bg-secondary/50 rounded-xl min-h-[120px] resize-none ${errors.description ? 'border-2 border-destructive' : 'border-border/50'}`}
               />
             </div>
 
@@ -384,8 +432,11 @@ const CreateToken = () => {
                 id="recipient"
                 placeholder="Enter address who will be the receiver of the token (owner)"
                 value={formData.recipientAddress}
-                onChange={(e) => setFormData({ ...formData, recipientAddress: e.target.value })}
-                className="bg-secondary/50 border-border/50 rounded-xl h-12"
+                onChange={(e) => {
+                  setFormData({ ...formData, recipientAddress: e.target.value });
+                  clearError('recipientAddress');
+                }}
+                className={`bg-secondary/50 rounded-xl h-12 ${errors.recipientAddress ? 'border-2 border-destructive' : 'border-border/50'}`}
               />
             </div>
 

@@ -14,6 +14,8 @@ interface Token {
   liquidity: string;
   imageUri?: string;
   createdAt?: string;
+  priceChange24h?: number;
+  volume24h?: number;
 }
 
 const Launched = () => {

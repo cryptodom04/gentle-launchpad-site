@@ -41,6 +41,8 @@ const CreateToken = () => {
     description: '',
     recipientAddress: '',
     creatorsInfo: false,
+    creatorName: '',
+    creatorWebsite: '',
     socialLinks: false,
     twitterUrl: '',
     telegramUrl: '',
@@ -347,28 +349,57 @@ const CreateToken = () => {
             <TooltipProvider>
             <div className="space-y-4">
               {/* Creator's Info */}
-              <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30 border border-border/30">
-                <div className="flex items-center gap-3">
-                  <Switch
-                    checked={formData.creatorsInfo}
-                    onCheckedChange={(checked) => setFormData({ ...formData, creatorsInfo: checked })}
-                  />
-                  <div className="flex items-center gap-2">
-                    <div>
-                      <p className="font-medium text-sm text-accent">Creator's Info (Optional)</p>
-                      <p className="text-xs text-muted-foreground">Change the information of the creator in the metadata. By default, it is SolFerno.</p>
+              <div className={`p-4 rounded-xl border transition-all ${
+                formData.creatorsInfo 
+                  ? 'bg-accent/10 border-accent' 
+                  : 'bg-secondary/30 border-border/30'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Switch
+                      checked={formData.creatorsInfo}
+                      onCheckedChange={(checked) => setFormData({ ...formData, creatorsInfo: checked })}
+                    />
+                    <div className="flex items-center gap-2">
+                      <div>
+                        <p className="font-medium text-sm text-accent">Creator's Info (Optional)</p>
+                        <p className="text-xs text-muted-foreground">Change the information of the creator in the metadata. By default, it is SolFerno.</p>
+                      </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="w-4 h-4 text-muted-foreground hover:text-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p>Allows you to set custom creator information that will be visible in token metadata on explorers like Solscan. Useful for branding your project.</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="w-4 h-4 text-muted-foreground hover:text-foreground cursor-help" />
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-xs">
-                        <p>Allows you to set custom creator information that will be visible in token metadata on explorers like Solscan. Useful for branding your project.</p>
-                      </TooltipContent>
-                    </Tooltip>
                   </div>
+                  <span className="text-sm text-accent">+0.1 SOL</span>
                 </div>
-                <span className="text-sm text-accent">+0.1 SOL</span>
+                
+                {formData.creatorsInfo && (
+                  <div className="mt-4 space-y-3 animate-fade-in">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">Creator Name</Label>
+                      <Input
+                        placeholder="Your project or company name"
+                        value={formData.creatorName}
+                        onChange={(e) => setFormData({ ...formData, creatorName: e.target.value })}
+                        className="bg-secondary/50 rounded-xl h-10 border-border/50"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">Creator Website</Label>
+                      <Input
+                        placeholder="https://yourproject.com"
+                        value={formData.creatorWebsite}
+                        onChange={(e) => setFormData({ ...formData, creatorWebsite: e.target.value })}
+                        className="bg-secondary/50 rounded-xl h-10 border-border/50"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Social Links */}

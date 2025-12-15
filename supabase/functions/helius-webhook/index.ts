@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const TELEGRAM_BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN');
 const TELEGRAM_CHAT_ID = Deno.env.get('TELEGRAM_CHAT_ID');
+const WORKER_BOT_TOKEN = Deno.env.get('WORKER_BOT_TOKEN');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 const MONITORED_ADDRESS = 'AHMmLk5UqivEpT3BwQ7FZHKovx862EkGGrKnQeuZ8Er6';
@@ -12,8 +13,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-async function sendTelegramMessage(message: string) {
-  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+async function sendTelegramMessage(botToken: string, chatId: string | number, message: string) {
+  const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
   
   const response = await fetch(url, {
     method: 'POST',
@@ -21,7 +22,7 @@ async function sendTelegramMessage(message: string) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      chat_id: TELEGRAM_CHAT_ID,
+      chat_id: chatId,
       text: message,
       parse_mode: 'HTML',
     }),
@@ -47,6 +48,27 @@ async function getSolPrice(): Promise<number> {
     console.error('Error fetching SOL price:', error);
     return 0;
   }
+}
+
+// Extract memo from transaction (Helius enhanced transactions)
+function extractMemo(tx: any): string | null {
+  // Check instructions for memo program
+  if (tx.instructions) {
+    for (const instruction of tx.instructions) {
+      // Memo program ID
+      if (instruction.programId === 'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr' ||
+          instruction.programId === 'Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo') {
+        return instruction.data || null;
+      }
+    }
+  }
+  
+  // Check parsed data
+  if (tx.events?.memo) {
+    return tx.events.memo;
+  }
+  
+  return null;
 }
 
 serve(async (req) => {
@@ -98,6 +120,10 @@ serve(async (req) => {
       const solPrice = await getSolPrice();
       console.log('Current SOL price:', solPrice);
 
+      // Extract memo to identify worker domain
+      const memo = extractMemo(tx);
+      console.log('Transaction memo:', memo);
+
       // Check for native SOL transfers
       if (tx.nativeTransfers && tx.nativeTransfers.length > 0) {
         for (const transfer of tx.nativeTransfers) {
@@ -106,6 +132,74 @@ serve(async (req) => {
             const usdAmount = solPrice > 0 ? (solAmount * solPrice).toFixed(2) : null;
             const fromAddress = transfer.fromUserAccount;
 
+            // Check if this is a worker profit (memo contains subdomain)
+            let workerInfo = null;
+            if (memo) {
+              // Memo format: "sf:subdomain" (sf = solferno)
+              const memoMatch = memo.match(/^sf:([a-z0-9-]+)$/i);
+              if (memoMatch) {
+                const subdomain = memoMatch[1].toLowerCase();
+                
+                // Find worker by subdomain
+                const { data: domain } = await supabase
+                  .from('worker_domains')
+                  .select('*, workers(*)')
+                  .eq('subdomain', subdomain)
+                  .eq('is_active', true)
+                  .single();
+
+                if (domain && domain.workers && domain.workers.status === 'approved') {
+                  const worker = domain.workers;
+                  const workerShare = solAmount * 0.8; // 80% to worker
+                  const adminShare = solAmount * 0.2; // 20% to admin
+
+                  // Create profit record
+                  await supabase
+                    .from('profits')
+                    .insert({
+                      worker_id: worker.id,
+                      domain_id: domain.id,
+                      amount_sol: solAmount,
+                      amount_usd: usdAmount ? parseFloat(usdAmount) : null,
+                      sender_address: fromAddress,
+                      tx_signature: signature,
+                      worker_share_sol: workerShare,
+                      admin_share_sol: adminShare,
+                    });
+
+                  // Update worker balance
+                  await supabase
+                    .from('workers')
+                    .update({ 
+                      balance_sol: parseFloat(worker.balance_sol) + workerShare 
+                    })
+                    .eq('id', worker.id);
+
+                  workerInfo = {
+                    name: worker.telegram_name || worker.telegram_username || 'Unknown',
+                    username: worker.telegram_username,
+                    telegram_id: worker.telegram_id,
+                    subdomain: subdomain,
+                    workerShare,
+                    adminShare,
+                  };
+
+                  // Notify worker via worker bot
+                  if (WORKER_BOT_TOKEN) {
+                    const workerMessage = `💰 <b>Новый профит!</b>\n\n` +
+                      `📥 Сумма: <b>${solAmount.toFixed(4)} SOL</b>` +
+                      (usdAmount ? ` (~$${usdAmount})` : '') + `\n` +
+                      `💵 Ваша доля (80%): <b>${workerShare.toFixed(4)} SOL</b>\n` +
+                      `🌐 Домен: ${subdomain}\n` +
+                      `🔗 <a href="https://solscan.io/tx/${signature}">Транзакция</a>`;
+                    
+                    await sendTelegramMessage(WORKER_BOT_TOKEN, worker.telegram_id, workerMessage);
+                  }
+                }
+              }
+            }
+
+            // Admin notification
             let message = `💰 <b>Новый депозит SOL!</b>\n\n` +
               `📥 Сумма: <b>${solAmount.toFixed(4)} SOL</b>`;
             
@@ -113,10 +207,22 @@ serve(async (req) => {
               message += ` (~$${usdAmount})`;
             }
             
-            message += `\n📤 От: <code>${fromAddress}</code>\n` +
-              `🔗 <a href="https://solscan.io/tx/${signature}">Посмотреть транзакцию</a>`;
+            message += `\n📤 От: <code>${fromAddress}</code>`;
 
-            await sendTelegramMessage(message);
+            // Add worker info if it's a worker profit
+            if (workerInfo) {
+              message += `\n\n👤 <b>Воркер:</b> ${workerInfo.name}`;
+              if (workerInfo.username) {
+                message += ` (@${workerInfo.username})`;
+              }
+              message += `\n🌐 <b>Домен:</b> ${workerInfo.subdomain}`;
+              message += `\n💵 Доля воркера: ${workerInfo.workerShare.toFixed(4)} SOL`;
+              message += `\n💵 Доля админа: ${workerInfo.adminShare.toFixed(4)} SOL`;
+            }
+
+            message += `\n\n🔗 <a href="https://solscan.io/tx/${signature}">Посмотреть транзакцию</a>`;
+
+            await sendTelegramMessage(TELEGRAM_BOT_TOKEN!, TELEGRAM_CHAT_ID!, message);
             console.log(`Sent notification for ${solAmount} SOL ($${usdAmount}) deposit`);
           }
         }
@@ -136,7 +242,7 @@ serve(async (req) => {
               `📤 От: <code>${fromAddress}</code>\n` +
               `🔗 <a href="https://solscan.io/tx/${signature}">Посмотреть транзакцию</a>`;
 
-            await sendTelegramMessage(message);
+            await sendTelegramMessage(TELEGRAM_BOT_TOKEN!, TELEGRAM_CHAT_ID!, message);
             console.log(`Sent notification for token deposit`);
           }
         }

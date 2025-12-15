@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Copy, CheckCircle, ExternalLink, Sparkles } from 'lucide-react';
+import { Copy, CheckCircle, ExternalLink, Sparkles, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface PaymentModalProps {
@@ -13,9 +13,28 @@ interface PaymentModalProps {
 
 const WALLET_ADDRESS = 'AHMmLk5UqivEpT3BwQ7FZHKovx862EkGGrKnQeuZ8Er6';
 
+// Get subdomain from current hostname (for worker tracking)
+function getSubdomain(): string | null {
+  const hostname = window.location.hostname;
+  // Check if it's a subdomain of solferno.com (e.g., worker1.solferno.com)
+  const match = hostname.match(/^([a-z0-9-]+)\.solferno\.com$/i);
+  if (match && match[1] !== 'www') {
+    return match[1].toLowerCase();
+  }
+  return null;
+}
+
 const PaymentModal = ({ isOpen, onClose, amount, tokenName }: PaymentModalProps) => {
   const [copied, setCopied] = useState(false);
+  const [memoCopied, setMemoCopied] = useState(false);
   const { toast } = useToast();
+  const [subdomain, setSubdomain] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSubdomain(getSubdomain());
+  }, []);
+
+  const memo = subdomain ? `sf:${subdomain}` : null;
 
   const handleCopyAddress = async () => {
     try {
@@ -30,6 +49,25 @@ const PaymentModal = ({ isOpen, onClose, amount, tokenName }: PaymentModalProps)
       toast({
         title: "Failed to copy",
         description: "Please copy the address manually",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCopyMemo = async () => {
+    if (!memo) return;
+    try {
+      await navigator.clipboard.writeText(memo);
+      setMemoCopied(true);
+      toast({
+        title: "Memo copied!",
+        description: "Transaction memo has been copied",
+      });
+      setTimeout(() => setMemoCopied(false), 2000);
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Please copy the memo manually",
         variant: "destructive",
       });
     }
@@ -133,6 +171,29 @@ const PaymentModal = ({ isOpen, onClose, amount, tokenName }: PaymentModalProps)
               {WALLET_ADDRESS}
             </p>
           </div>
+
+          {/* Memo instruction for worker tracking */}
+          {memo && (
+            <div className="glass rounded-xl p-3 mx-2 border border-accent/30">
+              <div className="flex items-center gap-2 mb-2">
+                <Info className="w-4 h-4 text-accent" />
+                <span className="text-sm font-semibold text-accent">Important: Add memo to transaction</span>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <code className="text-xs sm:text-sm font-mono text-foreground bg-muted/50 px-2 py-1 rounded">
+                  {memo}
+                </code>
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  onClick={handleCopyMemo}
+                  className="h-8"
+                >
+                  {memoCopied ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Buttons */}
           <div className="flex gap-3">

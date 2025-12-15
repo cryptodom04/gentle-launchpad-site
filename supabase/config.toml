@@ -20,3 +20,9 @@ verify_jwt = false
 
 [functions.chat-get-messages]
 verify_jwt = false
+
+[functions.worker-bot-webhook]
+verify_jwt = false
+
+[functions.setup-worker-bot-webhook]
+verify_jwt = false

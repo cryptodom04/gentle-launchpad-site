@@ -179,7 +179,7 @@ const Docs = () => {
             <span className="text-sm font-medium">Documentation</span>
           </div>
           
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
             API <span className="gradient-text">Documentation</span>
           </h1>
           

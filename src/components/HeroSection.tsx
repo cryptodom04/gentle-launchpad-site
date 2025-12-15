@@ -30,7 +30,7 @@ const HeroSection = () => {
           animationDelay: '0.1s'
         }}>
             <span className="block">Create Solana</span>
-            <span className="block gradient-text pb-2">Tokens Instantly</span>
+            <span className="block gradient-text pb-3">Tokens Instantly</span>
           </h1>
 
           {/* Subheading */}

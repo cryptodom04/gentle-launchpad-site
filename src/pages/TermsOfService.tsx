@@ -11,7 +11,7 @@ const sections = [
   {
     icon: Coins,
     title: 'Token Creation Services',
-    content: 'SolFerno provides tools for creating SPL tokens on the Solana blockchain. You are solely responsible for the tokens you create, including their name, symbol, supply, and any associated metadata. We do not endorse, verify, or guarantee the legitimacy of any tokens created through our platform. Token creation fees are non-refundable once the transaction is confirmed on the blockchain.'
+    content: 'SolFerno provides tools for creating SPL tokens on the Solana blockchain. You are solely responsible for the tokens you create, including their name, symbol, supply, and any associated metadata. We do not endorse, verify, or guarantee the legitimacy of any tokens created through our platform.'
   },
   {
     icon: AlertTriangle,

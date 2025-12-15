@@ -11,10 +11,6 @@ const navLinks = [{
   href: '/create',
   isPage: true
 }, {
-  name: 'Launched',
-  href: '/launched',
-  isPage: true
-}, {
   name: 'Liquidity',
   href: '/liquidity',
   isPage: true

@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
     const botToken = Deno.env.get('WORKER_BOT_TOKEN');
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    const adminChatId = Deno.env.get('TELEGRAM_CHAT_ID');
+    const adminChatId = Deno.env.get('WORKER_ADMIN_CHAT_ID');
 
     if (!botToken || !supabaseUrl || !supabaseServiceKey) {
       throw new Error('Missing required environment variables');

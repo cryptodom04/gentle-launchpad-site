@@ -50,86 +50,102 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Fetching tokens from DexScreener API...');
+    console.log('Fetching new Solana tokens from DexScreener...');
 
-    // Fetch trending Solana tokens from DexScreener
-    const response = await fetch('https://api.dexscreener.com/token-boosts/top/v1', {
-      headers: {
-        'Accept': 'application/json',
-      },
-    });
+    // Fetch multiple sources in parallel for more tokens
+    const [profilesRes, boostsRes, trendingRes] = await Promise.all([
+      // Latest token profiles (new tokens)
+      fetch('https://api.dexscreener.com/token-profiles/latest/v1', {
+        headers: { 'Accept': 'application/json' },
+      }),
+      // Boosted tokens
+      fetch('https://api.dexscreener.com/token-boosts/top/v1', {
+        headers: { 'Accept': 'application/json' },
+      }),
+      // Search for new Solana pairs (moonshot/pump related)
+      fetch('https://api.dexscreener.com/latest/dex/search?q=solana', {
+        headers: { 'Accept': 'application/json' },
+      }),
+    ]);
 
-    if (!response.ok) {
-      console.error('DexScreener boosts API error:', response.status);
-      throw new Error(`DexScreener API error: ${response.status}`);
+    const allTokenAddresses: string[] = [];
+
+    // Process latest profiles
+    if (profilesRes.ok) {
+      const profiles = await profilesRes.json();
+      if (Array.isArray(profiles)) {
+        const solanaProfiles = profiles
+          .filter((p: any) => p.chainId === 'solana')
+          .map((p: any) => p.tokenAddress)
+          .filter(Boolean);
+        allTokenAddresses.push(...solanaProfiles);
+        console.log('Profiles Solana tokens:', solanaProfiles.length);
+      }
     }
 
-    const boostData = await response.json();
-    console.log('Boosts data received:', Array.isArray(boostData) ? boostData.length : 'not array');
-
-    // Filter for Solana tokens and get their details
-    const solanaTokens = Array.isArray(boostData) 
-      ? boostData.filter((item: any) => item.chainId === 'solana').slice(0, 20)
-      : [];
-
-    console.log('Solana tokens from boosts:', solanaTokens.length);
-
-    // Also fetch latest pairs from Solana
-    const latestResponse = await fetch('https://api.dexscreener.com/latest/dex/pairs/solana', {
-      headers: {
-        'Accept': 'application/json',
-      },
-    });
-
-    let latestPairs: DexScreenerPair[] = [];
-    if (latestResponse.ok) {
-      const latestData = await latestResponse.json();
-      latestPairs = latestData.pairs || [];
-      console.log('Latest pairs received:', latestPairs.length);
+    // Process boosts
+    if (boostsRes.ok) {
+      const boosts = await boostsRes.json();
+      if (Array.isArray(boosts)) {
+        const solanaBoosts = boosts
+          .filter((b: any) => b.chainId === 'solana')
+          .map((b: any) => b.tokenAddress)
+          .filter(Boolean);
+        allTokenAddresses.push(...solanaBoosts);
+        console.log('Boosts Solana tokens:', solanaBoosts.length);
+      }
     }
 
-    // Get token details for boosted tokens
-    const tokenAddresses = solanaTokens.map((t: any) => t.tokenAddress).filter(Boolean);
-    let detailedTokens: DexScreenerPair[] = [];
+    // Process trending search results
+    let searchPairs: DexScreenerPair[] = [];
+    if (trendingRes.ok) {
+      const trending = await trendingRes.json();
+      if (trending.pairs) {
+        searchPairs = trending.pairs.filter((p: DexScreenerPair) => p.chainId === 'solana');
+        console.log('Search Solana pairs:', searchPairs.length);
+      }
+    }
 
-    if (tokenAddresses.length > 0) {
-      // Fetch in batches of 30 (API limit)
+    // Deduplicate token addresses
+    const uniqueAddresses = [...new Set(allTokenAddresses)].slice(0, 100);
+    console.log('Unique token addresses:', uniqueAddresses.length);
+
+    // Fetch details for tokens in batches
+    let detailedPairs: DexScreenerPair[] = [];
+    
+    if (uniqueAddresses.length > 0) {
       const batches = [];
-      for (let i = 0; i < tokenAddresses.length; i += 30) {
-        batches.push(tokenAddresses.slice(i, i + 30));
+      for (let i = 0; i < uniqueAddresses.length; i += 30) {
+        batches.push(uniqueAddresses.slice(i, i + 30));
       }
 
-      for (const batch of batches) {
-        const detailsUrl = `https://api.dexscreener.com/latest/dex/tokens/${batch.join(',')}`;
-        const detailsResponse = await fetch(detailsUrl, {
+      const batchPromises = batches.map(batch => 
+        fetch(`https://api.dexscreener.com/latest/dex/tokens/${batch.join(',')}`, {
           headers: { 'Accept': 'application/json' },
-        });
+        }).then(res => res.ok ? res.json() : { pairs: [] })
+      );
 
-        if (detailsResponse.ok) {
-          const detailsData = await detailsResponse.json();
-          if (detailsData.pairs) {
-            detailedTokens.push(...detailsData.pairs);
-          }
+      const batchResults = await Promise.all(batchPromises);
+      for (const result of batchResults) {
+        if (result.pairs) {
+          detailedPairs.push(...result.pairs.filter((p: DexScreenerPair) => p.chainId === 'solana'));
         }
       }
-      console.log('Detailed tokens fetched:', detailedTokens.length);
+      console.log('Detailed pairs fetched:', detailedPairs.length);
     }
 
     // Combine all pairs
-    const allPairs = [...detailedTokens, ...latestPairs];
+    const allPairs = [...detailedPairs, ...searchPairs];
 
-    // Filter and deduplicate by base token address
+    // Filter by 50k+ market cap and deduplicate
     const seenTokens = new Set<string>();
     const filteredTokens = allPairs
       .filter((pair: DexScreenerPair) => {
-        if (!pair.baseToken?.address || seenTokens.has(pair.baseToken.address)) {
-          return false;
-        }
+        if (!pair.baseToken?.address) return false;
+        if (seenTokens.has(pair.baseToken.address)) return false;
         
         const marketCap = pair.marketCap || pair.fdv || 0;
-        if (marketCap < 50000) {
-          return false;
-        }
+        if (marketCap < 50000) return false;
         
         seenTokens.add(pair.baseToken.address);
         return true;
@@ -145,9 +161,16 @@ serve(async (req) => {
         createdAt: pair.pairCreatedAt ? new Date(pair.pairCreatedAt).toISOString() : undefined,
         priceChange24h: pair.priceChange?.h24 || 0,
         volume24h: pair.volume?.h24 || 0,
+        dex: pair.dexId,
       }))
-      .sort((a, b) => b.marketCap - a.marketCap)
-      .slice(0, 30);
+      .sort((a, b) => {
+        // Sort by creation date (newest first), then by market cap
+        if (a.createdAt && b.createdAt) {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        return b.marketCap - a.marketCap;
+      })
+      .slice(0, 50);
 
     console.log(`Returning ${filteredTokens.length} tokens with 50k+ market cap`);
 
@@ -155,7 +178,8 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         tokens: filteredTokens,
-        count: filteredTokens.length
+        count: filteredTokens.length,
+        timestamp: new Date().toISOString()
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

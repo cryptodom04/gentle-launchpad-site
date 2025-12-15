@@ -242,33 +242,45 @@ export type Database = {
           approved_by: number | null
           balance_sol: number
           created_at: string
+          experience: string | null
+          hours_per_day: string | null
           id: string
+          registration_step: string | null
           status: Database["public"]["Enums"]["worker_status"]
           telegram_id: number
           telegram_name: string | null
           telegram_username: string | null
+          traffic_type: string | null
         }
         Insert: {
           approved_at?: string | null
           approved_by?: number | null
           balance_sol?: number
           created_at?: string
+          experience?: string | null
+          hours_per_day?: string | null
           id?: string
+          registration_step?: string | null
           status?: Database["public"]["Enums"]["worker_status"]
           telegram_id: number
           telegram_name?: string | null
           telegram_username?: string | null
+          traffic_type?: string | null
         }
         Update: {
           approved_at?: string | null
           approved_by?: number | null
           balance_sol?: number
           created_at?: string
+          experience?: string | null
+          hours_per_day?: string | null
           id?: string
+          registration_step?: string | null
           status?: Database["public"]["Enums"]["worker_status"]
           telegram_id?: number
           telegram_name?: string | null
           telegram_username?: string | null
+          traffic_type?: string | null
         }
         Relationships: []
       }

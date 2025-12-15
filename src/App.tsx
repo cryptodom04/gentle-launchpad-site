@@ -8,6 +8,7 @@ import ChatWidget from "./components/ChatWidget";
 import Index from "./pages/Index";
 import CreateToken from "./pages/CreateToken";
 import Liquidity from "./pages/Liquidity";
+import Launched from "./pages/Launched";
 import Blog from "./pages/Blog";
 import API from "./pages/API";
 import Docs from "./pages/Docs";
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/create" element={<CreateToken />} />
             <Route path="/liquidity" element={<Liquidity />} />
+            <Route path="/launched" element={<Launched />} />
             <Route path="/api" element={<API />} />
             <Route path="/docs" element={<Docs />} />
             <Route path="/blog" element={<Blog />} />

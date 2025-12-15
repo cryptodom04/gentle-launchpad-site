@@ -1,0 +1,214 @@
+import { useState, useEffect } from 'react';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { Rocket, TrendingUp, ExternalLink, RefreshCw } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Token {
+  mint: string;
+  name: string;
+  symbol: string;
+  priceUsd: string;
+  marketCap: number;
+  liquidity: string;
+  imageUri?: string;
+  createdAt?: string;
+}
+
+const Launched = () => {
+  useScrollReveal();
+  const [tokens, setTokens] = useState<Token[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchTokens = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('fetch-pumpfun-tokens');
+      
+      if (fnError) {
+        throw new Error(fnError.message);
+      }
+      
+      if (data?.tokens) {
+        setTokens(data.tokens);
+      }
+    } catch (err) {
+      console.error('Error fetching tokens:', err);
+      setError('Failed to load tokens');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTokens();
+    
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchTokens, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const formatMarketCap = (value: number) => {
+    if (value >= 1000000) {
+      return `$${(value / 1000000).toFixed(2)}M`;
+    }
+    return `$${(value / 1000).toFixed(1)}K`;
+  };
+
+  const formatPrice = (price: string) => {
+    const num = parseFloat(price);
+    if (num < 0.00001) {
+      return `$${num.toExponential(2)}`;
+    }
+    return `$${num.toFixed(8)}`;
+  };
+
+  return (
+    <div className="min-h-screen bg-background noise">
+      <Header />
+      <main className="pt-24 pb-16">
+        <div className="container mx-auto px-4">
+          {/* Header Section */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6">
+              <Rocket className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium">Live Launches</span>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Tokens <span className="gradient-text">Launched</span>
+            </h1>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Real-time view of successful token launches through SolFerno. 
+              Only showing tokens with 50K+ market cap.
+            </p>
+            
+            <button 
+              onClick={fetchTokens}
+              disabled={loading}
+              className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl glass hover:bg-secondary/50 transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </button>
+          </div>
+
+          {/* Stats Bar */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="glass rounded-2xl p-4 text-center">
+              <p className="text-2xl font-bold gradient-text">{tokens.length}</p>
+              <p className="text-sm text-muted-foreground">Active Tokens</p>
+            </div>
+            <div className="glass rounded-2xl p-4 text-center">
+              <p className="text-2xl font-bold text-green-400">50K+</p>
+              <p className="text-sm text-muted-foreground">Min Market Cap</p>
+            </div>
+            <div className="glass rounded-2xl p-4 text-center">
+              <p className="text-2xl font-bold text-primary">Live</p>
+              <p className="text-sm text-muted-foreground">Auto-updating</p>
+            </div>
+            <div className="glass rounded-2xl p-4 text-center">
+              <p className="text-2xl font-bold text-cyan-400">Solana</p>
+              <p className="text-sm text-muted-foreground">Network</p>
+            </div>
+          </div>
+
+          {/* Tokens Grid */}
+          {loading && tokens.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <RefreshCw className="w-8 h-8 animate-spin text-primary mb-4" />
+              <p className="text-muted-foreground">Loading tokens...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-20">
+              <p className="text-destructive mb-4">{error}</p>
+              <button 
+                onClick={fetchTokens}
+                className="px-4 py-2 rounded-xl glass hover:bg-secondary/50 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {tokens.map((token) => (
+                <div 
+                  key={token.mint}
+                  className="glass rounded-2xl p-5 hover:bg-secondary/30 transition-all duration-300 group"
+                >
+                  <div className="flex items-start gap-4">
+                    {/* Token Image */}
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {token.imageUri ? (
+                        <img 
+                          src={token.imageUri} 
+                          alt={token.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <span className="text-lg font-bold gradient-text">
+                          {token.symbol?.slice(0, 2) || '??'}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Token Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-bold truncate">{token.name || 'Unknown'}</h3>
+                        <span className="text-xs text-muted-foreground px-2 py-0.5 rounded-full bg-secondary/50">
+                          ${token.symbol || '???'}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 text-sm">
+                        <TrendingUp className="w-3 h-3 text-green-400" />
+                        <span className="text-green-400 font-medium">
+                          {formatMarketCap(token.marketCap)}
+                        </span>
+                        <span className="text-muted-foreground">MCap</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Price & Actions */}
+                  <div className="mt-4 pt-4 border-t border-border/30 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Price</p>
+                      <p className="font-mono text-sm">{formatPrice(token.priceUsd)}</p>
+                    </div>
+                    
+                    <a
+                      href={`https://pump.fun/${token.mint}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-sm transition-colors"
+                    >
+                      <span>View</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {tokens.length === 0 && !loading && !error && (
+            <div className="text-center py-20">
+              <p className="text-muted-foreground">No tokens with 50K+ market cap at the moment</p>
+            </div>
+          )}
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default Launched;

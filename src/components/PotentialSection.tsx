@@ -39,7 +39,7 @@ const PotentialSection = () => {
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent" />
                         <div>
-                          <p className="text-xs text-muted-foreground">@nebula_user</p>
+                          <p className="text-xs text-muted-foreground">@solferno_user</p>
                           <p className="text-xs font-medium">Wallet</p>
                         </div>
                       </div>

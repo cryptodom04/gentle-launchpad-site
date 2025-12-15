@@ -19,8 +19,7 @@ const sections = [
     content: [
       'We do not sell your personal information to third parties',
       'Blockchain transactions are publicly visible by nature',
-      'We may share data with service providers who assist our operations',
-      'We may disclose information when required by law'
+      'We may share data with service providers who assist our operations'
     ]
   },
   {

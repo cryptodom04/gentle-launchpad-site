@@ -154,7 +154,7 @@ const PotentialSection = () => {
             {/* Trust indicators */}
             <div className="flex items-center justify-center gap-6 mt-6 sm:mt-8 pt-6 border-t border-border/30">
               <div className="text-center">
-                <p className="text-lg sm:text-xl font-bold gradient-text">50K+</p>
+                <p className="text-lg sm:text-xl font-bold gradient-text">2K+</p>
                 <p className="text-[10px] sm:text-xs text-muted-foreground">Tokens Created</p>
               </div>
               <div className="w-px h-8 bg-border/50" />

@@ -216,60 +216,6 @@ const API = () => {
             ))}
           </div>
         </section>
-
-        {/* Pricing */}
-        <section className="container mx-auto px-4 py-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-            Simple <span className="gradient-text">Pricing</span>
-          </h2>
-          <p className="text-muted-foreground text-center max-w-xl mx-auto mb-12">
-            Pay only for what you use
-          </p>
-          
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <div className="p-6 rounded-2xl glass text-center">
-              <h3 className="text-lg font-semibold mb-2">Free</h3>
-              <div className="text-3xl font-bold mb-4">$0</div>
-              <ul className="text-sm text-muted-foreground space-y-2 mb-6">
-                <li>100 API calls/month</li>
-                <li>Testnet only</li>
-                <li>Community support</li>
-              </ul>
-              <button className="w-full py-3 rounded-xl glass hover:bg-secondary/50 transition-all text-sm font-medium">
-                Get Started
-              </button>
-            </div>
-            
-            <div className="p-6 rounded-2xl glass-strong border border-primary/30 text-center relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold">
-                Popular
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Pro</h3>
-              <div className="text-3xl font-bold mb-4">$49<span className="text-sm text-muted-foreground">/mo</span></div>
-              <ul className="text-sm text-muted-foreground space-y-2 mb-6">
-                <li>10,000 API calls/month</li>
-                <li>Mainnet access</li>
-                <li>Priority support</li>
-              </ul>
-              <button className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-accent text-primary-foreground text-sm font-medium hover:opacity-90 transition-all">
-                Subscribe
-              </button>
-            </div>
-            
-            <div className="p-6 rounded-2xl glass text-center">
-              <h3 className="text-lg font-semibold mb-2">Enterprise</h3>
-              <div className="text-3xl font-bold mb-4">Custom</div>
-              <ul className="text-sm text-muted-foreground space-y-2 mb-6">
-                <li>Unlimited API calls</li>
-                <li>Dedicated infrastructure</li>
-                <li>24/7 support</li>
-              </ul>
-              <button className="w-full py-3 rounded-xl glass hover:bg-secondary/50 transition-all text-sm font-medium">
-                Contact Sales
-              </button>
-            </div>
-          </div>
-        </section>
       </main>
 
       <Footer />

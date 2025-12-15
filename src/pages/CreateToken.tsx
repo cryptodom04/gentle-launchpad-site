@@ -99,6 +99,12 @@ const CreateToken = () => {
     return total;
   };
 
+  // Validate Solana wallet address (base58, 32-44 characters)
+  const isValidSolanaAddress = (address: string): boolean => {
+    const base58Regex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+    return base58Regex.test(address);
+  };
+
   const validateForm = () => {
     const newErrors: {[key: string]: boolean} = {};
     
@@ -107,7 +113,12 @@ const CreateToken = () => {
     if (!formData.decimals) newErrors.decimals = true;
     if (!formData.supply) newErrors.supply = true;
     if (!formData.description.trim()) newErrors.description = true;
-    if (!formData.recipientAddress.trim()) newErrors.recipientAddress = true;
+    
+    // Validate Solana address
+    if (!formData.recipientAddress.trim() || !isValidSolanaAddress(formData.recipientAddress.trim())) {
+      newErrors.recipientAddress = true;
+    }
+    
     if (!logoPreview) newErrors.logo = true;
     
     // Liquidity is always required

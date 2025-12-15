@@ -14,7 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      chat_messages: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          message: string
+          sender_type: string
+          telegram_message_id: number | null
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          message: string
+          sender_type: string
+          telegram_message_id?: number | null
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          sender_type?: string
+          telegram_message_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          updated_at: string
+          visitor_country: string | null
+          visitor_country_code: string | null
+          visitor_email: string
+          visitor_ip: string | null
+          visitor_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          visitor_country?: string | null
+          visitor_country_code?: string | null
+          visitor_email: string
+          visitor_ip?: string | null
+          visitor_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          visitor_country?: string | null
+          visitor_country_code?: string | null
+          visitor_email?: string
+          visitor_ip?: string | null
+          visitor_name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

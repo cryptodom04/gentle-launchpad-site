@@ -85,7 +85,7 @@ const CreateToken = () => {
 
   // Calculate total fees
   const calculateFees = () => {
-    let total = 1.25; // Base fee
+    let total = 0.5; // Base fee
     if (formData.creatorsInfo) total += 0.1;
     if (formData.socialLinks) total += 0.1;
     if (formData.revokeFreeze) total += 0.1;
@@ -502,7 +502,7 @@ const CreateToken = () => {
               </Button>
               
               <p className="text-sm text-muted-foreground">
-                Total Fees: <span className="line-through text-muted-foreground/50">1.9 SOL</span>{' '}
+                Total Fees: <span className="line-through text-muted-foreground/50">1 SOL</span>{' '}
                 <span className="text-foreground font-bold">{calculateFees().toFixed(2)} SOL</span>
               </p>
             </div>

@@ -16,7 +16,7 @@ const blogContent: Record<string, {
     readTime: '5 min',
     category: 'Tutorial',
     content: [
-      'Creating a token on Solana has never been easier. With NebulaForge, you can launch your own SPL token in under a minute, without writing a single line of code.',
+      'Creating a token on Solana has never been easier. With SolFerno, you can launch your own SPL token in under a minute, without writing a single line of code.',
       '## Getting Started',
       'First, navigate to our Create Token page and connect your Solana wallet. We support all major wallets including Phantom, Solflare, and Backpack.',
       '## Step 1: Basic Information',

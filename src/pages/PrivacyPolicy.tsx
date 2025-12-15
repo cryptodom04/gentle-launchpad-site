@@ -102,7 +102,7 @@ const PrivacyPolicy = () => {
           {/* Introduction */}
           <div className="glass rounded-3xl p-6 sm:p-8 mb-8">
             <p className="text-muted-foreground leading-relaxed">
-              NebulaForge ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our token creation platform on the Solana blockchain. Please read this policy carefully to understand our practices regarding your personal data.
+              SolFerno ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our token creation platform on the Solana blockchain. Please read this policy carefully to understand our practices regarding your personal data.
             </p>
           </div>
 
@@ -135,10 +135,10 @@ const PrivacyPolicy = () => {
               If you have any questions about this Privacy Policy, please contact us at:
             </p>
             <a 
-              href="mailto:privacy@nebulaforge.io"
+              href="mailto:privacy@solferno.io"
               className="text-primary hover:underline"
             >
-              privacy@nebulaforge.io
+              privacy@solferno.io
             </a>
           </div>
         </div>

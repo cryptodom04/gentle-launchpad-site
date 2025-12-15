@@ -12,7 +12,7 @@ const blogContent: Record<string, {
 }> = {
   'how-to-create-solana-token': {
     title: 'How to Create Your First Solana Token in 60 Seconds',
-    date: '2024-12-10',
+    date: '2025-12-10',
     readTime: '5 min',
     category: 'Tutorial',
     content: [
@@ -33,7 +33,7 @@ const blogContent: Record<string, {
   },
   'understanding-tokenomics': {
     title: 'Understanding Tokenomics: Supply, Decimals & Authorities',
-    date: '2024-12-08',
+    date: '2025-12-08',
     readTime: '8 min',
     category: 'Education',
     content: [
@@ -53,7 +53,7 @@ const blogContent: Record<string, {
   },
   'liquidity-pool-guide': {
     title: 'Complete Guide to Adding Liquidity on Raydium',
-    date: '2024-12-05',
+    date: '2025-12-05',
     readTime: '6 min',
     category: 'Guide',
     content: [
@@ -72,7 +72,7 @@ const blogContent: Record<string, {
   },
   'revoke-authorities-explained': {
     title: 'Why Revoking Token Authorities Builds Trust',
-    date: '2024-12-01',
+    date: '2025-12-01',
     readTime: '4 min',
     category: 'Security',
     content: [

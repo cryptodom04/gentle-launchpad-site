@@ -142,6 +142,28 @@ const ChatWidget = () => {
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
+  const renderMessageWithLinks = (text: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+    
+    return parts.map((part, index) => {
+      if (part.match(urlRegex)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:opacity-80 break-all"
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
+
   return (
     <>
       {/* Chat Button */}
@@ -228,7 +250,7 @@ const ChatWidget = () => {
                           : 'bg-secondary text-foreground rounded-bl-md'
                       }`}
                     >
-                      <p className="text-sm">{msg.message}</p>
+                      <p className="text-sm">{renderMessageWithLinks(msg.message)}</p>
                       <p className={`text-xs mt-1 ${msg.sender_type === 'visitor' ? 'text-white/70' : 'text-muted-foreground'}`}>
                         {formatTime(msg.created_at)}
                       </p>

@@ -13,9 +13,6 @@ const LiquiditySection = () => {
       <div className="absolute inset-0 aurora-bg opacity-40" />
       <div className="absolute inset-0 grid-bg opacity-20" />
       
-      {/* Large decorative orb */}
-      <div className="absolute -left-64 top-1/2 -translate-y-1/2 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-gradient-to-r from-accent/20 to-primary/10 rounded-full blur-[150px]" />
-      
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
           {/* Left side - Content */}

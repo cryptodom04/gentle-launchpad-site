@@ -15,7 +15,7 @@ const faqCategories = [
       },
       {
         question: 'How do I start creating tokens?',
-        answer: 'Simply go to the Create page, fill out the form with your token parameters (name, symbol, supply), connect your Solana wallet and pay the fee. The token will be created automatically.'
+        answer: 'Simply go to the "Create" page and fill out the form with the token parameters (name, symbol, proposal). The token will be created automatically.'
       },
       {
         question: 'Do I need technical knowledge?',

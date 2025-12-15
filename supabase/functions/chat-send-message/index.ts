@@ -108,6 +108,7 @@ serve(async (req) => {
     }
     
     let convId = conversationId;
+    let sessionToken = body.sessionToken;
     
     // Create new conversation if needed
     if (isNewConversation) {
@@ -120,11 +121,34 @@ serve(async (req) => {
           visitor_country: country,
           visitor_country_code: countryCode,
         })
-        .select()
+        .select('id, session_token')
         .single();
       
       if (convError) throw convError;
       convId = convData.id;
+      sessionToken = convData.session_token;
+    } else {
+      // Validate session token for existing conversation
+      if (!sessionToken) {
+        return new Response(
+          JSON.stringify({ error: 'Session token required' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      const { data: conv } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('id', conversationId)
+        .eq('session_token', sessionToken)
+        .maybeSingle();
+      
+      if (!conv) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid session' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
     
     // Insert message
@@ -196,6 +220,7 @@ ${message}`;
       JSON.stringify({ 
         success: true, 
         conversationId: convId,
+        sessionToken: sessionToken,
         messageId: msgData.id 
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

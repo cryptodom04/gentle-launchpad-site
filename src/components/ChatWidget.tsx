@@ -11,6 +11,13 @@ interface Message {
   created_at: string;
 }
 
+interface ChatSession {
+  name: string;
+  email: string;
+  conversationId: string;
+  sessionToken: string;
+}
+
 const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<'form' | 'chat'>('form');
@@ -19,61 +26,60 @@ const ChatWidget = () => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load saved session
   useEffect(() => {
     const savedSession = localStorage.getItem('chat_session');
     if (savedSession) {
-      const session = JSON.parse(savedSession);
-      setName(session.name);
-      setEmail(session.email);
-      setConversationId(session.conversationId);
-      setStep('chat');
+      try {
+        const session: ChatSession = JSON.parse(savedSession);
+        if (session.name && session.email && session.conversationId && session.sessionToken) {
+          setName(session.name);
+          setEmail(session.email);
+          setConversationId(session.conversationId);
+          setSessionToken(session.sessionToken);
+          setStep('chat');
+        }
+      } catch (e) {
+        localStorage.removeItem('chat_session');
+      }
     }
   }, []);
 
   // Load messages when conversation exists
   useEffect(() => {
-    if (!conversationId) return;
+    if (!conversationId || !sessionToken) return;
 
     const loadMessages = async () => {
-      const { data } = await supabase
-        .from('chat_messages')
-        .select('*')
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true });
-      
-      if (data) {
-        setMessages(data as Message[]);
+      try {
+        const response = await supabase.functions.invoke('chat-get-messages', {
+          body: { conversationId, sessionToken },
+        });
+
+        if (response.data?.messages) {
+          setMessages(response.data.messages as Message[]);
+        }
+      } catch (error) {
+        console.error('Error loading messages:', error);
       }
     };
 
     loadMessages();
 
-    // Subscribe to new messages
-    const channel = supabase
-      .channel(`chat-${conversationId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'chat_messages',
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        (payload) => {
-          setMessages((prev) => [...prev, payload.new as Message]);
-        }
-      )
-      .subscribe();
+    // Poll for new messages every 3 seconds
+    pollIntervalRef.current = setInterval(loadMessages, 3000);
 
     return () => {
-      supabase.removeChannel(channel);
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+      }
     };
-  }, [conversationId]);
+  }, [conversationId, sessionToken]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -99,6 +105,7 @@ const ChatWidget = () => {
       const response = await supabase.functions.invoke('chat-send-message', {
         body: {
           conversationId,
+          sessionToken,
           message: message.trim(),
           visitorEmail: email,
           visitorName: name,
@@ -109,13 +116,16 @@ const ChatWidget = () => {
       if (response.error) throw response.error;
 
       const newConvId = response.data.conversationId;
+      const newSessionToken = response.data.sessionToken;
       
-      if (isNewConversation) {
+      if (isNewConversation && newConvId && newSessionToken) {
         setConversationId(newConvId);
+        setSessionToken(newSessionToken);
         localStorage.setItem('chat_session', JSON.stringify({
           name,
           email,
           conversationId: newConvId,
+          sessionToken: newSessionToken,
         }));
       }
 

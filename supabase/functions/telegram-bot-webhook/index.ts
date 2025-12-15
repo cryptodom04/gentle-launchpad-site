@@ -131,7 +131,7 @@ serve(async (req) => {
       }
       
       // Check if this is a reply to our prompt message (contains conversation ID)
-      const uuidMatch = replyToText.match(/🔑 _([a-f0-9-]{36})_/);
+      const uuidMatch = replyToText.match(/🔑\s*_?([a-f0-9-]{36})_?/i);
       
       if (uuidMatch) {
         const conversationId = uuidMatch[1];

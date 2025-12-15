@@ -513,8 +513,7 @@ const CreateToken = () => {
               </Button>
               
               <p className="text-sm text-muted-foreground">
-                Total Fees: <span className="line-through text-muted-foreground/50">1 SOL</span>{' '}
-                <span className="text-foreground font-bold">{calculateFees().toFixed(2)} SOL</span>
+                Total Fees: <span className="text-foreground font-bold">{calculateFees().toFixed(2)} SOL</span>
               </p>
             </div>
           </form>

@@ -5,12 +5,12 @@ import { ArrowRight, Rocket, TrendingUp, Wallet, Send, ArrowUpDown, DollarSign }
 const PotentialSection = () => {
   return (
     <section className="py-16 sm:py-24 md:py-32 relative overflow-hidden">
-      <div className="absolute inset-0 aurora-bg opacity-40" />
-      <div className="absolute inset-0 grid-bg opacity-20" />
+      <div className="absolute inset-0 aurora-bg opacity-40 pointer-events-none" />
+      <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
       
       {/* Decorative orbs */}
-      <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-gradient-to-l from-primary/30 to-transparent rounded-full blur-[120px]" />
-      <div className="absolute bottom-1/4 left-0 w-[300px] h-[300px] bg-gradient-to-r from-accent/20 to-transparent rounded-full blur-[100px]" />
+      <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-gradient-to-l from-primary/30 to-transparent rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-1/4 left-0 w-[300px] h-[300px] bg-gradient-to-r from-accent/20 to-transparent rounded-full blur-[100px] pointer-events-none" />
       
       <div className="container mx-auto px-4 relative z-10">
         {/* Header */}

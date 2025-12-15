@@ -3,7 +3,6 @@ import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
 import FeaturesSection from '@/components/FeaturesSection';
 import PotentialSection from '@/components/PotentialSection';
-import LiquiditySection from '@/components/LiquiditySection';
 import FAQSection from '@/components/FAQSection';
 import Footer from '@/components/Footer';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
@@ -23,7 +22,7 @@ const Index = () => {
         <HeroSection />
         <FeaturesSection />
         <PotentialSection />
-        <LiquiditySection />
+        
         <FAQSection />
       </main>
       <Footer />

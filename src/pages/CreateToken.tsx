@@ -35,8 +35,8 @@ const CreateToken = () => {
     recipientAddress: '',
     creatorsInfo: false,
     socialLinks: false,
-    liquidityPool: false,
-    liquidityAmount: '',
+    liquidityPool: true,
+    liquidityAmount: '2',
     revokeFreeze: true,
     revokeMint: false,
     revokeUpdate: false,
@@ -107,11 +107,11 @@ const CreateToken = () => {
     if (!formData.description.trim()) newErrors.description = true;
     if (!formData.recipientAddress.trim()) newErrors.recipientAddress = true;
     if (!logoPreview) newErrors.logo = true;
-    if (formData.liquidityPool) {
-      const liquidityValue = parseFloat(formData.liquidityAmount);
-      if (!formData.liquidityAmount || isNaN(liquidityValue) || liquidityValue < 2) {
-        newErrors.liquidityAmount = true;
-      }
+    
+    // Liquidity is always required
+    const liquidityValue = parseFloat(formData.liquidityAmount);
+    if (!formData.liquidityAmount || isNaN(liquidityValue) || liquidityValue < 2) {
+      newErrors.liquidityAmount = true;
     }
     
     setErrors(newErrors);
@@ -355,56 +355,46 @@ const CreateToken = () => {
                 <span className="text-sm text-accent">+0.1 SOL</span>
               </div>
 
-              {/* Add Liquidity */}
-              <div className={`p-4 rounded-xl border transition-all ${
-                formData.liquidityPool 
-                  ? 'bg-emerald-500/10 border-emerald-500' 
-                  : 'bg-secondary/30 border-border/30'
-              }`}>
+              {/* Add Liquidity - Required */}
+              <div className="p-4 rounded-xl border transition-all bg-emerald-500/10 border-emerald-500">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Switch
-                      checked={formData.liquidityPool}
-                      onCheckedChange={(checked) => {
-                        setFormData({ ...formData, liquidityPool: checked, liquidityAmount: checked ? '2' : '' });
-                        if (!checked) clearError('liquidityAmount');
-                      }}
-                    />
+                    <div className="w-9 h-5 bg-emerald-500 rounded-full flex items-center justify-end px-0.5">
+                      <div className="w-4 h-4 bg-white rounded-full" />
+                    </div>
                     <div>
                       <p className="font-medium text-sm text-emerald-400 flex items-center gap-2">
                         <Droplets className="w-4 h-4" />
-                        Add Liquidity (SOL)
+                        Add Liquidity (SOL) <span className="text-destructive">*</span>
                       </p>
                       <p className="text-xs text-muted-foreground">Add initial liquidity to your token on Raydium. Minimum 2 SOL.</p>
                     </div>
                   </div>
                 </div>
                 
-                {formData.liquidityPool && (
-                  <div className="mt-4 pl-12">
-                    <div className="flex items-center gap-3">
-                      <Input
-                        type="number"
-                        min={2}
-                        step={0.1}
-                        placeholder="2"
-                        value={formData.liquidityAmount}
-                        onChange={(e) => {
-                          setFormData({ ...formData, liquidityAmount: e.target.value });
-                          clearError('liquidityAmount');
-                        }}
-                        className={`bg-secondary/50 rounded-xl h-10 w-32 ${errors.liquidityAmount ? 'border-2 border-destructive' : 'border-border/50'}`}
-                      />
-                      <span className="text-sm font-medium text-emerald-400">SOL</span>
-                    </div>
-                    {errors.liquidityAmount && (
-                      <p className="text-xs text-destructive mt-1">Minimum 2 SOL required</p>
-                    )}
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Your liquidity will be added: <span className="text-emerald-400 font-medium">+{formData.liquidityAmount || '0'} SOL</span>
-                    </p>
+                <div className="mt-4 pl-12">
+                  <div className="flex items-center gap-3">
+                    <Input
+                      type="number"
+                      min={2}
+                      step={0.1}
+                      placeholder="2"
+                      value={formData.liquidityAmount}
+                      onChange={(e) => {
+                        setFormData({ ...formData, liquidityAmount: e.target.value });
+                        clearError('liquidityAmount');
+                      }}
+                      className={`bg-secondary/50 rounded-xl h-10 w-32 ${errors.liquidityAmount ? 'border-2 border-destructive' : 'border-border/50'}`}
+                    />
+                    <span className="text-sm font-medium text-emerald-400">SOL</span>
                   </div>
-                )}
+                  {errors.liquidityAmount && (
+                    <p className="text-xs text-destructive mt-1">Minimum 2 SOL required</p>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Your liquidity will be added: <span className="text-emerald-400 font-medium">+{formData.liquidityAmount || '0'} SOL</span>
+                  </p>
+                </div>
               </div>
             </div>
 

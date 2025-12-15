@@ -139,7 +139,7 @@ const ChatWidget = () => {
 
   const formatTime = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
   return (
@@ -163,7 +163,7 @@ const ChatWidget = () => {
           <div className="bg-gradient-to-r from-primary to-accent p-4 text-white">
             <h3 className="font-semibold text-lg">SolFerno Support</h3>
             <p className="text-sm opacity-90">
-              {step === 'form' ? 'Представьтесь, пожалуйста' : 'Мы онлайн'}
+              {step === 'form' ? 'Please introduce yourself' : 'We are online'}
             </p>
           </div>
 
@@ -173,20 +173,20 @@ const ChatWidget = () => {
               <div className="flex-1 flex flex-col justify-center gap-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground/80 mb-2">
-                    Ваше имя
+                    Your Name
                   </label>
                   <Input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Введите имя"
+                    placeholder="Enter your name"
                     required
                     className="bg-background/50"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground/80 mb-2">
-                    Email
+                    Email Address
                   </label>
                   <Input
                     type="email"
@@ -202,7 +202,7 @@ const ChatWidget = () => {
                 type="submit" 
                 className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90"
               >
-                Начать чат
+                Start Chat
               </Button>
             </form>
           ) : (
@@ -212,8 +212,8 @@ const ChatWidget = () => {
                 {messages.length === 0 && (
                   <div className="text-center text-muted-foreground py-8">
                     <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>Напишите нам сообщение</p>
-                    <p className="text-sm">Мы ответим в ближайшее время</p>
+                    <p>Send us a message</p>
+                    <p className="text-sm">We'll reply as soon as possible</p>
                   </div>
                 )}
                 {messages.map((msg) => (
@@ -244,7 +244,7 @@ const ChatWidget = () => {
                   <Input
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Введите сообщение..."
+                    placeholder="Type a message..."
                     disabled={isSending}
                     className="flex-1 bg-background/50"
                   />

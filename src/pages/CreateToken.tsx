@@ -357,22 +357,17 @@ const CreateToken = () => {
 
               {/* Add Liquidity - Required */}
               <div className="p-4 rounded-xl border transition-all bg-emerald-500/10 border-emerald-500">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-5 bg-emerald-500 rounded-full flex items-center justify-end px-0.5">
-                      <div className="w-4 h-4 bg-white rounded-full" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm text-emerald-400 flex items-center gap-2">
-                        <Droplets className="w-4 h-4" />
-                        Add Liquidity (SOL) <span className="text-destructive">*</span>
-                      </p>
-                      <p className="text-xs text-muted-foreground">Add initial liquidity to your token on Raydium. Minimum 2 SOL.</p>
-                    </div>
+                <div className="flex items-center gap-3">
+                  <div>
+                    <p className="font-medium text-sm text-emerald-400 flex items-center gap-2">
+                      <Droplets className="w-4 h-4" />
+                      Add Liquidity (SOL) <span className="text-destructive">*</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">Add initial liquidity to your token on Raydium. Minimum 2 SOL.</p>
                   </div>
                 </div>
                 
-                <div className="mt-4 pl-12">
+                <div className="mt-4">
                   <div className="flex items-center gap-3">
                     <Input
                       type="number"

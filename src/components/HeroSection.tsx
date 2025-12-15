@@ -74,8 +74,8 @@ const HeroSection = () => {
             value: '<60s',
             label: 'Deploy Time',
             Icon: Flame
-          }].map((stat) => <div key={stat.label} className="glass rounded-xl sm:rounded-2xl p-3 sm:p-5 group hover:glow-primary transition-all duration-500 card-3d">
-                <div className="card-3d-inner">
+          }].map((stat) => <div key={stat.label} className="glass rounded-xl sm:rounded-2xl p-3 sm:p-5 group hover:glow-primary transition-all duration-500 card-3d text-center">
+                <div className="card-3d-inner flex flex-col items-center">
                   <stat.Icon className="w-5 h-5 sm:w-6 sm:h-6 mb-1 sm:mb-2 text-white" />
                   <div className="text-xl sm:text-2xl md:text-3xl font-bold gradient-text">{stat.value}</div>
                   <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mt-1">{stat.label}</div>

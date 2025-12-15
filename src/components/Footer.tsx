@@ -15,8 +15,7 @@ const Footer = () => {
                 Sol<span className="gradient-text">Ferno</span>
               </span>
             </a>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-md leading-relaxed">Easy Token Launch & Realistic Terminal Chart Simulation. Earn
-with Us! 
+            <p className="text-sm sm:text-base text-muted-foreground max-w-md leading-relaxed">Easy Token Launch & Realistic Terminal Chart Simulation. Profit with Us! 
  </p>
           </div>
 

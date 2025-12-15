@@ -31,6 +31,7 @@ serve(async (req) => {
     if (update.callback_query) {
       const callbackData = update.callback_query.data;
       const chatId = update.callback_query.message.chat.id;
+      const messageId = update.callback_query.message.message_id;
       
       console.log('Callback data:', callbackData);
       
@@ -38,13 +39,13 @@ serve(async (req) => {
         const conversationId = callbackData.replace('reply_', '');
         
         // Get conversation details
-        const { data: conv, error: convError } = await supabase
+        const { data: conv } = await supabase
           .from('conversations')
           .select('*')
           .eq('id', conversationId)
-          .single();
+          .maybeSingle();
         
-        console.log('Conversation:', conv, 'Error:', convError);
+        console.log('Conversation:', conv);
         
         // Answer callback
         await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/answerCallbackQuery`, {
@@ -52,21 +53,28 @@ serve(async (req) => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             callback_query_id: update.callback_query.id,
-            text: 'Используйте команду ниже для ответа',
+            text: 'Ответьте на следующее сообщение',
           }),
         });
         
-        // Send reply instruction with command
-        const shortId = conversationId.substring(0, 8);
-        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        // Send a message that user needs to reply to
+        // Include conversation ID in the message for tracking
+        const promptResult = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             chat_id: chatId,
-            text: `✍️ Чтобы ответить *${conv?.visitor_name}*, отправьте:\n\n\`/r ${conversationId} Ваш ответ\`\n\nИли скопируйте и измените:\n\`/r ${conversationId} Здравствуйте! Чем могу помочь?\``,
+            text: `💬 Ответ для: ${conv?.visitor_name || 'Посетитель'}\n📧 ${conv?.visitor_email || ''}\n\n👇 *Ответьте на это сообщение* чтобы отправить ответ клиенту\n\n🔑 _${conversationId}_`,
             parse_mode: 'Markdown',
+            reply_markup: {
+              force_reply: true,
+              selective: false,
+              input_field_placeholder: 'Введите ваш ответ...'
+            }
           }),
         });
+        
+        console.log('Prompt sent:', await promptResult.json());
         
         return new Response(JSON.stringify({ ok: true }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -74,43 +82,21 @@ serve(async (req) => {
       }
     }
 
-    // Handle /r command: /r UUID message
-    if (update.message?.text && update.message.text.startsWith('/r ')) {
-      const text = update.message.text;
+    // Handle reply to bot's message (the main reply mechanism)
+    if (update.message?.reply_to_message?.text) {
+      const replyToText = update.message.reply_to_message.text;
+      const adminMessage = update.message.text;
       const chatId = update.message.chat.id;
       
-      console.log('Reply command received:', text);
+      console.log('Reply detected. Reply to:', replyToText);
+      console.log('Admin message:', adminMessage);
       
-      // Parse: /r <uuid> <message>
-      const match = text.match(/^\/r\s+([a-f0-9-]+)\s+(.+)$/is);
+      // Check if this is a reply to our prompt message (contains conversation ID)
+      const uuidMatch = replyToText.match(/🔑 _([a-f0-9-]{36})_/);
       
-      if (match) {
-        const conversationId = match[1];
-        const replyMessage = match[2].trim();
-        
-        console.log('Parsed - ConvID:', conversationId, 'Message:', replyMessage);
-        
-        // Verify conversation exists
-        const { data: conv, error: convError } = await supabase
-          .from('conversations')
-          .select('*')
-          .eq('id', conversationId)
-          .single();
-        
-        if (convError || !conv) {
-          console.error('Conversation not found:', convError);
-          await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              chat_id: chatId,
-              text: '❌ Диалог не найден. Проверьте ID.',
-            }),
-          });
-          return new Response(JSON.stringify({ ok: true }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        }
+      if (uuidMatch) {
+        const conversationId = uuidMatch[1];
+        console.log('Found conversation ID:', conversationId);
         
         // Insert admin reply
         const { data: insertedMsg, error: insertError } = await supabase
@@ -118,7 +104,7 @@ serve(async (req) => {
           .insert({
             conversation_id: conversationId,
             sender_type: 'admin',
-            message: replyMessage,
+            message: adminMessage,
           })
           .select()
           .single();
@@ -135,26 +121,58 @@ serve(async (req) => {
             }),
           });
         } else {
+          // Get conversation for name
+          const { data: conv } = await supabase
+            .from('conversations')
+            .select('visitor_name')
+            .eq('id', conversationId)
+            .maybeSingle();
+          
           await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               chat_id: chatId,
-              text: `✅ Ответ отправлен пользователю *${conv.visitor_name}*!`,
-              parse_mode: 'Markdown',
+              text: `✅ Ответ отправлен ${conv?.visitor_name || 'клиенту'}!`,
             }),
           });
         }
-      } else {
-        // Invalid format
+        
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
+    // Handle /r command as fallback: /r UUID message
+    if (update.message?.text && update.message.text.startsWith('/r ')) {
+      const text = update.message.text;
+      const chatId = update.message.chat.id;
+      
+      console.log('Reply command received:', text);
+      
+      const match = text.match(/^\/r\s+([a-f0-9-]{36})\s+(.+)$/is);
+      
+      if (match) {
+        const conversationId = match[1];
+        const replyMessage = match[2].trim();
+        
+        const { error: insertError } = await supabase
+          .from('chat_messages')
+          .insert({
+            conversation_id: conversationId,
+            sender_type: 'admin',
+            message: replyMessage,
+          });
+        
+        const responseText = insertError 
+          ? '❌ Ошибка: ' + insertError.message 
+          : '✅ Ответ отправлен!';
+        
         await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: '❌ Неверный формат. Используйте:\n`/r <ID диалога> <Ваш ответ>`',
-            parse_mode: 'Markdown',
-          }),
+          body: JSON.stringify({ chat_id: chatId, text: responseText }),
         });
       }
       
@@ -171,7 +189,7 @@ serve(async (req) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           chat_id: chatId,
-          text: '👋 Привет! Я бот SolFerno Support.\n\nКогда пользователи пишут на сайте, вы получите уведомление с кнопкой "Ответить".',
+          text: '👋 Привет! Я бот SolFerno Support.\n\nКогда пользователи пишут на сайте, вы получите уведомление с кнопкой "Ответить".\n\nНажмите кнопку и ответьте на сообщение бота!',
         }),
       });
     }

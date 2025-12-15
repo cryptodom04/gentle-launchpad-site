@@ -107,25 +107,6 @@ const Launched = () => {
             </div>
           </div>
 
-          {/* Stats Bar */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="glass rounded-2xl p-4 text-center">
-              <p className="text-2xl font-bold gradient-text">{tokens.length}</p>
-              <p className="text-sm text-muted-foreground">Active Tokens</p>
-            </div>
-            <div className="glass rounded-2xl p-4 text-center">
-              <p className="text-2xl font-bold text-green-400">50K+</p>
-              <p className="text-sm text-muted-foreground">Min Market Cap</p>
-            </div>
-            <div className="glass rounded-2xl p-4 text-center">
-              <p className="text-2xl font-bold text-primary">5s</p>
-              <p className="text-sm text-muted-foreground">Auto-refresh</p>
-            </div>
-            <div className="glass rounded-2xl p-4 text-center">
-              <p className="text-2xl font-bold text-cyan-400">Solana</p>
-              <p className="text-sm text-muted-foreground">Network</p>
-            </div>
-          </div>
 
           {/* Tokens Grid */}
           {loading && tokens.length === 0 ? (

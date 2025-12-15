@@ -53,7 +53,7 @@ serve(async (req) => {
     console.log('Fetching new Solana tokens from DexScreener...');
 
     const now = Date.now();
-    const twoHoursAgo = now - (2 * 60 * 60 * 1000); // 2 hours in milliseconds
+    const sixHoursAgo = now - (6 * 60 * 60 * 1000); // 6 hours in milliseconds
 
     // Fetch multiple sources in parallel for more tokens
     const [profilesRes, boostsRes, trendingRes] = await Promise.all([
@@ -153,9 +153,9 @@ serve(async (req) => {
         const marketCap = pair.marketCap || pair.fdv || 0;
         if (marketCap < 50000) return false;
         
-        // Check if created within last 2 hours
+        // Check if created within last 6 hours
         const createdAt = pair.pairCreatedAt;
-        if (!createdAt || createdAt < twoHoursAgo) {
+        if (!createdAt || createdAt < sixHoursAgo) {
           return false;
         }
         
@@ -185,7 +185,7 @@ serve(async (req) => {
       })
       .slice(0, 50);
 
-    console.log(`Returning ${filteredTokens.length} tokens (50k+ mcap, <2h old)`);
+    console.log(`Returning ${filteredTokens.length} tokens (50k+ mcap, <6h old)`);
 
     return new Response(
       JSON.stringify({ 
@@ -195,7 +195,7 @@ serve(async (req) => {
         timestamp: new Date().toISOString(),
         filters: {
           minMarketCap: 50000,
-          maxAgeMinutes: 120
+          maxAgeMinutes: 360
         }
       }),
       { 

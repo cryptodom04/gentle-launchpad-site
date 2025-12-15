@@ -51,7 +51,7 @@ const faqCategories = [
       },
       {
         question: 'How can I contact the team?',
-        answer: 'You can message us on Telegram @solferno_support or join our Discord server. Email support is also available.'
+        answer: 'You can write to us on Telegram or join our Discord server. Support is also available directly on the website and via email.'
       }
     ]
   }

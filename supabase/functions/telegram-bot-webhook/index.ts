@@ -6,8 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Store pending replies in memory (conversation_id -> waiting for reply)
-const pendingReplies = new Map<string, boolean>();
+// Simple in-memory store for pending replies (resets on cold start, but works for our use case)
+const pendingReplies: Record<string, string> = {};
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -23,15 +23,22 @@ serve(async (req) => {
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
     
     const update = await req.json();
-    console.log('Telegram update:', JSON.stringify(update, null, 2));
+    console.log('Telegram update received:', JSON.stringify(update, null, 2));
 
     // Handle callback query (button click)
     if (update.callback_query) {
       const callbackData = update.callback_query.data;
       const chatId = update.callback_query.message.chat.id;
+      const userId = update.callback_query.from.id;
+      
+      console.log('Callback received:', callbackData);
       
       if (callbackData.startsWith('reply_')) {
         const conversationId = callbackData.replace('reply_', '');
+        
+        // Store pending reply for this user
+        pendingReplies[String(userId)] = conversationId;
+        console.log('Stored pending reply for user', userId, 'conversation', conversationId);
         
         // Get conversation details
         const { data: conv } = await supabase
@@ -39,6 +46,8 @@ serve(async (req) => {
           .select('*')
           .eq('id', conversationId)
           .single();
+        
+        console.log('Conversation found:', conv);
         
         // Answer callback query
         await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/answerCallbackQuery`, {
@@ -50,104 +59,56 @@ serve(async (req) => {
           }),
         });
         
-        // Send prompt message
+        // Send prompt message with conversation ID for reference
         await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             chat_id: chatId,
-            text: `✍️ Напишите ответ для *${conv?.visitor_name}* (${conv?.visitor_email}):\n\n_Отправьте следующее сообщение как ответ_`,
+            text: `✍️ *Ответ для:* ${conv?.visitor_name} (${conv?.visitor_email})\n\n📝 Напишите ваш ответ следующим сообщением.\n\n_ID: ${conversationId}_`,
             parse_mode: 'Markdown',
-            reply_markup: {
-              force_reply: true,
-              selective: true,
-              input_field_placeholder: 'Введите ответ...'
-            }
           }),
         });
         
-        // Store pending reply state in database (using a simple approach)
-        await supabase
-          .from('conversations')
-          .update({ updated_at: new Date().toISOString() })
-          .eq('id', conversationId);
-        
-        // We'll use the reply_to_message to track which conversation to reply to
         return new Response(JSON.stringify({ ok: true }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
     }
 
-    // Handle regular message (reply from admin)
-    if (update.message && update.message.reply_to_message) {
-      const replyToText = update.message.reply_to_message.text || '';
-      const adminMessage = update.message.text;
+    // Handle regular message from admin
+    if (update.message?.text && !update.message.text.startsWith('/')) {
       const chatId = update.message.chat.id;
+      const userId = update.message.from.id;
+      const adminMessage = update.message.text;
       
-      // Check if this is a reply to our prompt
-      if (replyToText.includes('Напишите ответ для')) {
-        // Extract email from the prompt
-        const emailMatch = replyToText.match(/\(([^)]+@[^)]+)\)/);
-        if (emailMatch) {
-          const email = emailMatch[1];
-          
-          // Find the conversation
-          const { data: conv } = await supabase
-            .from('conversations')
-            .select('*')
-            .eq('visitor_email', email)
-            .order('updated_at', { ascending: false })
-            .limit(1)
-            .single();
-          
-          if (conv) {
-            // Insert admin reply
-            const { error } = await supabase
-              .from('chat_messages')
-              .insert({
-                conversation_id: conv.id,
-                sender_type: 'admin',
-                message: adminMessage,
-              });
-            
-            if (!error) {
-              // Confirm delivery
-              await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  chat_id: chatId,
-                  text: `✅ Ответ отправлен пользователю *${conv.visitor_name}*`,
-                  parse_mode: 'Markdown',
-                }),
-              });
-            }
-          }
-        }
-      }
-    }
-
-    // Handle direct message with conversation ID format: /reply_UUID message
-    if (update.message?.text?.startsWith('/reply_')) {
-      const text = update.message.text;
-      const match = text.match(/^\/reply_([a-f0-9-]+)\s+(.+)$/s);
+      console.log('Message from user', userId, ':', adminMessage);
+      console.log('Pending replies:', JSON.stringify(pendingReplies));
       
-      if (match) {
-        const conversationId = match[1];
-        const replyMessage = match[2];
-        const chatId = update.message.chat.id;
+      // Check if user has a pending reply
+      const conversationId = pendingReplies[String(userId)];
+      
+      if (conversationId) {
+        console.log('Found pending reply for conversation:', conversationId);
         
         // Insert admin reply
-        const { error } = await supabase
+        const { data: insertedMsg, error } = await supabase
           .from('chat_messages')
           .insert({
             conversation_id: conversationId,
             sender_type: 'admin',
-            message: replyMessage,
-          });
+            message: adminMessage,
+          })
+          .select()
+          .single();
+        
+        console.log('Insert result:', insertedMsg, 'Error:', error);
         
         if (!error) {
+          // Clear pending reply
+          delete pendingReplies[String(userId)];
+          
+          // Confirm delivery
           await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -156,7 +117,47 @@ serve(async (req) => {
               text: '✅ Ответ отправлен!',
             }),
           });
+        } else {
+          await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: '❌ Ошибка: ' + error.message,
+            }),
+          });
         }
+        
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
+    // Handle direct command format: /r UUID message
+    if (update.message?.text?.startsWith('/r ')) {
+      const text = update.message.text;
+      const parts = text.substring(3).split(' ');
+      const conversationId = parts[0];
+      const replyMessage = parts.slice(1).join(' ');
+      const chatId = update.message.chat.id;
+      
+      if (conversationId && replyMessage) {
+        const { error } = await supabase
+          .from('chat_messages')
+          .insert({
+            conversation_id: conversationId,
+            sender_type: 'admin',
+            message: replyMessage,
+          });
+        
+        const responseText = error ? '❌ Ошибка: ' + error.message : '✅ Ответ отправлен!';
+        
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId, text: responseText }),
+        });
       }
     }
 

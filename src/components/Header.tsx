@@ -11,8 +11,8 @@ const navLinks = [{
   isPage: true
 }, {
   name: 'Liquidity',
-  href: '/#liquidity',
-  isPage: false
+  href: '/liquidity',
+  isPage: true
 }, {
   name: 'Features',
   href: '/#features',

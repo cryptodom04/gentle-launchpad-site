@@ -19,6 +19,7 @@ export type Database = {
           conversation_id: string
           created_at: string
           id: string
+          image_url: string | null
           message: string
           sender_type: string
           telegram_message_id: number | null
@@ -27,6 +28,7 @@ export type Database = {
           conversation_id: string
           created_at?: string
           id?: string
+          image_url?: string | null
           message: string
           sender_type: string
           telegram_message_id?: number | null
@@ -35,6 +37,7 @@ export type Database = {
           conversation_id?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           message?: string
           sender_type?: string
           telegram_message_id?: number | null

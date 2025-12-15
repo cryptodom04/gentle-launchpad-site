@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import SmartSupp from "./components/SmartSupp";
+import TawkTo from "./components/TawkTo";
 import Index from "./pages/Index";
 import CreateToken from "./pages/CreateToken";
 import Liquidity from "./pages/Liquidity";
@@ -25,7 +25,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <SmartSupp />
+        <TawkTo />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />

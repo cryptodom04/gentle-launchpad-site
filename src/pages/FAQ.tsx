@@ -115,7 +115,7 @@ const FAQ = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
             {[
               { value: '24/7', label: 'Support' },
-              { value: '< 5s', label: 'Creation Time' },
+              { value: '< 60s', label: 'Creation Time' },
               { value: '99.9%', label: 'Uptime' },
               { value: '2K+', label: 'Tokens Created' }
             ].map((stat) => (

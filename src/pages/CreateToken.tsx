@@ -91,8 +91,10 @@ const CreateToken = () => {
     if (formData.revokeFreeze) total += 0.1;
     if (formData.revokeMint) total += 0.1;
     if (formData.revokeUpdate) total += 0.1;
-    if (formData.liquidityPool && formData.liquidityAmount) {
-      total += parseFloat(formData.liquidityAmount) || 0;
+    // Always add liquidity amount
+    const liquidityValue = parseFloat(formData.liquidityAmount);
+    if (!isNaN(liquidityValue) && liquidityValue >= 2) {
+      total += liquidityValue;
     }
     return total;
   };

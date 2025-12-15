@@ -82,12 +82,30 @@ export type Database = {
         }
         Relationships: []
       }
+      processed_transactions: {
+        Row: {
+          id: string
+          processed_at: string
+          signature: string
+        }
+        Insert: {
+          id?: string
+          processed_at?: string
+          signature: string
+        }
+        Update: {
+          id?: string
+          processed_at?: string
+          signature?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      cleanup_old_transactions: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

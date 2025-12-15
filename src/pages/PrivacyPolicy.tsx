@@ -7,7 +7,7 @@ const sections = [
     icon: Database,
     title: "We Don't Collect Information",
     content: [
-      'Wallet addresses used for token creation and transactions',
+      'We do not store wallet addresses or transactions.',
       'Transaction history and token creation data on the Solana blockchain',
       'Usage data including pages visited and features used',
       'Device information such as browser type and operating system'

@@ -62,7 +62,7 @@ const Liquidity = () => {
             <span className="text-sm font-medium">Liquidity Solutions</span>
           </div>
           
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-6">
             Add <span className="gradient-text">Liquidity</span> to Your Token
           </h1>
           

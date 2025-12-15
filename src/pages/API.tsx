@@ -102,7 +102,7 @@ const API = () => {
             <span className="text-sm font-medium">Developer API</span>
           </div>
           
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-6">
             Build with <span className="gradient-text">SolFerno API</span>
           </h1>
           

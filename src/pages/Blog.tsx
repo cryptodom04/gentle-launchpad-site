@@ -59,8 +59,8 @@ const Blog = () => {
 
           {/* Page Header */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Nebula<span className="gradient-text">Forge</span> Blog
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+              Sol<span className="gradient-text">Ferno</span> Blog
             </h1>
             <p className="text-muted-foreground max-w-lg mx-auto">
               Insights, tutorials, and guides about Solana token creation and blockchain development

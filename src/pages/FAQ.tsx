@@ -117,7 +117,7 @@ const FAQ = () => {
               { value: '24/7', label: 'Support' },
               { value: '< 5s', label: 'Creation Time' },
               { value: '99.9%', label: 'Uptime' },
-              { value: '10K+', label: 'Tokens Created' }
+              { value: '2K+', label: 'Tokens Created' }
             ].map((stat) => (
               <div key={stat.label} className="glass rounded-2xl p-4 text-center">
                 <div className="text-2xl sm:text-3xl font-bold gradient-text mb-1">{stat.value}</div>

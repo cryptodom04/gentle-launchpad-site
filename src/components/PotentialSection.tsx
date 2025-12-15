@@ -159,7 +159,7 @@ const PotentialSection = () => {
               </div>
               <div className="w-px h-8 bg-border/50" />
               <div className="text-center">
-                <p className="text-lg sm:text-xl font-bold gradient-text">$12M+</p>
+                <p className="text-lg sm:text-xl font-bold gradient-text">$3M+</p>
                 <p className="text-[10px] sm:text-xs text-muted-foreground">Total Volume</p>
               </div>
               <div className="w-px h-8 bg-border/50" />

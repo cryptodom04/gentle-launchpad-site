@@ -1,1 +1,4 @@
 project_id = "qzasxqikcrvvxuptgvdd"
+
+[functions.helius-webhook]
+verify_jwt = false

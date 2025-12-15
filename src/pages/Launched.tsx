@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
-import { Rocket, TrendingUp, ExternalLink, RefreshCw } from 'lucide-react';
+import { Rocket, TrendingUp, TrendingDown, ExternalLink, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Token {
@@ -188,15 +188,30 @@ const Launched = () => {
                     </div>
                   </div>
                   
-                  {/* Price & Actions */}
-                  <div className="mt-4 pt-4 border-t border-border/30 flex items-center justify-between">
-                    <div>
+                  {/* Price, Change & Actions */}
+                  <div className="mt-4 pt-4 border-t border-border/30 flex items-center justify-between gap-3">
+                    <div className="flex-1">
                       <p className="text-xs text-muted-foreground">Price</p>
                       <p className="font-mono text-sm">{formatPrice(token.priceUsd)}</p>
                     </div>
                     
+                    {/* 24h Change */}
+                    <div className="text-center">
+                      <p className="text-xs text-muted-foreground">24h</p>
+                      <div className={`flex items-center justify-center gap-1 font-medium text-sm ${
+                        (token.priceChange24h || 0) >= 0 ? 'text-green-400' : 'text-red-400'
+                      }`}>
+                        {(token.priceChange24h || 0) >= 0 ? (
+                          <TrendingUp className="w-3 h-3" />
+                        ) : (
+                          <TrendingDown className="w-3 h-3" />
+                        )}
+                        <span>{(token.priceChange24h || 0) >= 0 ? '+' : ''}{(token.priceChange24h || 0).toFixed(1)}%</span>
+                      </div>
+                    </div>
+                    
                     <a
-                      href={`https://pump.fun/${token.mint}`}
+                      href={`https://dexscreener.com/solana/${token.mint}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-sm transition-colors"

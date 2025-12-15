@@ -23,12 +23,18 @@ Terminal Chart Simulation.</p>
           <div>
             <h4 className="font-bold text-base sm:text-lg mb-4 sm:mb-6">Product</h4>
             <ul className="space-y-3 sm:space-y-4">
-              {['Create Token', 'API'].map(item => <li key={item}>
-                  <a href="#" className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
-                    {item}
-                    <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </a>
-                </li>)}
+              <li>
+                <Link to="/create" className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
+                  Create Token
+                  <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Link>
+              </li>
+              <li>
+                <a href="#" className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
+                  API
+                  <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </a>
+              </li>
             </ul>
           </div>
 

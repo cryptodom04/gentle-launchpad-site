@@ -19,11 +19,6 @@ const sections = [
     content: 'You agree not to use SolFerno for: creating tokens intended for fraud or scams; impersonating other projects or entities; money laundering or terrorist financing; violating any applicable laws or regulations; attempting to exploit or harm our platform or users; creating tokens with misleading or deceptive information; any activity that could damage our reputation or operations.'
   },
   {
-    icon: Scale,
-    title: 'Limitation of Liability',
-    content: 'To the maximum extent permitted by law, SolFerno and its operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, or tokens. Our total liability shall not exceed the amount you paid for our services in the 12 months preceding the claim.'
-  },
-  {
     icon: RefreshCw,
     title: 'Modifications and Termination',
     content: 'We reserve the right to modify, suspend, or discontinue any part of our services at any time without notice. We may also terminate or suspend your access to the platform if we believe you have violated these terms or engaged in any prohibited activities. Upon termination, your right to use the platform will immediately cease.'

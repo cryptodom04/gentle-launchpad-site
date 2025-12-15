@@ -121,7 +121,7 @@ const PotentialSection = () => {
               </div>
               
               {/* Stat card 1 - Success rate */}
-              <div className="absolute -right-4 sm:-right-16 top-16 sm:top-20 glass-strong rounded-2xl p-4 sm:p-6 border border-border/50 shadow-xl">
+              <div className="absolute -right-4 sm:-right-16 top-36 sm:top-44 glass-strong rounded-2xl p-4 sm:p-6 border border-border/50 shadow-xl">
                 <p className="text-3xl sm:text-4xl md:text-5xl font-bold gradient-text">99.9%</p>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-1">Successful Launches</p>
               </div>

@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.tawkto-webhook]
 verify_jwt = false
+
+[functions.chat-send-message]
+verify_jwt = false
+
+[functions.telegram-bot-webhook]
+verify_jwt = false

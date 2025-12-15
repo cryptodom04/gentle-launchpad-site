@@ -75,7 +75,7 @@ serve(async (req) => {
     }
 
     // Handle /r command: /r UUID message
-    if (update.message?.text?.startsWith('/r ')) {
+    if (update.message?.text && update.message.text.startsWith('/r ')) {
       const text = update.message.text;
       const chatId = update.message.chat.id;
       

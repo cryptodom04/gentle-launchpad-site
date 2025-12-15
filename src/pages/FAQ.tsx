@@ -10,8 +10,8 @@ const faqCategories = [
     icon: Zap,
     questions: [
       {
-        question: 'What is NebulaForge?',
-        answer: 'NebulaForge is a platform for creating tokens on the Solana blockchain. We allow anyone to create their own SPL token without needing to write code or understand technical details.'
+        question: 'What is SolFerno?',
+        answer: 'SolFerno is a platform for creating tokens on the Solana blockchain. We allow anyone to create their own SPL token without needing to write code or understand technical details.'
       },
       {
         question: 'How do I start creating tokens?',
@@ -69,7 +69,7 @@ const faqCategories = [
       },
       {
         question: 'How can I contact the team?',
-        answer: 'You can message us on Telegram @nebulaforge_support or join our Discord server. Email support is also available.'
+        answer: 'You can message us on Telegram @solferno_support or join our Discord server. Email support is also available.'
       }
     ]
   }

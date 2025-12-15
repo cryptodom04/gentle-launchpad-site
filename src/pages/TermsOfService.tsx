@@ -6,27 +6,27 @@ const sections = [
   {
     icon: FileText,
     title: 'Acceptance of Terms',
-    content: 'By accessing or using NebulaForge, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this platform. We reserve the right to modify these terms at any time, and your continued use of the platform constitutes acceptance of any changes.'
+    content: 'By accessing or using SolFerno, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this platform. We reserve the right to modify these terms at any time, and your continued use of the platform constitutes acceptance of any changes.'
   },
   {
     icon: Coins,
     title: 'Token Creation Services',
-    content: 'NebulaForge provides tools for creating SPL tokens on the Solana blockchain. You are solely responsible for the tokens you create, including their name, symbol, supply, and any associated metadata. We do not endorse, verify, or guarantee the legitimacy of any tokens created through our platform. Token creation fees are non-refundable once the transaction is confirmed on the blockchain.'
+    content: 'SolFerno provides tools for creating SPL tokens on the Solana blockchain. You are solely responsible for the tokens you create, including their name, symbol, supply, and any associated metadata. We do not endorse, verify, or guarantee the legitimacy of any tokens created through our platform. Token creation fees are non-refundable once the transaction is confirmed on the blockchain.'
   },
   {
     icon: AlertTriangle,
     title: 'Risks and Disclaimers',
-    content: 'Cryptocurrency and blockchain technologies involve significant risks. You acknowledge that: (1) the value of tokens can be highly volatile; (2) blockchain transactions are irreversible; (3) you may lose access to your tokens if you lose your wallet credentials; (4) regulatory changes may affect your ability to use tokens; (5) smart contracts may contain bugs or vulnerabilities. NebulaForge is provided "as is" without warranties of any kind.'
+    content: 'Cryptocurrency and blockchain technologies involve significant risks. You acknowledge that: (1) the value of tokens can be highly volatile; (2) blockchain transactions are irreversible; (3) you may lose access to your tokens if you lose your wallet credentials; (4) regulatory changes may affect your ability to use tokens; (5) smart contracts may contain bugs or vulnerabilities. SolFerno is provided "as is" without warranties of any kind.'
   },
   {
     icon: Ban,
     title: 'Prohibited Activities',
-    content: 'You agree not to use NebulaForge for: creating tokens intended for fraud or scams; impersonating other projects or entities; money laundering or terrorist financing; violating any applicable laws or regulations; attempting to exploit or harm our platform or users; creating tokens with misleading or deceptive information; any activity that could damage our reputation or operations.'
+    content: 'You agree not to use SolFerno for: creating tokens intended for fraud or scams; impersonating other projects or entities; money laundering or terrorist financing; violating any applicable laws or regulations; attempting to exploit or harm our platform or users; creating tokens with misleading or deceptive information; any activity that could damage our reputation or operations.'
   },
   {
     icon: Scale,
     title: 'Limitation of Liability',
-    content: 'To the maximum extent permitted by law, NebulaForge and its operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, or tokens. Our total liability shall not exceed the amount you paid for our services in the 12 months preceding the claim.'
+    content: 'To the maximum extent permitted by law, SolFerno and its operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, or tokens. Our total liability shall not exceed the amount you paid for our services in the 12 months preceding the claim.'
   },
   {
     icon: RefreshCw,
@@ -72,7 +72,7 @@ const TermsOfService = () => {
           {/* Introduction */}
           <div className="glass rounded-3xl p-6 sm:p-8 mb-8">
             <p className="text-muted-foreground leading-relaxed">
-              Welcome to NebulaForge. These Terms of Service ("Terms") govern your use of our token creation platform and related services. By using NebulaForge, you enter into a binding agreement with us. Please ensure you understand and agree to these terms before proceeding.
+              Welcome to SolFerno. These Terms of Service ("Terms") govern your use of our token creation platform and related services. By using SolFerno, you enter into a binding agreement with us. Please ensure you understand and agree to these terms before proceeding.
             </p>
           </div>
 
@@ -97,7 +97,7 @@ const TermsOfService = () => {
           <div className="glass rounded-3xl p-6 sm:p-8 mt-8">
             <h3 className="text-xl font-bold mb-4">Governing Law</h3>
             <p className="text-muted-foreground leading-relaxed">
-              These Terms shall be governed by and construed in accordance with applicable laws, without regard to conflict of law principles. Any disputes arising from these terms or your use of NebulaForge shall be resolved through binding arbitration.
+              These Terms shall be governed by and construed in accordance with applicable laws, without regard to conflict of law principles. Any disputes arising from these terms or your use of SolFerno shall be resolved through binding arbitration.
             </p>
           </div>
 

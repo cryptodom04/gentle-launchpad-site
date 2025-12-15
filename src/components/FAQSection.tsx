@@ -4,8 +4,8 @@ import { cn } from '@/lib/utils';
 
 const faqs = [
   {
-    question: 'What is NebulaForge?',
-    answer: 'NebulaForge is a premium platform that enables users to launch new tokens on the Solana blockchain without writing any code. Our platform provides a secure, efficient, and user-friendly environment for token creators of all experience levels.',
+    question: 'What is SolFerno?',
+    answer: 'SolFerno is a premium platform that enables users to launch new tokens on the Solana blockchain without writing any code. Our platform provides a secure, efficient, and user-friendly environment for token creators of all experience levels.',
   },
   {
     question: 'How quickly can I create a token?',
@@ -21,7 +21,7 @@ const faqs = [
   },
   {
     question: 'What wallets are supported?',
-    answer: 'We support all major Solana wallets including Phantom, Solflare, Backpack, Ledger, Torus, and 20+ more. Any wallet compatible with Solana dApps will work seamlessly with NebulaForge.',
+    answer: 'We support all major Solana wallets including Phantom, Solflare, Backpack, Ledger, Torus, and 20+ more. Any wallet compatible with Solana dApps will work seamlessly with SolFerno.',
   },
   {
     question: 'How much does it cost to create a token?',
@@ -49,7 +49,7 @@ const FAQSection = () => {
             </h2>
             
             <p className="text-base sm:text-lg text-muted-foreground px-4">
-              Find quick answers to common questions about NebulaForge
+              Find quick answers to common questions about SolFerno
             </p>
           </div>
 

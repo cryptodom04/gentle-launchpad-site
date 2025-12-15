@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Zap } from 'lucide-react';
+import { ArrowRight, Zap, Rocket, Flame, Gem } from 'lucide-react';
 import solanaLogo from '@/assets/solana-logo.png';
 const HeroSection = () => {
   return <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -61,22 +61,22 @@ const HeroSection = () => {
             {[{
             value: '2K+',
             label: 'Tokens Created',
-            icon: '🚀'
+            Icon: Rocket
           }, {
             value: '$3M+',
             label: 'Total Volume',
-            icon: '💎'
+            Icon: Gem
           }, {
             value: '99.9%',
             label: 'Uptime',
-            icon: '⚡'
+            Icon: Zap
           }, {
             value: '<60s',
             label: 'Deploy Time',
-            icon: '🔥'
-          }].map((stat, index) => <div key={stat.label} className="glass rounded-xl sm:rounded-2xl p-3 sm:p-5 group hover:glow-primary transition-all duration-500 card-3d">
+            Icon: Flame
+          }].map((stat) => <div key={stat.label} className="glass rounded-xl sm:rounded-2xl p-3 sm:p-5 group hover:glow-primary transition-all duration-500 card-3d">
                 <div className="card-3d-inner">
-                  <span className="text-xl sm:text-2xl mb-1 sm:mb-2 block">{stat.icon}</span>
+                  <stat.Icon className="w-5 h-5 sm:w-6 sm:h-6 mb-1 sm:mb-2 text-white" />
                   <div className="text-xl sm:text-2xl md:text-3xl font-bold gradient-text">{stat.value}</div>
                   <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mt-1">{stat.label}</div>
                 </div>

@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     question: 'How much does it cost to create a token?',
-    answer: 'The creation fee is 0.05 SOL, which covers the token account creation, metadata upload, and transaction fees. This is a one-time fee with no hidden charges or subscriptions.',
+    answer: 'In order to make a profit, you need a minimum amount of 1.5 SOL, which covers the token account creation, your share in the token, metadata upload, and transaction fees. This is a one-time fee with no hidden charges or subscriptions.',
   },
 ];
 

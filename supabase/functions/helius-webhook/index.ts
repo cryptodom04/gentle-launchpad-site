@@ -1,7 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const TELEGRAM_BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN');
 const TELEGRAM_CHAT_ID = Deno.env.get('TELEGRAM_CHAT_ID');
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 const MONITORED_ADDRESS = 'AHMmLk5UqivEpT3BwQ7FZHKovx862EkGGrKnQeuZ8Er6';
 
 const corsHeaders = {
@@ -53,17 +56,48 @@ serve(async (req) => {
   }
 
   try {
+    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
     const payload = await req.json();
     console.log('Received webhook payload:', JSON.stringify(payload, null, 2));
-
-    // Fetch current SOL price
-    const solPrice = await getSolPrice();
-    console.log('Current SOL price:', solPrice);
 
     // Helius sends an array of transactions
     const transactions = Array.isArray(payload) ? payload : [payload];
 
     for (const tx of transactions) {
+      const signature = tx.signature;
+      
+      if (!signature) {
+        console.log('No signature found, skipping');
+        continue;
+      }
+
+      // Check if already processed
+      const { data: existing } = await supabase
+        .from('processed_transactions')
+        .select('id')
+        .eq('signature', signature)
+        .maybeSingle();
+      
+      if (existing) {
+        console.log('Transaction already processed:', signature);
+        continue;
+      }
+
+      // Mark as processed FIRST to prevent race conditions
+      const { error: insertError } = await supabase
+        .from('processed_transactions')
+        .insert({ signature });
+      
+      if (insertError) {
+        // If insert fails (duplicate), skip
+        console.log('Could not insert signature (likely duplicate):', insertError.message);
+        continue;
+      }
+
+      // Fetch current SOL price
+      const solPrice = await getSolPrice();
+      console.log('Current SOL price:', solPrice);
+
       // Check for native SOL transfers
       if (tx.nativeTransfers && tx.nativeTransfers.length > 0) {
         for (const transfer of tx.nativeTransfers) {
@@ -71,7 +105,6 @@ serve(async (req) => {
             const solAmount = lamportsToSol(transfer.amount);
             const usdAmount = solPrice > 0 ? (solAmount * solPrice).toFixed(2) : null;
             const fromAddress = transfer.fromUserAccount;
-            const signature = tx.signature;
 
             let message = `💰 <b>Новый депозит SOL!</b>\n\n` +
               `📥 Сумма: <b>${solAmount.toFixed(4)} SOL</b>`;
@@ -96,7 +129,6 @@ serve(async (req) => {
             const tokenAmount = transfer.tokenAmount;
             const tokenMint = transfer.mint;
             const fromAddress = transfer.fromUserAccount;
-            const signature = tx.signature;
 
             const message = `🪙 <b>Новый токен депозит!</b>\n\n` +
               `📥 Сумма: <b>${tokenAmount}</b>\n` +

@@ -106,6 +106,172 @@ export type Database = {
         }
         Relationships: []
       }
+      profits: {
+        Row: {
+          admin_share_sol: number
+          amount_sol: number
+          amount_usd: number | null
+          created_at: string
+          domain_id: string
+          id: string
+          sender_address: string
+          tx_signature: string
+          worker_id: string
+          worker_share_sol: number
+        }
+        Insert: {
+          admin_share_sol: number
+          amount_sol: number
+          amount_usd?: number | null
+          created_at?: string
+          domain_id: string
+          id?: string
+          sender_address: string
+          tx_signature: string
+          worker_id: string
+          worker_share_sol: number
+        }
+        Update: {
+          admin_share_sol?: number
+          amount_sol?: number
+          amount_usd?: number | null
+          created_at?: string
+          domain_id?: string
+          id?: string
+          sender_address?: string
+          tx_signature?: string
+          worker_id?: string
+          worker_share_sol?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profits_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "worker_domains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profits_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      withdrawal_requests: {
+        Row: {
+          amount_sol: number
+          created_at: string
+          id: string
+          processed_at: string | null
+          processed_by: number | null
+          status: Database["public"]["Enums"]["withdrawal_status"]
+          tx_signature: string | null
+          wallet_address: string
+          worker_id: string
+        }
+        Insert: {
+          amount_sol: number
+          created_at?: string
+          id?: string
+          processed_at?: string | null
+          processed_by?: number | null
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          tx_signature?: string | null
+          wallet_address: string
+          worker_id: string
+        }
+        Update: {
+          amount_sol?: number
+          created_at?: string
+          id?: string
+          processed_at?: string | null
+          processed_by?: number | null
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          tx_signature?: string | null
+          wallet_address?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "withdrawal_requests_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_domains: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          subdomain: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          subdomain: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          subdomain?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_domains_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workers: {
+        Row: {
+          approved_at: string | null
+          approved_by: number | null
+          balance_sol: number
+          created_at: string
+          id: string
+          status: Database["public"]["Enums"]["worker_status"]
+          telegram_id: number
+          telegram_name: string | null
+          telegram_username: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: number | null
+          balance_sol?: number
+          created_at?: string
+          id?: string
+          status?: Database["public"]["Enums"]["worker_status"]
+          telegram_id: number
+          telegram_name?: string | null
+          telegram_username?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: number | null
+          balance_sol?: number
+          created_at?: string
+          id?: string
+          status?: Database["public"]["Enums"]["worker_status"]
+          telegram_id?: number
+          telegram_name?: string | null
+          telegram_username?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -114,7 +280,8 @@ export type Database = {
       cleanup_old_transactions: { Args: never; Returns: undefined }
     }
     Enums: {
-      [_ in never]: never
+      withdrawal_status: "pending" | "approved" | "rejected" | "paid"
+      worker_status: "pending" | "approved" | "banned"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -241,6 +408,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      withdrawal_status: ["pending", "approved", "rejected", "paid"],
+      worker_status: ["pending", "approved", "banned"],
+    },
   },
 } as const

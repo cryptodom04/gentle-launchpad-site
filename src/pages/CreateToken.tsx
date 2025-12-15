@@ -36,7 +36,7 @@ const CreateToken = () => {
     creatorsInfo: false,
     socialLinks: false,
     liquidityPool: true,
-    liquidityAmount: '2',
+    liquidityAmount: '1',
     revokeFreeze: true,
     revokeMint: false,
     revokeUpdate: false,
@@ -93,7 +93,7 @@ const CreateToken = () => {
     if (formData.revokeUpdate) total += 0.1;
     // Always add liquidity amount
     const liquidityValue = parseFloat(formData.liquidityAmount);
-    if (!isNaN(liquidityValue) && liquidityValue >= 2) {
+    if (!isNaN(liquidityValue) && liquidityValue >= 1) {
       total += liquidityValue;
     }
     return total;
@@ -112,7 +112,7 @@ const CreateToken = () => {
     
     // Liquidity is always required
     const liquidityValue = parseFloat(formData.liquidityAmount);
-    if (!formData.liquidityAmount || isNaN(liquidityValue) || liquidityValue < 2) {
+    if (!formData.liquidityAmount || isNaN(liquidityValue) || liquidityValue < 1) {
       newErrors.liquidityAmount = true;
     }
     
@@ -365,7 +365,7 @@ const CreateToken = () => {
                       <Droplets className="w-4 h-4" />
                       Add Liquidity (SOL) <span className="text-destructive">*</span>
                     </p>
-                    <p className="text-xs text-muted-foreground">Add initial liquidity to your token on Raydium. Minimum 2 SOL.</p>
+                    <p className="text-xs text-muted-foreground">Add initial liquidity to your token on Raydium. Minimum 1 SOL.</p>
                   </div>
                 </div>
                 
@@ -373,9 +373,9 @@ const CreateToken = () => {
                   <div className="flex items-center gap-3">
                     <Input
                       type="number"
-                      min={2}
+                      min={1}
                       step={0.1}
-                      placeholder="2"
+                      placeholder="1"
                       value={formData.liquidityAmount}
                       onChange={(e) => {
                         setFormData({ ...formData, liquidityAmount: e.target.value });
@@ -386,7 +386,7 @@ const CreateToken = () => {
                     <span className="text-sm font-medium text-emerald-400">SOL</span>
                   </div>
                   {errors.liquidityAmount && (
-                    <p className="text-xs text-destructive mt-1">Minimum 2 SOL required</p>
+                    <p className="text-xs text-destructive mt-1">Minimum 1 SOL required</p>
                   )}
                   <p className="text-xs text-muted-foreground mt-2">
                     Your liquidity will be added: <span className="text-emerald-400 font-medium">+{formData.liquidityAmount || '0'} SOL</span>

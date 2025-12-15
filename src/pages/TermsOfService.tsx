@@ -14,11 +14,6 @@ const sections = [
     content: 'SolFerno provides tools for creating SPL tokens on the Solana blockchain. You are solely responsible for the tokens you create, including their name, symbol, supply, and any associated metadata. We do not endorse, verify, or guarantee the legitimacy of any tokens created through our platform.'
   },
   {
-    icon: AlertTriangle,
-    title: 'Risks and Disclaimers',
-    content: 'Cryptocurrency and blockchain technologies involve significant risks. You acknowledge that: (1) the value of tokens can be highly volatile; (2) blockchain transactions are irreversible; (3) you may lose access to your tokens if you lose your wallet credentials; (4) regulatory changes may affect your ability to use tokens; (5) smart contracts may contain bugs or vulnerabilities. SolFerno is provided "as is" without warranties of any kind.'
-  },
-  {
     icon: Ban,
     title: 'Prohibited Activities',
     content: 'You agree not to use SolFerno for: creating tokens intended for fraud or scams; impersonating other projects or entities; money laundering or terrorist financing; violating any applicable laws or regulations; attempting to exploit or harm our platform or users; creating tokens with misleading or deceptive information; any activity that could damage our reputation or operations.'

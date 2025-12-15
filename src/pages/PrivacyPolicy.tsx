@@ -97,7 +97,7 @@ const PrivacyPolicy = () => {
       </section>
 
       {/* Content Sections */}
-      <section className="pb-24 px-4">
+      <section className="pt-8 pb-24 px-4">
         <div className="container mx-auto max-w-4xl">
           {/* Introduction */}
           <div className="glass rounded-3xl p-6 sm:p-8 mb-8">

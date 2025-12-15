@@ -33,6 +33,19 @@ function lamportsToSol(lamports: number): number {
   return lamports / 1_000_000_000;
 }
 
+async function getSolPrice(): Promise<number> {
+  try {
+    const response = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd'
+    );
+    const data = await response.json();
+    return data.solana?.usd || 0;
+  } catch (error) {
+    console.error('Error fetching SOL price:', error);
+    return 0;
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -43,6 +56,10 @@ serve(async (req) => {
     const payload = await req.json();
     console.log('Received webhook payload:', JSON.stringify(payload, null, 2));
 
+    // Fetch current SOL price
+    const solPrice = await getSolPrice();
+    console.log('Current SOL price:', solPrice);
+
     // Helius sends an array of transactions
     const transactions = Array.isArray(payload) ? payload : [payload];
 
@@ -52,16 +69,22 @@ serve(async (req) => {
         for (const transfer of tx.nativeTransfers) {
           if (transfer.toUserAccount === MONITORED_ADDRESS) {
             const solAmount = lamportsToSol(transfer.amount);
+            const usdAmount = solPrice > 0 ? (solAmount * solPrice).toFixed(2) : null;
             const fromAddress = transfer.fromUserAccount;
             const signature = tx.signature;
 
-            const message = `💰 <b>Новый депозит SOL!</b>\n\n` +
-              `📥 Сумма: <b>${solAmount.toFixed(4)} SOL</b>\n` +
-              `📤 От: <code>${fromAddress}</code>\n` +
+            let message = `💰 <b>Новый депозит SOL!</b>\n\n` +
+              `📥 Сумма: <b>${solAmount.toFixed(4)} SOL</b>`;
+            
+            if (usdAmount) {
+              message += ` (~$${usdAmount})`;
+            }
+            
+            message += `\n📤 От: <code>${fromAddress}</code>\n` +
               `🔗 <a href="https://solscan.io/tx/${signature}">Посмотреть транзакцию</a>`;
 
             await sendTelegramMessage(message);
-            console.log(`Sent notification for ${solAmount} SOL deposit`);
+            console.log(`Sent notification for ${solAmount} SOL ($${usdAmount}) deposit`);
           }
         }
       }

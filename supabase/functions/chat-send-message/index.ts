@@ -16,6 +16,17 @@ const getCountryFlag = (countryCode: string): string => {
   return String.fromCodePoint(...codePoints);
 };
 
+// Input validation helpers
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  return emailRegex.test(email);
+};
+
+const sanitizeInput = (input: string, maxLength: number): string => {
+  if (!input || typeof input !== 'string') return '';
+  return input.trim().slice(0, maxLength);
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -33,7 +44,46 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
     
-    const { conversationId, message, visitorEmail, visitorName, isNewConversation } = await req.json();
+    const body = await req.json();
+    
+    // Validate and sanitize inputs
+    const conversationId = body.conversationId;
+    const message = sanitizeInput(body.message, 5000);
+    const visitorEmail = sanitizeInput(body.visitorEmail, 255);
+    const visitorName = sanitizeInput(body.visitorName, 100);
+    const isNewConversation = Boolean(body.isNewConversation);
+    
+    // Validate required fields
+    if (!message || message.length === 0) {
+      return new Response(
+        JSON.stringify({ error: 'Message is required and cannot be empty' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    if (isNewConversation) {
+      if (!visitorName || visitorName.length === 0) {
+        return new Response(
+          JSON.stringify({ error: 'Name is required' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      if (!visitorEmail || !validateEmail(visitorEmail)) {
+        return new Response(
+          JSON.stringify({ error: 'Valid email is required' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+    
+    // Validate conversationId format if provided
+    if (conversationId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(conversationId)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid conversation ID format' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     
     // Get visitor's IP from headers
     const visitorIp = req.headers.get('x-forwarded-for')?.split(',')[0] || 

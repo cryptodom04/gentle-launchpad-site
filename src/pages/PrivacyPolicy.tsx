@@ -27,7 +27,6 @@ const sections = [
     title: 'Data Security',
     content: [
       'We implement industry-standard security measures',
-      'We never store your private keys or seed phrases',
       'All sensitive data is encrypted in transit and at rest',
       'Regular security audits are conducted on our systems'
     ]

@@ -63,7 +63,8 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <a href="/" onClick={e => handleNavClick(e, '/#home', false)} className="flex items-center group">
+          <a href="/" onClick={e => handleNavClick(e, '/#home', false)} className="flex items-center gap-2 group">
+            <img src="/favicon.png" alt="SolFerno" className="w-8 h-8" />
             <div className="flex flex-col">
               <span className="font-bold text-xl tracking-tight">
                 Sol<span className="gradient-text">Ferno</span>

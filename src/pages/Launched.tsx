@@ -23,9 +23,10 @@ const Launched = () => {
   const [tokens, setTokens] = useState<Token[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<string>('');
 
-  const fetchTokens = async () => {
-    setLoading(true);
+  const fetchTokens = async (showLoading = false) => {
+    if (showLoading) setLoading(true);
     setError(null);
     
     try {
@@ -37,6 +38,7 @@ const Launched = () => {
       
       if (data?.tokens) {
         setTokens(data.tokens);
+        setLastUpdate(new Date().toLocaleTimeString());
       }
     } catch (err) {
       console.error('Error fetching tokens:', err);
@@ -47,10 +49,10 @@ const Launched = () => {
   };
 
   useEffect(() => {
-    fetchTokens();
+    fetchTokens(true);
     
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchTokens, 30000);
+    // Auto-refresh every 5 seconds
+    const interval = setInterval(() => fetchTokens(false), 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -88,14 +90,21 @@ const Launched = () => {
               Only showing tokens with 50K+ market cap.
             </p>
             
-            <button 
-              onClick={fetchTokens}
-              disabled={loading}
-              className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl glass hover:bg-secondary/50 transition-colors disabled:opacity-50"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              <span>Refresh</span>
-            </button>
+            <div className="flex items-center justify-center gap-4 mt-6">
+              <button 
+                onClick={() => fetchTokens(true)}
+                disabled={loading}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl glass hover:bg-secondary/50 transition-colors disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                <span>Refresh</span>
+              </button>
+              {lastUpdate && (
+                <span className="text-xs text-muted-foreground">
+                  Updated: {lastUpdate}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Stats Bar */}
@@ -109,8 +118,8 @@ const Launched = () => {
               <p className="text-sm text-muted-foreground">Min Market Cap</p>
             </div>
             <div className="glass rounded-2xl p-4 text-center">
-              <p className="text-2xl font-bold text-primary">Live</p>
-              <p className="text-sm text-muted-foreground">Auto-updating</p>
+              <p className="text-2xl font-bold text-primary">5s</p>
+              <p className="text-sm text-muted-foreground">Auto-refresh</p>
             </div>
             <div className="glass rounded-2xl p-4 text-center">
               <p className="text-2xl font-bold text-cyan-400">Solana</p>
@@ -128,7 +137,7 @@ const Launched = () => {
             <div className="text-center py-20">
               <p className="text-destructive mb-4">{error}</p>
               <button 
-                onClick={fetchTokens}
+                onClick={() => fetchTokens(true)}
                 className="px-4 py-2 rounded-xl glass hover:bg-secondary/50 transition-colors"
               >
                 Try Again

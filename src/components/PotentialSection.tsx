@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Rocket, TrendingUp, Wallet, Send, ArrowUpDown, DollarSign } from 'lucide-react';
+import solLogo from '@/assets/sol-logo.png';
+import usdcLogo from '@/assets/usdc-logo.png';
+import pepeLogo from '@/assets/pepe-logo.png';
 
 const PotentialSection = () => {
   return (
@@ -76,13 +79,13 @@ const PotentialSection = () => {
                   {/* Token list */}
                   <div className="px-4 space-y-2">
                     {[
-                      { name: 'USDC', amount: '$10,049.52', change: '+$0.36', color: 'from-blue-500 to-cyan-500' },
-                      { name: 'Solana', amount: '$4,944.10', change: '+$153.80', color: 'from-purple-500 to-pink-500' },
-                      { name: 'NEBULA', amount: '$31.11', change: '+$1.45', color: 'from-primary to-accent' },
+                      { name: 'USDC', amount: '$10,049.52', change: '+$0.36', logo: usdcLogo },
+                      { name: 'Solana', amount: '$4,944.10', change: '+$153.80', logo: solLogo },
+                      { name: 'PEPE', amount: '$31.11', change: '+$1.45', logo: pepeLogo },
                     ].map((token) => (
                       <div key={token.name} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50">
                         <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${token.color}`} />
+                          <img src={token.logo} alt={token.name} className="w-8 h-8 rounded-full" />
                           <div>
                             <p className="text-sm font-medium">{token.name}</p>
                             <p className="text-[10px] text-muted-foreground">Token</p>

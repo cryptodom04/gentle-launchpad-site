@@ -11,7 +11,7 @@ const faqCategories = [
     questions: [
       {
         question: 'What is SolFerno?',
-        answer: 'SolFerno is a platform for creating tokens and ragpulls on the Solana blockchain. We enable anyone to create their own SPL token without having to write code or understand the technical details.'
+        answer: 'SolFerno is a platform for creating tokens and rugpulls on the Solana blockchain. We enable anyone to create their own SPL token without having to write code or understand the technical details.'
       },
       {
         question: 'How do I start creating tokens?',

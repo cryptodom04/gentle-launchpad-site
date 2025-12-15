@@ -356,7 +356,7 @@ const CreateToken = () => {
                   <div className="flex items-center gap-2">
                     <div>
                       <p className="font-medium text-sm text-accent">Creator's Info (Optional)</p>
-                      <p className="text-xs text-muted-foreground">Change the information of the creator in the metadata. By default, it is Luna Launch.</p>
+                      <p className="text-xs text-muted-foreground">Change the information of the creator in the metadata. By default, it is SolFerno.</p>
                     </div>
                     <Tooltip>
                       <TooltipTrigger asChild>

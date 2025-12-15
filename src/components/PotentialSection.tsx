@@ -43,8 +43,8 @@ const PotentialSection = () => {
                     {/* Screen */}
                     <div className="w-full h-full rounded-[35px] sm:rounded-[40px] bg-gradient-to-b from-[#1a1a2e] via-[#16162a] to-[#0f0f1a] overflow-hidden relative">
                       {/* Dynamic Island */}
-                      <div className="absolute top-2 sm:top-3 left-1/2 -translate-x-1/2 w-[90px] sm:w-[110px] h-[28px] sm:h-[34px] bg-black rounded-full flex items-center justify-center gap-2">
-                        <div className="w-[8px] h-[8px] rounded-full bg-[#1a1a1a] border border-[#2a2a2a]" />
+                      <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[72px] sm:w-[85px] h-[20px] sm:h-[24px] bg-black rounded-full flex items-center justify-center">
+                        <div className="w-[6px] h-[6px] rounded-full bg-[#1a1a1a] border border-[#2a2a2a]" />
                       </div>
                       
                       {/* Phantom Wallet UI */}

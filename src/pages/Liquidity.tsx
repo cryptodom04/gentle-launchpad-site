@@ -134,25 +134,6 @@ const Liquidity = () => {
             ))}
           </div>
         </section>
-
-        {/* CTA Section */}
-        <section className="container mx-auto px-4 py-16">
-          <div className="max-w-3xl mx-auto text-center p-8 md:p-12 rounded-3xl glass-strong">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">
-              Ready to Launch Your Token?
-            </h2>
-            <p className="text-muted-foreground mb-8">
-              Create your Solana token first, then add liquidity to start trading.
-            </p>
-            <Link 
-              to="/create"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold bg-gradient-to-r from-primary to-accent text-primary-foreground hover:opacity-90 transition-all"
-            >
-              Launch Token Now
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-          </div>
-        </section>
       </main>
 
       <Footer />

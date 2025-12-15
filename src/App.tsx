@@ -8,6 +8,7 @@ import CreateToken from "./pages/CreateToken";
 import Liquidity from "./pages/Liquidity";
 import Blog from "./pages/Blog";
 import API from "./pages/API";
+import Docs from "./pages/Docs";
 import BlogPost from "./pages/BlogPost";
 import FAQ from "./pages/FAQ";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/create" element={<CreateToken />} />
           <Route path="/liquidity" element={<Liquidity />} />
           <Route path="/api" element={<API />} />
+          <Route path="/docs" element={<Docs />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/faq" element={<FAQ />} />

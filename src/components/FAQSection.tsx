@@ -9,7 +9,7 @@ const faqs = [
   },
   {
     question: 'How quickly can I create a token?',
-    answer: 'Token creation takes less than 60 seconds! Simply connect your wallet, fill in the token details, upload a logo, and click create. Your token will be deployed to Solana mainnet instantly.',
+    answer: 'Token creation takes less than 60 seconds! Fill in the token details, upload a logo, and click create. Your token will be deployed to Solana mainnet instantly.',
   },
   {
     question: 'What are token authorities and how do they work?',

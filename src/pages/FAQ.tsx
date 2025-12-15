@@ -24,24 +24,6 @@ const faqCategories = [
     ]
   },
   {
-    title: 'Security',
-    icon: Shield,
-    questions: [
-      {
-        question: 'Is the platform secure?',
-        answer: 'Yes, we use verified smart contracts and follow security best practices. All transactions happen directly on the Solana blockchain, ensuring transparency and immutability.'
-      },
-      {
-        question: 'How are my funds protected?',
-        answer: 'We never store your private keys. All operations are signed in your wallet. The platform only creates transactions but has no access to your funds.'
-      },
-      {
-        question: 'Can I lose my tokens?',
-        answer: 'After creation, tokens belong only to you and are stored in your wallet. You can only lose them by losing access to your wallet, so keep your seed phrase in a safe place.'
-      }
-    ]
-  },
-  {
     title: 'Tokens & Fees',
     icon: Coins,
     questions: [

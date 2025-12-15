@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 const sections = [
   {
     icon: Database,
-    title: 'Information We Collect',
+    title: "We Don't Collect Information",
     content: [
       'Wallet addresses used for token creation and transactions',
       'Transaction history and token creation data on the Solana blockchain',

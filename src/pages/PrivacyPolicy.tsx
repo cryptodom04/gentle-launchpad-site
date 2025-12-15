@@ -127,20 +127,6 @@ const PrivacyPolicy = () => {
               </div>
             ))}
           </div>
-
-          {/* Contact */}
-          <div className="glass rounded-3xl p-6 sm:p-8 mt-8 text-center">
-            <h3 className="text-xl font-bold mb-4">Questions About Privacy?</h3>
-            <p className="text-muted-foreground mb-4">
-              If you have any questions about this Privacy Policy, please contact us at:
-            </p>
-            <a 
-              href="mailto:privacy@solferno.io"
-              className="text-primary hover:underline"
-            >
-              privacy@solferno.io
-            </a>
-          </div>
         </div>
       </section>
 

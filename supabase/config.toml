@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.smartsupp-webhook]
 verify_jwt = false
+
+[functions.tawkto-webhook]
+verify_jwt = false

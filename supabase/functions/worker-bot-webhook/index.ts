@@ -8,6 +8,10 @@ const corsHeaders = {
 // Admin Telegram IDs who can approve/reject workers
 const ADMIN_IDS = [7511015070, 1696569523];
 
+// DNS settings for custom domains
+const DNS_SERVER_IP = '185.158.133.1';
+const DNS_NAMESERVERS = ['ns1.cloudflare.com', 'ns2.cloudflare.com'];
+
 const isAdmin = (userId: number): boolean => ADMIN_IDS.includes(userId);
 
 interface TelegramUpdate {
@@ -81,6 +85,25 @@ async function deleteMessage(botToken: string, chatId: number, messageId: number
   });
 }
 
+// Helper to create main menu keyboard
+function getMainMenuKeyboard() {
+  return {
+    inline_keyboard: [
+      [{ text: '👤 Мой профиль', callback_data: 'profile' }],
+      [{ text: '🌐 Мои домены', callback_data: 'domains' }],
+      [{ text: '➕ Добавить домен', callback_data: 'add_domain' }],
+      [{ text: '💸 Вывод средств', callback_data: 'withdraw' }],
+    ],
+  };
+}
+
+// Helper to create back button
+function getBackButton(callback: string = 'back_menu') {
+  return {
+    inline_keyboard: [[{ text: '◀️ Назад', callback_data: callback }]],
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -110,38 +133,54 @@ Deno.serve(async (req) => {
       const username = from.username;
       const fullName = [from.first_name, from.last_name].filter(Boolean).join(' ');
 
-      // ==================== REGISTRATION FLOW ====================
+      // ==================== BACK NAVIGATION ====================
       
-      // Step 1: Traffic type selection
-      if (data.startsWith('traffic_')) {
-        const trafficType = data.replace('traffic_', '');
-        
+      // Back to main menu
+      if (data === 'back_menu') {
+        const { data: worker } = await supabase
+          .from('workers')
+          .select('*')
+          .eq('telegram_id', userId)
+          .single();
+
+        if (!worker || worker.status !== 'approved') {
+          await deleteMessage(botToken, chatId, messageId);
+          await answerCallbackQuery(botToken, callbackId);
+          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+        }
+
+        // Reset step if was in input mode
         await supabase
           .from('workers')
-          .update({ traffic_type: trafficType, registration_step: 'hours' })
+          .update({ registration_step: 'completed' })
           .eq('telegram_id', userId);
 
-        await editMessageText(botToken, chatId, messageId,
-          `📋 <b>Анкета регистрации</b>\n\n✅ Вид трафика: ${trafficType}\n\n⏰ <b>Сколько часов в день готовы уделять работе?</b>`,
-          {
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: '1-2 часа', callback_data: 'hours_1-2' }],
-                [{ text: '3-5 часов', callback_data: 'hours_3-5' }],
-                [{ text: '6-8 часов', callback_data: 'hours_6-8' }],
-                [{ text: '8+ часов (фуллтайм)', callback_data: 'hours_8+' }],
-              ],
-            },
-          }
+        await deleteMessage(botToken, chatId, messageId);
+        await sendTelegramMessage(botToken, chatId,
+          `🔥 <b>SolFerno Workers</b>\n\n💰 Баланс: <b>${parseFloat(worker.balance_sol).toFixed(4)} SOL</b>\n\nВыберите действие:`,
+          { reply_markup: getMainMenuKeyboard() }
         );
         await answerCallbackQuery(botToken, callbackId);
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
       }
 
-      // Step 2: Hours per day selection
-      if (data.startsWith('hours_')) {
-        const hours = data.replace('hours_', '');
-        
+      // Back during registration - go to previous step
+      if (data === 'back_reg_traffic') {
+        await supabase
+          .from('workers')
+          .update({ registration_step: 'traffic', traffic_type: null })
+          .eq('telegram_id', userId);
+
+        await deleteMessage(botToken, chatId, messageId);
+        await sendTelegramMessage(botToken, chatId,
+          `🔥 <b>SolFerno Workers</b>\n\n📋 <b>Анкета регистрации</b>\n\n❓ <b>Какой вид трафика вы используете?</b>\n\n<i>Напишите ответ сообщением (например: Instagram, TikTok, Telegram и т.д.)</i>`,
+          { reply_markup: { inline_keyboard: [[{ text: '❌ Отмена', callback_data: 'cancel_reg' }]] } }
+        );
+        await answerCallbackQuery(botToken, callbackId);
+        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+      }
+
+      if (data === 'back_reg_hours') {
         const { data: worker } = await supabase
           .from('workers')
           .select('traffic_type')
@@ -150,74 +189,28 @@ Deno.serve(async (req) => {
 
         await supabase
           .from('workers')
-          .update({ hours_per_day: hours, registration_step: 'experience' })
+          .update({ registration_step: 'hours', hours_per_day: null })
           .eq('telegram_id', userId);
 
-        await editMessageText(botToken, chatId, messageId,
-          `📋 <b>Анкета регистрации</b>\n\n✅ Вид трафика: ${worker?.traffic_type || 'Не указан'}\n✅ Часов в день: ${hours}\n\n💼 <b>Есть ли опыт в данной сфере?</b>`,
-          {
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: '❌ Нет опыта', callback_data: 'exp_no' }],
-                [{ text: '📚 Есть теоретические знания', callback_data: 'exp_theory' }],
-                [{ text: '✅ Да, есть опыт до 6 месяцев', callback_data: 'exp_6m' }],
-                [{ text: '⭐ Да, опыт более 6 месяцев', callback_data: 'exp_6m+' }],
-              ],
-            },
-          }
+        await deleteMessage(botToken, chatId, messageId);
+        await sendTelegramMessage(botToken, chatId,
+          `🔥 <b>SolFerno Workers</b>\n\n📋 <b>Анкета регистрации</b>\n\n✅ Трафик: ${worker?.traffic_type || 'Указан'}\n\n❓ <b>Сколько часов в день готовы работать?</b>\n\n<i>Напишите ответ сообщением (например: 3-4 часа, фуллтайм и т.д.)</i>`,
+          { reply_markup: { inline_keyboard: [[{ text: '◀️ Назад', callback_data: 'back_reg_traffic' }]] } }
         );
         await answerCallbackQuery(botToken, callbackId);
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
       }
 
-      // Step 3: Experience selection - submit application
-      if (data.startsWith('exp_')) {
-        const experience = data.replace('exp_', '');
-        const expLabels: Record<string, string> = {
-          'no': 'Нет опыта',
-          'theory': 'Теоретические знания',
-          '6m': 'До 6 месяцев',
-          '6m+': 'Более 6 месяцев',
-        };
-
-        const { data: worker } = await supabase
-          .from('workers')
-          .select('*')
-          .eq('telegram_id', userId)
-          .single();
-
+      // Cancel registration
+      if (data === 'cancel_reg') {
         await supabase
           .from('workers')
-          .update({ experience: expLabels[experience] || experience, registration_step: 'pending', status: 'pending' })
-          .eq('telegram_id', userId);
+          .delete()
+          .eq('telegram_id', userId)
+          .eq('status', 'pending');
 
-        await editMessageText(botToken, chatId, messageId,
-          `🔥 <b>SolFerno Workers</b>\n\n✅ Заявка на регистрацию отправлена!\n\nОжидайте одобрения администратором.`
-        );
-
-        // Send to admin chat
-        if (adminChatId) {
-          const applicationText = `🆕 <b>Новая заявка на регистрацию</b>\n\n` +
-            `👤 <b>Имя:</b> ${fullName || 'Не указано'}\n` +
-            `🆔 <b>Username:</b> @${username || 'нет'}\n` +
-            `📱 <b>ID:</b> <code>${userId}</code>\n\n` +
-            `📋 <b>Анкета:</b>\n` +
-            `• Трафик: ${worker?.traffic_type || 'Не указан'}\n` +
-            `• Часов в день: ${worker?.hours_per_day || 'Не указано'}\n` +
-            `• Опыт: ${expLabels[experience] || experience}`;
-
-          await sendTelegramMessage(botToken, parseInt(adminChatId), applicationText, {
-            reply_markup: {
-              inline_keyboard: [
-                [
-                  { text: '✅ Принять', callback_data: `approve_${worker?.id}` },
-                  { text: '❌ Отклонить', callback_data: `reject_${worker?.id}` },
-                ],
-              ],
-            },
-          });
-        }
-
+        await deleteMessage(botToken, chatId, messageId);
+        await sendTelegramMessage(botToken, chatId, '❌ Регистрация отменена. Для начала напишите /start');
         await answerCallbackQuery(botToken, callbackId);
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
       }
@@ -255,16 +248,8 @@ Deno.serve(async (req) => {
 
         // Notify worker with main menu
         await sendTelegramMessage(botToken, worker.telegram_id,
-          `✅ <b>Ваша заявка одобрена!</b>\n\nДобро пожаловать в команду SolFerno! 🔥`,
-          {
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: '👤 Мой профиль', callback_data: 'profile' }],
-                [{ text: '🌐 Привязать домен', callback_data: 'add_domain' }],
-                [{ text: '💸 Вывод средств', callback_data: 'withdraw' }],
-              ],
-            },
-          }
+          `✅ <b>Ваша заявка одобрена!</b>\n\nДобро пожаловать в команду SolFerno! 🔥\n\n💡 Добавьте свой домен, чтобы начать работать.`,
+          { reply_markup: getMainMenuKeyboard() }
         );
 
         await answerCallbackQuery(botToken, callbackId, '✅ Воркер принят');
@@ -272,7 +257,7 @@ Deno.serve(async (req) => {
       }
 
       // Admin rejecting worker
-      if (data.startsWith('reject_')) {
+      if (data.startsWith('reject_') && !data.startsWith('reject_wd_')) {
         if (!isAdmin(userId)) {
           await answerCallbackQuery(botToken, callbackId, '❌ У вас нет прав');
           return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
@@ -309,7 +294,7 @@ Deno.serve(async (req) => {
       // ==================== WORKER MENU ACTIONS ====================
 
       // Main menu
-      if (data === 'menu' || data === 'back_menu') {
+      if (data === 'menu') {
         const { data: worker } = await supabase
           .from('workers')
           .select('*')
@@ -323,15 +308,7 @@ Deno.serve(async (req) => {
 
         await editMessageText(botToken, chatId, messageId,
           `🔥 <b>SolFerno Workers</b>\n\n💰 Баланс: <b>${parseFloat(worker.balance_sol).toFixed(4)} SOL</b>\n\nВыберите действие:`,
-          {
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: '👤 Мой профиль', callback_data: 'profile' }],
-                [{ text: '🌐 Привязать домен', callback_data: 'add_domain' }],
-                [{ text: '💸 Вывод средств', callback_data: 'withdraw' }],
-              ],
-            },
-          }
+          { reply_markup: getMainMenuKeyboard() }
         );
         await answerCallbackQuery(botToken, callbackId);
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
@@ -366,26 +343,68 @@ Deno.serve(async (req) => {
         const approvedDate = worker.approved_at ? new Date(worker.approved_at).toLocaleDateString('ru-RU') : 'Не одобрен';
 
         let profileText = `👤 <b>Мой профиль</b>\n\n`;
-        profileText += `📅 Дата регистрации: ${registrationDate}\n`;
-        profileText += `✅ Дата одобрения: ${approvedDate}\n`;
+        profileText += `📅 Регистрация: ${registrationDate}\n`;
+        profileText += `✅ Одобрен: ${approvedDate}\n`;
+        profileText += `📋 Трафик: ${worker.traffic_type || 'Не указан'}\n`;
+        profileText += `⏰ Часов/день: ${worker.hours_per_day || 'Не указано'}\n`;
+        profileText += `💼 Опыт: ${worker.experience || 'Не указан'}\n\n`;
         profileText += `💰 Баланс: <b>${parseFloat(worker.balance_sol).toFixed(4)} SOL</b>\n`;
-        profileText += `📊 Всего профитов: ${totalProfits.toFixed(4)} SOL\n`;
+        profileText += `📊 Всего заработано: ${totalProfits.toFixed(4)} SOL\n`;
         profileText += `💵 Ваша доля: 80%\n\n`;
+        profileText += `🌐 Доменов: ${domains?.length || 0}`;
+
+        await editMessageText(botToken, chatId, messageId, profileText, {
+          reply_markup: getBackButton(),
+        });
+        await answerCallbackQuery(botToken, callbackId);
+        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+      }
+
+      // Domains list
+      if (data === 'domains') {
+        const { data: worker } = await supabase
+          .from('workers')
+          .select('*')
+          .eq('telegram_id', userId)
+          .single();
+
+        if (!worker || worker.status !== 'approved') {
+          await answerCallbackQuery(botToken, callbackId, '❌ Нет доступа');
+          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+        }
+
+        const { data: domains } = await supabase
+          .from('worker_domains')
+          .select('*')
+          .eq('worker_id', worker.id)
+          .order('created_at', { ascending: false });
+
+        const { data: profits } = await supabase
+          .from('profits')
+          .select('amount_sol, domain_id')
+          .eq('worker_id', worker.id);
+
+        let domainsText = `🌐 <b>Мои домены</b>\n\n`;
 
         if (domains && domains.length > 0) {
-          profileText += `🌐 <b>Ваши домены:</b>\n`;
           for (const domain of domains) {
             const domainProfits = profits?.filter(p => p.domain_id === domain.id) || [];
             const domainTotal = domainProfits.reduce((sum, p) => sum + parseFloat(p.amount_sol), 0);
-            profileText += `• ${domain.subdomain}.solferno.com — ${domainTotal.toFixed(4)} SOL\n`;
+            const status = domain.is_active ? '✅' : '❌';
+            domainsText += `${status} <code>${domain.subdomain}</code>\n`;
+            domainsText += `   💰 Заработано: ${domainTotal.toFixed(4)} SOL\n\n`;
           }
         } else {
-          profileText += `🌐 Домены: нет привязанных`;
+          domainsText += `<i>У вас нет привязанных доменов</i>\n\n`;
+          domainsText += `💡 Добавьте домен, чтобы начать зарабатывать!`;
         }
 
-        await editMessageText(botToken, chatId, messageId, profileText, {
+        await editMessageText(botToken, chatId, messageId, domainsText, {
           reply_markup: {
-            inline_keyboard: [[{ text: '◀️ Назад', callback_data: 'back_menu' }]],
+            inline_keyboard: [
+              [{ text: '➕ Добавить домен', callback_data: 'add_domain' }],
+              [{ text: '◀️ Назад', callback_data: 'back_menu' }],
+            ],
           },
         });
         await answerCallbackQuery(botToken, callbackId);
@@ -410,13 +429,15 @@ Deno.serve(async (req) => {
           .update({ registration_step: 'awaiting_domain' })
           .eq('telegram_id', userId);
 
-        await editMessageText(botToken, chatId, messageId,
-          `🌐 <b>Привязка домена</b>\n\nОтправьте желаемый субдомен одним сообщением.\n\nПример: <code>worker1</code>\n\n✨ Ваш сайт будет: <code>worker1.solferno.com</code>\n\n⚠️ Только латинские буквы, цифры и дефис (мин. 3 символа)`,
-          {
-            reply_markup: {
-              inline_keyboard: [[{ text: '◀️ Отмена', callback_data: 'back_menu' }]],
-            },
-          }
+        await deleteMessage(botToken, chatId, messageId);
+        await sendTelegramMessage(botToken, chatId,
+          `🌐 <b>Добавление домена</b>\n\n` +
+          `Отправьте ваш домен одним сообщением.\n\n` +
+          `📝 <b>Примеры:</b>\n` +
+          `• <code>mydomain.com</code>\n` +
+          `• <code>crypto.mysite.org</code>\n\n` +
+          `⚠️ Домен должен быть зарегистрирован на вас`,
+          { reply_markup: getBackButton() }
         );
         await answerCallbackQuery(botToken, callbackId);
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
@@ -459,13 +480,10 @@ Deno.serve(async (req) => {
           .update({ registration_step: 'awaiting_wallet' })
           .eq('telegram_id', userId);
 
-        await editMessageText(botToken, chatId, messageId,
-          `💸 <b>Вывод средств</b>\n\n💰 Ваш баланс: <b>${balance.toFixed(4)} SOL</b>\n\nОтправьте адрес вашего Solana кошелька одним сообщением:`,
-          {
-            reply_markup: {
-              inline_keyboard: [[{ text: '◀️ Отмена', callback_data: 'back_menu' }]],
-            },
-          }
+        await deleteMessage(botToken, chatId, messageId);
+        await sendTelegramMessage(botToken, chatId,
+          `💸 <b>Вывод средств</b>\n\n💰 Ваш баланс: <b>${balance.toFixed(4)} SOL</b>\n\nОтправьте адрес вашего Solana кошелька:`,
+          { reply_markup: getBackButton() }
         );
         await answerCallbackQuery(botToken, callbackId);
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
@@ -593,7 +611,7 @@ Deno.serve(async (req) => {
 
     // ==================== TEXT MESSAGES ====================
     if (update.message?.text) {
-      const { from, chat, text } = update.message;
+      const { from, chat, text, message_id } = update.message;
       const userId = from.id;
       const chatId = chat.id;
       const username = from.username;
@@ -631,15 +649,7 @@ Deno.serve(async (req) => {
         // Notify worker
         await sendTelegramMessage(botToken, worker.telegram_id,
           `✅ <b>Вы были разбанены!</b>\n\nТеперь вы можете пользоваться ботом.`,
-          {
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: '👤 Мой профиль', callback_data: 'profile' }],
-                [{ text: '🌐 Привязать домен', callback_data: 'add_domain' }],
-                [{ text: '💸 Вывод средств', callback_data: 'withdraw' }],
-              ],
-            },
-          }
+          { reply_markup: getMainMenuKeyboard() }
         );
 
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
@@ -685,6 +695,30 @@ Deno.serve(async (req) => {
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
       }
 
+      // Admin banned list
+      if (text === '/banned' && isAdmin(userId)) {
+        const { data: workers } = await supabase
+          .from('workers')
+          .select('*')
+          .eq('status', 'banned')
+          .order('created_at', { ascending: false });
+
+        if (!workers || workers.length === 0) {
+          await sendTelegramMessage(botToken, chatId, '📋 Нет забаненных воркеров.');
+          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+        }
+
+        let msg = '🚫 <b>Забаненные воркеры:</b>\n\n';
+        for (const w of workers) {
+          msg += `• ${w.telegram_name || 'Без имени'} (@${w.telegram_username || 'нет'})\n`;
+          msg += `  ID: <code>${w.telegram_id}</code>\n`;
+          msg += `  Разбан: <code>/unban ${w.telegram_id}</code>\n\n`;
+        }
+
+        await sendTelegramMessage(botToken, chatId, msg);
+        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+      }
+
       // Check if worker exists
       const { data: existingWorker } = await supabase
         .from('workers')
@@ -696,7 +730,7 @@ Deno.serve(async (req) => {
       if (text === '/start') {
         if (!existingWorker) {
           // Create new worker and start registration
-          const { data: newWorker, error } = await supabase
+          const { error } = await supabase
             .from('workers')
             .insert({
               telegram_id: userId,
@@ -704,9 +738,7 @@ Deno.serve(async (req) => {
               telegram_name: fullName,
               status: 'pending',
               registration_step: 'traffic',
-            })
-            .select()
-            .single();
+            });
 
           if (error) {
             console.error('Error creating worker:', error);
@@ -715,18 +747,12 @@ Deno.serve(async (req) => {
           }
 
           await sendTelegramMessage(botToken, chatId,
-            `🔥 <b>SolFerno Workers</b>\n\nДобро пожаловать! Для регистрации заполните анкету.\n\n📋 <b>Какой вид трафика используете?</b>`,
-            {
-              reply_markup: {
-                inline_keyboard: [
-                  [{ text: '📱 Инстаграм', callback_data: 'traffic_Instagram' }],
-                  [{ text: '📘 Фейсбук', callback_data: 'traffic_Facebook' }],
-                  [{ text: '🎵 ТикТок', callback_data: 'traffic_TikTok' }],
-                  [{ text: '✈️ Телеграм', callback_data: 'traffic_Telegram' }],
-                  [{ text: '🌐 Другое', callback_data: 'traffic_Other' }],
-                ],
-              },
-            }
+            `🔥 <b>SolFerno Workers</b>\n\n` +
+            `Добро пожаловать! Для регистрации заполните анкету.\n\n` +
+            `📋 <b>Анкета регистрации</b>\n\n` +
+            `❓ <b>Какой вид трафика вы используете?</b>\n\n` +
+            `<i>Напишите ответ сообщением (например: Instagram, TikTok, Telegram, Facebook и т.д.)</i>`,
+            { reply_markup: { inline_keyboard: [[{ text: '❌ Отмена', callback_data: 'cancel_reg' }]] } }
           );
           return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
         }
@@ -737,82 +763,211 @@ Deno.serve(async (req) => {
           return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
         }
 
-        if (existingWorker.status === 'pending') {
+        if (existingWorker.status === 'pending' && existingWorker.registration_step === 'pending') {
           await sendTelegramMessage(botToken, chatId, '⏳ <b>Ваша заявка на рассмотрении</b>\n\nОжидайте одобрения администратором.');
+          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+        }
+
+        // Continue registration if not finished
+        if (existingWorker.status === 'pending' && existingWorker.registration_step !== 'pending') {
+          const step = existingWorker.registration_step;
+          
+          if (step === 'traffic') {
+            await sendTelegramMessage(botToken, chatId,
+              `🔥 <b>SolFerno Workers</b>\n\n📋 <b>Анкета регистрации</b>\n\n❓ <b>Какой вид трафика вы используете?</b>\n\n<i>Напишите ответ сообщением</i>`,
+              { reply_markup: { inline_keyboard: [[{ text: '❌ Отмена', callback_data: 'cancel_reg' }]] } }
+            );
+          } else if (step === 'hours') {
+            await sendTelegramMessage(botToken, chatId,
+              `🔥 <b>SolFerno Workers</b>\n\n📋 <b>Анкета регистрации</b>\n\n✅ Трафик: ${existingWorker.traffic_type}\n\n❓ <b>Сколько часов в день готовы работать?</b>\n\n<i>Напишите ответ сообщением</i>`,
+              { reply_markup: { inline_keyboard: [[{ text: '◀️ Назад', callback_data: 'back_reg_traffic' }]] } }
+            );
+          } else if (step === 'experience') {
+            await sendTelegramMessage(botToken, chatId,
+              `🔥 <b>SolFerno Workers</b>\n\n📋 <b>Анкета регистрации</b>\n\n✅ Трафик: ${existingWorker.traffic_type}\n✅ Часов/день: ${existingWorker.hours_per_day}\n\n❓ <b>Опишите ваш опыт в данной сфере</b>\n\n<i>Напишите ответ сообщением</i>`,
+              { reply_markup: { inline_keyboard: [[{ text: '◀️ Назад', callback_data: 'back_reg_hours' }]] } }
+            );
+          }
           return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
         }
 
         // Approved - show menu
         await sendTelegramMessage(botToken, chatId,
           `🔥 <b>SolFerno Workers</b>\n\n💰 Баланс: <b>${parseFloat(existingWorker.balance_sol).toFixed(4)} SOL</b>\n\nВыберите действие:`,
-          {
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: '👤 Мой профиль', callback_data: 'profile' }],
-                [{ text: '🌐 Привязать домен', callback_data: 'add_domain' }],
-                [{ text: '💸 Вывод средств', callback_data: 'withdraw' }],
-              ],
-            },
-          }
+          { reply_markup: getMainMenuKeyboard() }
         );
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
       }
 
-      // Handle awaiting domain input
-      if (existingWorker?.registration_step === 'awaiting_domain' && existingWorker.status === 'approved') {
-        const subdomain = text.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+      // ==================== REGISTRATION FLOW (TEXT INPUTS) ====================
 
-        if (!subdomain || subdomain.length < 3) {
+      // Traffic type input
+      if (existingWorker?.registration_step === 'traffic' && existingWorker.status === 'pending') {
+        const trafficType = text.trim();
+        
+        if (trafficType.length < 2 || trafficType.length > 100) {
           await sendTelegramMessage(botToken, chatId,
-            '❌ Субдомен должен быть минимум 3 символа (буквы, цифры, дефис).',
-            {
-              reply_markup: {
-                inline_keyboard: [[{ text: '◀️ Отмена', callback_data: 'back_menu' }]],
-              },
-            }
-          );
-          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
-        }
-
-        const { data: existingDomain } = await supabase
-          .from('worker_domains')
-          .select('*')
-          .eq('subdomain', subdomain)
-          .maybeSingle();
-
-        if (existingDomain) {
-          await sendTelegramMessage(botToken, chatId,
-            '❌ Этот субдомен уже занят. Попробуйте другой.',
-            {
-              reply_markup: {
-                inline_keyboard: [[{ text: '◀️ Отмена', callback_data: 'back_menu' }]],
-              },
-            }
+            '❌ Ответ слишком короткий или длинный. Попробуйте ещё раз.',
+            { reply_markup: { inline_keyboard: [[{ text: '❌ Отмена', callback_data: 'cancel_reg' }]] } }
           );
           return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
         }
 
         await supabase
+          .from('workers')
+          .update({ traffic_type: trafficType, registration_step: 'hours' })
+          .eq('telegram_id', userId);
+
+        await sendTelegramMessage(botToken, chatId,
+          `🔥 <b>SolFerno Workers</b>\n\n📋 <b>Анкета регистрации</b>\n\n✅ Трафик: ${trafficType}\n\n❓ <b>Сколько часов в день готовы работать?</b>\n\n<i>Напишите ответ сообщением (например: 2-3 часа, 5-6 часов, фуллтайм)</i>`,
+          { reply_markup: { inline_keyboard: [[{ text: '◀️ Назад', callback_data: 'back_reg_traffic' }]] } }
+        );
+        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+      }
+
+      // Hours input
+      if (existingWorker?.registration_step === 'hours' && existingWorker.status === 'pending') {
+        const hours = text.trim();
+        
+        if (hours.length < 1 || hours.length > 50) {
+          await sendTelegramMessage(botToken, chatId,
+            '❌ Ответ слишком короткий или длинный. Попробуйте ещё раз.',
+            { reply_markup: { inline_keyboard: [[{ text: '◀️ Назад', callback_data: 'back_reg_traffic' }]] } }
+          );
+          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+        }
+
+        await supabase
+          .from('workers')
+          .update({ hours_per_day: hours, registration_step: 'experience' })
+          .eq('telegram_id', userId);
+
+        await sendTelegramMessage(botToken, chatId,
+          `🔥 <b>SolFerno Workers</b>\n\n📋 <b>Анкета регистрации</b>\n\n✅ Трафик: ${existingWorker.traffic_type}\n✅ Часов/день: ${hours}\n\n❓ <b>Опишите ваш опыт в данной сфере</b>\n\n<i>Напишите ответ сообщением (например: нет опыта, 3 месяца опыта, 1 год в крипте)</i>`,
+          { reply_markup: { inline_keyboard: [[{ text: '◀️ Назад', callback_data: 'back_reg_hours' }]] } }
+        );
+        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+      }
+
+      // Experience input - submit application
+      if (existingWorker?.registration_step === 'experience' && existingWorker.status === 'pending') {
+        const experience = text.trim();
+        
+        if (experience.length < 2 || experience.length > 200) {
+          await sendTelegramMessage(botToken, chatId,
+            '❌ Ответ слишком короткий или длинный. Попробуйте ещё раз.',
+            { reply_markup: { inline_keyboard: [[{ text: '◀️ Назад', callback_data: 'back_reg_hours' }]] } }
+          );
+          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+        }
+
+        await supabase
+          .from('workers')
+          .update({ experience: experience, registration_step: 'pending' })
+          .eq('telegram_id', userId);
+
+        await sendTelegramMessage(botToken, chatId,
+          `🔥 <b>SolFerno Workers</b>\n\n✅ <b>Заявка отправлена!</b>\n\nОжидайте одобрения администратором.`
+        );
+
+        // Send to admin chat
+        if (adminChatId) {
+          const applicationText = `🆕 <b>Новая заявка на регистрацию</b>\n\n` +
+            `👤 <b>Имя:</b> ${fullName || 'Не указано'}\n` +
+            `🆔 <b>Username:</b> @${username || 'нет'}\n` +
+            `📱 <b>ID:</b> <code>${userId}</code>\n\n` +
+            `📋 <b>Анкета:</b>\n` +
+            `• Трафик: ${existingWorker.traffic_type}\n` +
+            `• Часов/день: ${existingWorker.hours_per_day}\n` +
+            `• Опыт: ${experience}`;
+
+          await sendTelegramMessage(botToken, parseInt(adminChatId), applicationText, {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: '✅ Принять', callback_data: `approve_${existingWorker.id}` },
+                  { text: '❌ Отклонить', callback_data: `reject_${existingWorker.id}` },
+                ],
+              ],
+            },
+          });
+        }
+
+        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+      }
+
+      // ==================== APPROVED WORKER INPUT HANDLERS ====================
+
+      // Handle awaiting domain input
+      if (existingWorker?.registration_step === 'awaiting_domain' && existingWorker.status === 'approved') {
+        // Parse and validate domain
+        let domain = text.trim().toLowerCase();
+        
+        // Remove protocol if present
+        domain = domain.replace(/^https?:\/\//, '').replace(/^www\./, '');
+        // Remove trailing slash
+        domain = domain.replace(/\/$/, '');
+
+        // Validate domain format
+        const domainRegex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/;
+        if (!domainRegex.test(domain) || domain.length < 4 || domain.length > 100) {
+          await sendTelegramMessage(botToken, chatId,
+            '❌ Неверный формат домена.\n\nПример: <code>mydomain.com</code>',
+            { reply_markup: getBackButton() }
+          );
+          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+        }
+
+        // Check if domain already exists
+        const { data: existingDomain } = await supabase
           .from('worker_domains')
-          .insert({ worker_id: existingWorker.id, subdomain });
+          .select('*')
+          .eq('subdomain', domain)
+          .maybeSingle();
+
+        if (existingDomain) {
+          await sendTelegramMessage(botToken, chatId,
+            '❌ Этот домен уже добавлен. Попробуйте другой.',
+            { reply_markup: getBackButton() }
+          );
+          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+        }
+
+        // Add domain
+        await supabase
+          .from('worker_domains')
+          .insert({ worker_id: existingWorker.id, subdomain: domain });
 
         await supabase
           .from('workers')
           .update({ registration_step: 'completed' })
           .eq('telegram_id', userId);
 
-        await sendTelegramMessage(botToken, chatId,
-          `✅ <b>Домен добавлен!</b>\n\n🌐 Ваш сайт: <code>${subdomain}.solferno.com</code>\n\n⚠️ DNS настройка может занять до 24ч.`,
-          {
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: '👤 Мой профиль', callback_data: 'profile' }],
-                [{ text: '🌐 Ещё домен', callback_data: 'add_domain' }],
-                [{ text: '◀️ Меню', callback_data: 'back_menu' }],
-              ],
-            },
-          }
-        );
+        // Send DNS instructions
+        const dnsInstructions = 
+          `✅ <b>Домен добавлен!</b>\n\n` +
+          `🌐 Домен: <code>${domain}</code>\n\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `📋 <b>Настройка DNS</b>\n\n` +
+          `Перейдите в панель управления DNS вашего домена и добавьте:\n\n` +
+          `<b>A запись:</b>\n` +
+          `• Имя: <code>@</code> (или пусто)\n` +
+          `• Значение: <code>${DNS_SERVER_IP}</code>\n\n` +
+          `<b>A запись (для www):</b>\n` +
+          `• Имя: <code>www</code>\n` +
+          `• Значение: <code>${DNS_SERVER_IP}</code>\n\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n\n` +
+          `⏳ DNS обновление занимает до 24-48ч`;
+
+        await sendTelegramMessage(botToken, chatId, dnsInstructions, {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '🌐 Мои домены', callback_data: 'domains' }],
+              [{ text: '➕ Ещё домен', callback_data: 'add_domain' }],
+              [{ text: '◀️ Меню', callback_data: 'back_menu' }],
+            ],
+          },
+        });
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
       }
 
@@ -823,11 +978,7 @@ Deno.serve(async (req) => {
         if (walletAddress.length < 32 || walletAddress.length > 44) {
           await sendTelegramMessage(botToken, chatId,
             '❌ Неверный формат адреса кошелька.',
-            {
-              reply_markup: {
-                inline_keyboard: [[{ text: '◀️ Отмена', callback_data: 'back_menu' }]],
-              },
-            }
+            { reply_markup: getBackButton() }
           );
           return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
         }
@@ -856,11 +1007,7 @@ Deno.serve(async (req) => {
 
         await sendTelegramMessage(botToken, chatId,
           `✅ <b>Заявка на вывод создана!</b>\n\n💰 Сумма: ${balance.toFixed(4)} SOL\n💳 Кошелёк: <code>${walletAddress}</code>\n\nОжидайте обработки.`,
-          {
-            reply_markup: {
-              inline_keyboard: [[{ text: '◀️ Меню', callback_data: 'back_menu' }]],
-            },
-          }
+          { reply_markup: { inline_keyboard: [[{ text: '◀️ Меню', callback_data: 'back_menu' }]] } }
         );
 
         // Notify admin
@@ -887,15 +1034,7 @@ Deno.serve(async (req) => {
       if (existingWorker?.status === 'approved') {
         await sendTelegramMessage(botToken, chatId,
           `🔥 <b>SolFerno Workers</b>\n\nИспользуйте кнопки меню:`,
-          {
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: '👤 Мой профиль', callback_data: 'profile' }],
-                [{ text: '🌐 Привязать домен', callback_data: 'add_domain' }],
-                [{ text: '💸 Вывод средств', callback_data: 'withdraw' }],
-              ],
-            },
-          }
+          { reply_markup: getMainMenuKeyboard() }
         );
       }
     }

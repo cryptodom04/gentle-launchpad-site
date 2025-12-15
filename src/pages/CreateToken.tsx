@@ -501,6 +501,39 @@ const CreateToken = () => {
               />
             </div>
 
+            {/* Fee Breakdown */}
+            <div className="bg-secondary/30 rounded-xl p-4 border border-border/30 space-y-2">
+              <h4 className="text-sm font-semibold text-foreground mb-3">Cost Breakdown</h4>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Base fee</span>
+                <span className="text-foreground">0.50 SOL</span>
+              </div>
+              {(formData.creatorsInfo || formData.socialLinks || formData.revokeFreeze || formData.revokeMint || formData.revokeUpdate) && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Options</span>
+                  <span className="text-foreground">
+                    {(
+                      (formData.creatorsInfo ? 0.1 : 0) +
+                      (formData.socialLinks ? 0.1 : 0) +
+                      (formData.revokeFreeze ? 0.1 : 0) +
+                      (formData.revokeMint ? 0.1 : 0) +
+                      (formData.revokeUpdate ? 0.1 : 0)
+                    ).toFixed(2)} SOL
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Liquidity</span>
+                <span className="text-foreground">
+                  {parseFloat(formData.liquidityAmount) >= 1 ? parseFloat(formData.liquidityAmount).toFixed(2) : '1.00'} SOL
+                </span>
+              </div>
+              <div className="border-t border-border/30 pt-2 mt-2 flex justify-between text-sm font-bold">
+                <span className="text-foreground">Total</span>
+                <span className="text-primary">{calculateFees().toFixed(2)} SOL</span>
+              </div>
+            </div>
+
             {/* Submit Button */}
             <div className="text-center space-y-4 pt-4">
               <Button 
@@ -511,10 +544,6 @@ const CreateToken = () => {
                 <Zap className="w-5 h-5 mr-2" />
                 Launch Token
               </Button>
-              
-              <p className="text-sm text-muted-foreground">
-                Total Fees: <span className="text-foreground font-bold">{calculateFees().toFixed(2)} SOL</span>
-              </p>
             </div>
           </form>
         </div>

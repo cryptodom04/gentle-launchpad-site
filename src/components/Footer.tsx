@@ -1,9 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
-
 const Footer = () => {
-  return (
-    <footer className="relative py-12 sm:py-16 md:py-20 overflow-hidden">
+  return <footer className="relative py-12 sm:py-16 md:py-20 overflow-hidden">
       <div className="absolute inset-0 aurora-bg opacity-20" />
       <div className="absolute inset-0 grid-bg opacity-10" />
       
@@ -14,26 +12,23 @@ const Footer = () => {
           <div className="col-span-2 lg:col-span-2">
             <a href="#home" className="flex items-center mb-4 sm:mb-6">
               <span className="font-bold text-xl sm:text-2xl tracking-tight">
-                Nebula<span className="gradient-text">Forge</span>
+                Sol<span className="gradient-text">Ferno</span>
               </span>
             </a>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-md leading-relaxed">
-              The most powerful token launcher on Solana. Create, deploy, and manage your tokens with zero code and maximum control.
-            </p>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-md leading-relaxed">Easy Token Launch & Realistic
+Terminal Chart Simulation.</p>
           </div>
 
           {/* Links */}
           <div>
             <h4 className="font-bold text-base sm:text-lg mb-4 sm:mb-6">Product</h4>
             <ul className="space-y-3 sm:space-y-4">
-              {['Create Token', 'API'].map((item) => (
-                <li key={item}>
+              {['Create Token', 'API'].map(item => <li key={item}>
                   <a href="#" className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
                     {item}
                     <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </a>
-                </li>
-              ))}
+                </li>)}
             </ul>
           </div>
 
@@ -52,9 +47,7 @@ const Footer = () => {
 
         {/* Bottom bar */}
         <div className="pt-6 sm:pt-10 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
-          <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
-            © 2025 NebulaForge. All rights reserved.
-          </p>
+          <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">© 2026 SolFerno. All rights reserved.</p>
           <div className="flex items-center gap-4 sm:gap-6">
             <Link to="/privacy" className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors">
               Privacy Policy
@@ -65,8 +58,6 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;

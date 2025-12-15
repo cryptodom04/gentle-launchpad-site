@@ -390,24 +390,186 @@ Deno.serve(async (req) => {
           for (const domain of domains) {
             const domainProfits = profits?.filter(p => p.domain_id === domain.id) || [];
             const domainTotal = domainProfits.reduce((sum, p) => sum + parseFloat(p.amount_sol), 0);
+            const txCount = domainProfits.length;
             const status = domain.is_active ? '✅' : '❌';
             domainsText += `${status} <code>${domain.subdomain}</code>\n`;
-            domainsText += `   💰 Заработано: ${domainTotal.toFixed(4)} SOL\n\n`;
+            domainsText += `   💰 ${domainTotal.toFixed(4)} SOL • 📊 ${txCount} транз.\n\n`;
           }
         } else {
           domainsText += `<i>У вас нет привязанных доменов</i>\n\n`;
           domainsText += `💡 Добавьте домен, чтобы начать зарабатывать!`;
         }
 
+        const keyboard = [
+          [{ text: '➕ Добавить домен', callback_data: 'add_domain' }],
+        ];
+        
+        if (domains && domains.length > 0) {
+          keyboard.push([{ text: '📊 Статистика доменов', callback_data: 'domain_stats' }]);
+          keyboard.push([{ text: '🗑 Удалить домен', callback_data: 'delete_domains' }]);
+        }
+        
+        keyboard.push([{ text: '◀️ Назад', callback_data: 'back_menu' }]);
+
         await editMessageText(botToken, chatId, messageId, domainsText, {
+          reply_markup: { inline_keyboard: keyboard },
+        });
+        await answerCallbackQuery(botToken, callbackId);
+        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+      }
+
+      // Domain statistics
+      if (data === 'domain_stats') {
+        const { data: worker } = await supabase
+          .from('workers')
+          .select('*')
+          .eq('telegram_id', userId)
+          .single();
+
+        if (!worker || worker.status !== 'approved') {
+          await answerCallbackQuery(botToken, callbackId, '❌ Нет доступа');
+          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+        }
+
+        const { data: domains } = await supabase
+          .from('worker_domains')
+          .select('*')
+          .eq('worker_id', worker.id)
+          .order('created_at', { ascending: false });
+
+        const { data: profits } = await supabase
+          .from('profits')
+          .select('amount_sol, worker_share_sol, domain_id, created_at')
+          .eq('worker_id', worker.id);
+
+        let statsText = `📊 <b>Статистика доменов</b>\n\n`;
+
+        if (domains && domains.length > 0) {
+          let totalProfit = 0;
+          let totalTx = 0;
+
+          for (const domain of domains) {
+            const domainProfits = profits?.filter(p => p.domain_id === domain.id) || [];
+            const domainTotal = domainProfits.reduce((sum, p) => sum + parseFloat(p.worker_share_sol), 0);
+            const txCount = domainProfits.length;
+            totalProfit += domainTotal;
+            totalTx += txCount;
+
+            const status = domain.is_active ? '🟢' : '🔴';
+            const addedDate = new Date(domain.created_at).toLocaleDateString('ru-RU');
+            
+            statsText += `${status} <b>${domain.subdomain}</b>\n`;
+            statsText += `├ 💰 Заработок: ${domainTotal.toFixed(4)} SOL\n`;
+            statsText += `├ 📈 Транзакций: ${txCount}\n`;
+            statsText += `└ 📅 Добавлен: ${addedDate}\n\n`;
+          }
+
+          statsText += `━━━━━━━━━━━━━━━━━━━━\n`;
+          statsText += `📊 <b>Итого:</b>\n`;
+          statsText += `💰 Заработок: ${totalProfit.toFixed(4)} SOL\n`;
+          statsText += `📈 Транзакций: ${totalTx}\n`;
+          statsText += `🌐 Доменов: ${domains.length}`;
+        } else {
+          statsText += `<i>Нет данных для отображения</i>`;
+        }
+
+        await editMessageText(botToken, chatId, messageId, statsText, {
           reply_markup: {
             inline_keyboard: [
-              [{ text: '➕ Добавить домен', callback_data: 'add_domain' }],
-              [{ text: '◀️ Назад', callback_data: 'back_menu' }],
+              [{ text: '🌐 Мои домены', callback_data: 'domains' }],
+              [{ text: '◀️ Меню', callback_data: 'back_menu' }],
             ],
           },
         });
         await answerCallbackQuery(botToken, callbackId);
+        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+      }
+
+      // Delete domains - show list
+      if (data === 'delete_domains') {
+        const { data: worker } = await supabase
+          .from('workers')
+          .select('*')
+          .eq('telegram_id', userId)
+          .single();
+
+        if (!worker || worker.status !== 'approved') {
+          await answerCallbackQuery(botToken, callbackId, '❌ Нет доступа');
+          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+        }
+
+        const { data: domains } = await supabase
+          .from('worker_domains')
+          .select('*')
+          .eq('worker_id', worker.id)
+          .eq('is_active', true)
+          .order('created_at', { ascending: false });
+
+        if (!domains || domains.length === 0) {
+          await answerCallbackQuery(botToken, callbackId, '❌ Нет доменов для удаления');
+          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+        }
+
+        let deleteText = `🗑 <b>Удаление домена</b>\n\n`;
+        deleteText += `Выберите домен для удаления:\n\n`;
+        deleteText += `⚠️ Статистика домена сохранится`;
+
+        const keyboard = domains.map(d => ([{ text: `🗑 ${d.subdomain}`, callback_data: `del_domain_${d.id}` }]));
+        keyboard.push([{ text: '◀️ Назад', callback_data: 'domains' }]);
+
+        await editMessageText(botToken, chatId, messageId, deleteText, {
+          reply_markup: { inline_keyboard: keyboard },
+        });
+        await answerCallbackQuery(botToken, callbackId);
+        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+      }
+
+      // Delete specific domain
+      if (data.startsWith('del_domain_')) {
+        const { data: worker } = await supabase
+          .from('workers')
+          .select('*')
+          .eq('telegram_id', userId)
+          .single();
+
+        if (!worker || worker.status !== 'approved') {
+          await answerCallbackQuery(botToken, callbackId, '❌ Нет доступа');
+          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+        }
+
+        const domainId = data.replace('del_domain_', '');
+
+        // Verify domain belongs to worker
+        const { data: domain } = await supabase
+          .from('worker_domains')
+          .select('*')
+          .eq('id', domainId)
+          .eq('worker_id', worker.id)
+          .single();
+
+        if (!domain) {
+          await answerCallbackQuery(botToken, callbackId, '❌ Домен не найден');
+          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+        }
+
+        // Deactivate domain (keep for stats)
+        await supabase
+          .from('worker_domains')
+          .update({ is_active: false })
+          .eq('id', domainId);
+
+        await editMessageText(botToken, chatId, messageId,
+          `✅ <b>Домен удалён</b>\n\n🌐 <code>${domain.subdomain}</code>\n\n<i>Статистика сохранена</i>`,
+          {
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: '🌐 Мои домены', callback_data: 'domains' }],
+                [{ text: '◀️ Меню', callback_data: 'back_menu' }],
+              ],
+            },
+          }
+        );
+        await answerCallbackQuery(botToken, callbackId, '✅ Домен удалён');
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
       }
 

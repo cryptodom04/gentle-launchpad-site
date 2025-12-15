@@ -111,14 +111,9 @@ const API = () => {
             into your applications with our powerful REST API.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-8 py-4 rounded-2xl font-semibold bg-gradient-to-r from-primary to-accent text-primary-foreground hover:opacity-90 transition-all">
-              Get API Key
-            </button>
-            <Link to="/docs" className="px-8 py-4 rounded-2xl font-semibold glass hover:bg-secondary/50 transition-all">
-              View Documentation
-            </Link>
-          </div>
+          <Link to="/docs" className="inline-block px-8 py-4 rounded-2xl font-semibold glass hover:bg-secondary/50 transition-all">
+            View Documentation
+          </Link>
         </section>
 
         {/* Features */}

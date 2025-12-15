@@ -132,24 +132,15 @@ const PotentialSection = () => {
               Our automated platform ensures secure token creation with full control over your liquidity. Build confidence for potential buyers and generate profit with ease.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <Link to="/create" className="flex-1">
-                <Button 
-                  size="lg" 
-                  className="w-full py-5 sm:py-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-primary via-pink-500 to-accent hover:opacity-90 transition-all duration-300 glow-multi font-semibold group text-sm sm:text-base"
-                >
-                  Create Token
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
+            <Link to="/create">
               <Button 
                 size="lg" 
-                variant="outline"
-                className="flex-1 py-5 sm:py-6 rounded-xl sm:rounded-2xl glass border-border/50 hover:bg-secondary/50 font-medium text-sm sm:text-base"
+                className="w-full py-5 sm:py-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-primary via-pink-500 to-accent hover:opacity-90 transition-all duration-300 glow-multi font-semibold group text-sm sm:text-base"
               >
-                Learn More
+                Create Token
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
-            </div>
+            </Link>
             
             {/* Trust indicators */}
             <div className="flex items-center justify-center gap-6 mt-6 sm:mt-8 pt-6 border-t border-border/30">

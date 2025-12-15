@@ -13,6 +13,56 @@ const isAdmin = (userId: number): boolean => {
   return ADMIN_IDS.includes(userId);
 };
 
+// Get file URL from Telegram
+const getFileUrl = async (fileId: string, botToken: string): Promise<string | null> => {
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${botToken}/getFile?file_id=${fileId}`);
+    const data = await response.json();
+    
+    if (data.ok && data.result?.file_path) {
+      return `https://api.telegram.org/file/bot${botToken}/${data.result.file_path}`;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting file URL:', error);
+    return null;
+  }
+};
+
+// Upload image to Supabase Storage
+const uploadToStorage = async (
+  imageUrl: string,
+  supabase: any
+): Promise<string | null> => {
+  try {
+    // Download image from Telegram
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    
+    const fileName = `telegram/${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from('chat-images')
+      .upload(fileName, blob, {
+        contentType: 'image/jpeg',
+      });
+    
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      return null;
+    }
+    
+    const { data } = supabase.storage
+      .from('chat-images')
+      .getPublicUrl(fileName);
+    
+    return data.publicUrl;
+  } catch (error) {
+    console.error('Error uploading to storage:', error);
+    return null;
+  }
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -76,23 +126,22 @@ serve(async (req) => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             callback_query_id: update.callback_query.id,
-            text: 'Ответьте на следующее сообщение',
+            text: 'Ответьте на следующее сообщение (текст или фото)',
           }),
         });
         
         // Send a message that user needs to reply to
-        // Include conversation ID in the message for tracking
         const promptResult = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             chat_id: chatId,
-            text: `💬 Ответ для: ${conv?.visitor_name || 'Посетитель'}\n📧 ${conv?.visitor_email || ''}\n\n👇 *Ответьте на это сообщение* чтобы отправить ответ клиенту\n\n🔑 _${conversationId}_`,
+            text: `💬 Ответ для: ${conv?.visitor_name || 'Посетитель'}\n📧 ${conv?.visitor_email || ''}\n\n👇 *Ответьте на это сообщение* (текст или фото) чтобы отправить ответ клиенту\n\n🔑 _${conversationId}_`,
             parse_mode: 'Markdown',
             reply_markup: {
               force_reply: true,
               selective: false,
-              input_field_placeholder: 'Введите ваш ответ...'
+              input_field_placeholder: 'Введите ваш ответ или отправьте фото...'
             }
           }),
         });
@@ -105,30 +154,11 @@ serve(async (req) => {
       }
     }
 
-    // Handle reply to bot's message (the main reply mechanism)
+    // Handle reply to bot's message (text or photo)
     if (update.message?.reply_to_message?.text) {
       const replyToText = update.message.reply_to_message.text;
-      const adminMessage = update.message.text;
       const chatId = update.message.chat.id;
       const userId = update.message.from?.id;
-      
-      console.log('Reply detected. User ID:', userId, 'Reply to:', replyToText);
-      console.log('Admin message:', adminMessage);
-      
-      // Check if user is admin
-      if (!userId || !isAdmin(userId)) {
-        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: '⛔ У вас нет доступа к этой функции',
-          }),
-        });
-        return new Response(JSON.stringify({ ok: true }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
       
       // Check if this is a reply to our prompt message (contains conversation ID)
       const uuidMatch = replyToText.match(/🔑\s*_?([a-f0-9-]{36})_?/i);
@@ -137,13 +167,50 @@ serve(async (req) => {
         const conversationId = uuidMatch[1];
         console.log('Found conversation ID:', conversationId);
         
+        // Check if user is admin
+        if (!userId || !isAdmin(userId)) {
+          await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: '⛔ У вас нет доступа к этой функции',
+            }),
+          });
+          return new Response(JSON.stringify({ ok: true }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        
+        let adminMessage = update.message.text || '';
+        let imageUrl: string | null = null;
+        
+        // Check if message contains a photo
+        if (update.message.photo && update.message.photo.length > 0) {
+          // Get the largest photo
+          const photo = update.message.photo[update.message.photo.length - 1];
+          const telegramFileUrl = await getFileUrl(photo.file_id, TELEGRAM_BOT_TOKEN);
+          
+          if (telegramFileUrl) {
+            // Upload to Supabase Storage
+            imageUrl = await uploadToStorage(telegramFileUrl, supabase);
+            console.log('Uploaded image URL:', imageUrl);
+          }
+          
+          // Use caption as message if present
+          if (update.message.caption) {
+            adminMessage = update.message.caption;
+          }
+        }
+        
         // Insert admin reply
         const { data: insertedMsg, error: insertError } = await supabase
           .from('chat_messages')
           .insert({
             conversation_id: conversationId,
             sender_type: 'admin',
-            message: adminMessage,
+            message: adminMessage || (imageUrl ? '📷 Image' : ''),
+            image_url: imageUrl,
           })
           .select()
           .single();
@@ -167,12 +234,14 @@ serve(async (req) => {
             .eq('id', conversationId)
             .maybeSingle();
           
+          const messageType = imageUrl ? '📷 Фото' : '💬 Сообщение';
+          
           await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               chat_id: chatId,
-              text: `✅ Ответ отправлен ${conv?.visitor_name || 'клиенту'}!`,
+              text: `✅ ${messageType} отправлено ${conv?.visitor_name || 'клиенту'}!`,
             }),
           });
         }
@@ -244,7 +313,7 @@ serve(async (req) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           chat_id: chatId,
-          text: '👋 Привет! Я бот SolFerno Support.\n\nКогда пользователи пишут на сайте, вы получите уведомление с кнопкой "Ответить".\n\nНажмите кнопку и ответьте на сообщение бота!',
+          text: '👋 Привет! Я бот SolFerno Support.\n\nКогда пользователи пишут на сайте, вы получите уведомление с кнопкой "Ответить".\n\nНажмите кнопку и ответьте на сообщение бота текстом или фото!',
         }),
       });
     }

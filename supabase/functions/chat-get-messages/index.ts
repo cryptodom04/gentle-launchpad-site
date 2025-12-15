@@ -54,7 +54,7 @@ serve(async (req) => {
     // Fetch messages for this conversation
     const { data: messages, error: msgError } = await supabase
       .from('chat_messages')
-      .select('id, sender_type, message, created_at')
+      .select('id, sender_type, message, created_at, image_url')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true });
     

@@ -49,14 +49,15 @@ serve(async (req) => {
     // Validate and sanitize inputs
     const conversationId = body.conversationId;
     const message = sanitizeInput(body.message, 5000);
+    const imageUrl = body.imageUrl || null;
     const visitorEmail = sanitizeInput(body.visitorEmail, 255);
     const visitorName = sanitizeInput(body.visitorName, 100);
     const isNewConversation = Boolean(body.isNewConversation);
     
     // Validate required fields
-    if (!message || message.length === 0) {
+    if (!message && !imageUrl) {
       return new Response(
-        JSON.stringify({ error: 'Message is required and cannot be empty' }),
+        JSON.stringify({ error: 'Message or image is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -151,13 +152,14 @@ serve(async (req) => {
       }
     }
     
-    // Insert message
+    // Insert message with image_url
     const { data: msgData, error: msgError } = await supabase
       .from('chat_messages')
       .insert({
         conversation_id: convId,
         sender_type: 'visitor',
-        message: message,
+        message: message || '📷 Image',
+        image_url: imageUrl,
       })
       .select()
       .single();
@@ -176,7 +178,7 @@ serve(async (req) => {
     const timeStr = now.toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' });
     
     // Build Telegram message
-    const telegramMessage = `💬 *Новое сообщение*
+    let telegramMessage = `💬 *Новое сообщение*
 
 ${flag} *${country || convDetails?.visitor_country || 'Unknown'}*
 🕐 ${timeStr}
@@ -185,35 +187,65 @@ ${flag} *${country || convDetails?.visitor_country || 'Unknown'}*
 🌐 IP: ${convDetails?.visitor_ip || visitorIp}
 
 📝 *Сообщение:*
-${message}`;
+${message || '📷 Фото'}`;
 
-    // Send to Telegram with reply button
-    const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-    
-    const telegramResponse = await fetch(telegramUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: telegramMessage,
-        parse_mode: 'Markdown',
-        reply_markup: {
-          inline_keyboard: [[
-            { text: '💬 Ответить', callback_data: `reply_${convId}` }
-          ]]
-        }
-      }),
-    });
+    // If there's an image, send it as a photo
+    if (imageUrl) {
+      const photoUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`;
+      
+      const photoResponse = await fetch(photoUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          photo: imageUrl,
+          caption: telegramMessage,
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [[
+              { text: '💬 Ответить', callback_data: `reply_${convId}` }
+            ]]
+          }
+        }),
+      });
 
-    const telegramResult = await telegramResponse.json();
-    console.log('Telegram response:', JSON.stringify(telegramResult, null, 2));
+      const photoResult = await photoResponse.json();
+      console.log('Telegram photo response:', JSON.stringify(photoResult, null, 2));
 
-    // Update message with telegram_message_id
-    if (telegramResult.ok && telegramResult.result?.message_id) {
-      await supabase
-        .from('chat_messages')
-        .update({ telegram_message_id: telegramResult.result.message_id })
-        .eq('id', msgData.id);
+      if (photoResult.ok && photoResult.result?.message_id) {
+        await supabase
+          .from('chat_messages')
+          .update({ telegram_message_id: photoResult.result.message_id })
+          .eq('id', msgData.id);
+      }
+    } else {
+      // Send text message
+      const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+      
+      const telegramResponse = await fetch(telegramUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: telegramMessage,
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [[
+              { text: '💬 Ответить', callback_data: `reply_${convId}` }
+            ]]
+          }
+        }),
+      });
+
+      const telegramResult = await telegramResponse.json();
+      console.log('Telegram response:', JSON.stringify(telegramResult, null, 2));
+
+      if (telegramResult.ok && telegramResult.result?.message_id) {
+        await supabase
+          .from('chat_messages')
+          .update({ telegram_message_id: telegramResult.result.message_id })
+          .eq('id', msgData.id);
+      }
     }
 
     return new Response(

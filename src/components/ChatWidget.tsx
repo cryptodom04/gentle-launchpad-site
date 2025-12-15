@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, ImagePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +9,7 @@ interface Message {
   sender_type: 'visitor' | 'admin';
   message: string;
   created_at: string;
+  image_url?: string;
 }
 
 interface ChatSession {
@@ -29,8 +30,10 @@ const ChatWidget = () => {
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load saved session
   useEffect(() => {
@@ -93,9 +96,64 @@ const ChatWidget = () => {
     setStep('chat');
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim() || isSending) return;
+  const uploadImage = async (file: File): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `chat/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('chat-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('chat-images')
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      return null;
+    }
+  };
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image must be less than 5MB');
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const imageUrl = await uploadImage(file);
+      if (imageUrl) {
+        await sendMessageWithImage('', imageUrl);
+      }
+    } catch (error) {
+      console.error('Error handling image:', error);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const sendMessageWithImage = async (text: string, imageUrl?: string) => {
+    if ((!text.trim() && !imageUrl) || isSending) return;
 
     setIsSending(true);
     
@@ -106,7 +164,8 @@ const ChatWidget = () => {
         body: {
           conversationId,
           sessionToken,
-          message: message.trim(),
+          message: text.trim() || (imageUrl ? '📷 Image' : ''),
+          imageUrl,
           visitorEmail: email,
           visitorName: name,
           isNewConversation,
@@ -135,6 +194,12 @@ const ChatWidget = () => {
     } finally {
       setIsSending(false);
     }
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!message.trim() || isSending) return;
+    await sendMessageWithImage(message.trim());
   };
 
   const formatTime = (dateStr: string) => {
@@ -250,7 +315,19 @@ const ChatWidget = () => {
                           : 'bg-secondary text-foreground rounded-bl-md'
                       }`}
                     >
-                      <p className="text-sm">{renderMessageWithLinks(msg.message)}</p>
+                      {msg.image_url && (
+                        <a href={msg.image_url} target="_blank" rel="noopener noreferrer">
+                          <img 
+                            src={msg.image_url} 
+                            alt="Shared image" 
+                            className="max-w-full rounded-lg mb-2 cursor-pointer hover:opacity-90 transition-opacity"
+                            style={{ maxHeight: '200px' }}
+                          />
+                        </a>
+                      )}
+                      {msg.message && msg.message !== '📷 Image' && (
+                        <p className="text-sm">{renderMessageWithLinks(msg.message)}</p>
+                      )}
                       <p className={`text-xs mt-1 ${msg.sender_type === 'visitor' ? 'text-white/70' : 'text-muted-foreground'}`}>
                         {formatTime(msg.created_at)}
                       </p>
@@ -263,17 +340,42 @@ const ChatWidget = () => {
               {/* Message Input */}
               <form onSubmit={handleSendMessage} className="p-4 border-t border-border/50">
                 <div className="flex gap-2">
+                  {/* Hidden file input */}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageSelect}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  
+                  {/* Image upload button */}
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="outline"
+                    disabled={isUploading || isSending}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="shrink-0"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <ImagePlus className="w-4 h-4" />
+                    )}
+                  </Button>
+                  
                   <Input
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Type a message..."
-                    disabled={isSending}
+                    disabled={isSending || isUploading}
                     className="flex-1 bg-background/50"
                   />
                   <Button
                     type="submit"
                     size="icon"
-                    disabled={isSending || !message.trim()}
+                    disabled={isSending || isUploading || !message.trim()}
                     className="bg-gradient-to-r from-primary to-accent hover:opacity-90"
                   >
                     {isSending ? (

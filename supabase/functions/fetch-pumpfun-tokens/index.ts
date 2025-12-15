@@ -52,6 +52,9 @@ serve(async (req) => {
   try {
     console.log('Fetching new Solana tokens from DexScreener...');
 
+    const now = Date.now();
+    const thirtyMinutesAgo = now - (30 * 60 * 1000); // 30 minutes in milliseconds
+
     // Fetch multiple sources in parallel for more tokens
     const [profilesRes, boostsRes, trendingRes] = await Promise.all([
       // Latest token profiles (new tokens)
@@ -62,8 +65,8 @@ serve(async (req) => {
       fetch('https://api.dexscreener.com/token-boosts/top/v1', {
         headers: { 'Accept': 'application/json' },
       }),
-      // Search for new Solana pairs (moonshot/pump related)
-      fetch('https://api.dexscreener.com/latest/dex/search?q=solana', {
+      // Search for new Solana pairs
+      fetch('https://api.dexscreener.com/latest/dex/search?q=sol', {
         headers: { 'Accept': 'application/json' },
       }),
     ]);
@@ -137,7 +140,10 @@ serve(async (req) => {
     // Combine all pairs
     const allPairs = [...detailedPairs, ...searchPairs];
 
-    // Filter by 50k+ market cap and deduplicate
+    // Filter by:
+    // 1. 50k+ market cap
+    // 2. Created within last 30 minutes
+    // 3. Deduplicate by token address
     const seenTokens = new Set<string>();
     const filteredTokens = allPairs
       .filter((pair: DexScreenerPair) => {
@@ -146,6 +152,12 @@ serve(async (req) => {
         
         const marketCap = pair.marketCap || pair.fdv || 0;
         if (marketCap < 50000) return false;
+        
+        // Check if created within last 30 minutes
+        const createdAt = pair.pairCreatedAt;
+        if (!createdAt || createdAt < thirtyMinutesAgo) {
+          return false;
+        }
         
         seenTokens.add(pair.baseToken.address);
         return true;
@@ -158,28 +170,33 @@ serve(async (req) => {
         marketCap: pair.marketCap || pair.fdv || 0,
         liquidity: pair.liquidity?.usd?.toString() || '0',
         imageUri: pair.info?.imageUrl,
-        createdAt: pair.pairCreatedAt ? new Date(pair.pairCreatedAt).toISOString() : undefined,
-        priceChange24h: pair.priceChange?.h24 || 0,
-        volume24h: pair.volume?.h24 || 0,
+        createdAt: pair.pairCreatedAt,
+        priceChange24h: pair.priceChange?.h24 || pair.priceChange?.h1 || 0,
+        volume24h: pair.volume?.h24 || pair.volume?.h1 || 0,
         dex: pair.dexId,
+        ageMinutes: pair.pairCreatedAt ? Math.floor((now - pair.pairCreatedAt) / 60000) : null,
       }))
       .sort((a, b) => {
-        // Sort by creation date (newest first), then by market cap
+        // Sort by creation date (newest first)
         if (a.createdAt && b.createdAt) {
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return b.createdAt - a.createdAt;
         }
         return b.marketCap - a.marketCap;
       })
       .slice(0, 50);
 
-    console.log(`Returning ${filteredTokens.length} tokens with 50k+ market cap`);
+    console.log(`Returning ${filteredTokens.length} tokens (50k+ mcap, <30min old)`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         tokens: filteredTokens,
         count: filteredTokens.length,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        filters: {
+          minMarketCap: 50000,
+          maxAgeMinutes: 30
+        }
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

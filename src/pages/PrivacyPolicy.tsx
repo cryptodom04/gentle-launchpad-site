@@ -14,16 +14,6 @@ const sections = [
     ]
   },
   {
-    icon: Lock,
-    title: 'How We Use Your Information',
-    content: [
-      'To process token creation requests and blockchain transactions',
-      'To provide customer support and respond to inquiries',
-      'To improve our platform and develop new features',
-      'To ensure security and prevent fraudulent activities'
-    ]
-  },
-  {
     icon: Eye,
     title: 'Information Sharing',
     content: [

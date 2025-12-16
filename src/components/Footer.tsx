@@ -38,17 +38,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          <div>
-            <h4 className="font-bold text-base sm:text-lg mb-4 sm:mb-6">Resources</h4>
-            <ul className="space-y-3 sm:space-y-4">
-              <li>
-                <Link to="/blog" className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
-                  Learn
-                  <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </Link>
-              </li>
-            </ul>
-          </div>
         </div>
 
         {/* Bottom bar */}

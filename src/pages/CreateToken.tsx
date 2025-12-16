@@ -23,11 +23,14 @@ import {
   Coins,
   FileEdit,
   Droplets,
-  Info
+  Info,
+  Loader2,
+  Wand2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
 import PaymentModal from '@/components/PaymentModal';
+import { supabase } from '@/integrations/supabase/client';
 
 const CreateToken = () => {
   const navigate = useNavigate();
@@ -58,6 +61,8 @@ const CreateToken = () => {
   const [dragActive, setDragActive] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: boolean}>({});
+  const [isGeneratingLogo, setIsGeneratingLogo] = useState(false);
+  const [aiLogoPrompt, setAiLogoPrompt] = useState('');
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -92,6 +97,50 @@ const CreateToken = () => {
         setLogoPreview(event.target?.result as string);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleGenerateAILogo = async () => {
+    if (!formData.name.trim() && !formData.symbol.trim() && !aiLogoPrompt.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please enter a token name, symbol, or description for AI logo generation",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsGeneratingLogo(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-logo', {
+        body: {
+          tokenName: formData.name || 'Crypto Token',
+          tokenSymbol: formData.symbol || 'TOKEN',
+          description: aiLogoPrompt || formData.description
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.imageUrl) {
+        setLogoPreview(data.imageUrl);
+        clearError('logo');
+        toast({
+          title: "Logo generated!",
+          description: "AI has created a unique logo for your token",
+        });
+      } else {
+        throw new Error(data?.error || 'Failed to generate logo');
+      }
+    } catch (error: any) {
+      console.error('Error generating logo:', error);
+      toast({
+        title: "Generation failed",
+        description: error.message || "Failed to generate logo. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingLogo(false);
     }
   };
 
@@ -314,17 +363,40 @@ const CreateToken = () => {
               </div>
               
               {/* AI Logo Generation */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label className="text-sm font-medium flex items-center gap-2">
                   Generate Personalized AI Logo 
-                  <span className="px-2 py-0.5 text-[10px] rounded-full bg-accent/20 text-accent font-medium">COMING SOON</span>
+                  <span className="px-2 py-0.5 text-[10px] rounded-full bg-gradient-to-r from-accent to-primary text-white font-medium">AI POWERED</span>
                 </Label>
-                <div className="border-2 border-dashed border-border rounded-xl p-8 bg-secondary/20 opacity-50">
-                  <div className="text-center">
-                    <ImageIcon className="w-8 h-8 mx-auto text-accent mb-2" />
-                  </div>
+                <div className="border border-border/50 rounded-xl p-4 bg-gradient-to-br from-accent/5 to-primary/5 space-y-3">
+                  <Input
+                    placeholder="Describe your logo style (optional)"
+                    value={aiLogoPrompt}
+                    onChange={(e) => setAiLogoPrompt(e.target.value)}
+                    className="bg-secondary/50 rounded-xl h-10 border-border/50"
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleGenerateAILogo}
+                    disabled={isGeneratingLogo}
+                    className="w-full bg-gradient-to-r from-accent to-primary hover:opacity-90 text-white rounded-xl h-11"
+                  >
+                    {isGeneratingLogo ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Wand2 className="w-4 h-4 mr-2" />
+                        Generate AI Logo
+                      </>
+                    )}
+                  </Button>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Uses your token name & symbol to create a unique logo
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground">(At just 0.05 SOL)</p>
               </div>
             </div>
 

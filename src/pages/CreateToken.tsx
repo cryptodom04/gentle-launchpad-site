@@ -455,7 +455,7 @@ const CreateToken = () => {
                     <div className="space-y-1.5">
                       <Label className="text-xs text-muted-foreground">Creator's Address (SOL) *</Label>
                       <Input
-                        placeholder="Your project or company name"
+                        placeholder="ADYy...GYWv"
                         value={formData.creatorName}
                         onChange={(e) => setFormData({ ...formData, creatorName: e.target.value })}
                         className="bg-secondary/50 rounded-xl h-10 border-border/50"

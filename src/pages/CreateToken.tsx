@@ -453,7 +453,7 @@ const CreateToken = () => {
                 {formData.creatorsInfo && (
                   <div className="mt-4 space-y-3 animate-fade-in">
                     <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground">Creator Name</Label>
+                      <Label className="text-xs text-muted-foreground">Creator's Address (SOL) *</Label>
                       <Input
                         placeholder="Your project or company name"
                         value={formData.creatorName}

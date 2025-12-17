@@ -462,7 +462,7 @@ const CreateToken = () => {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground">Creator Website</Label>
+                      <Label className="text-xs text-muted-foreground">Creator's Name *</Label>
                       <Input
                         placeholder="https://yourproject.com"
                         value={formData.creatorWebsite}

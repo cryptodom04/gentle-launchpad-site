@@ -113,54 +113,12 @@ const PaymentModal = ({ isOpen, onClose, amount, tokenName }: PaymentModalProps)
           <div className="flex justify-center">
             <div className="relative">
               <div className="absolute -inset-2 bg-gradient-to-r from-primary/30 to-accent/30 rounded-2xl blur-lg" />
-              <div className="relative w-48 h-48 bg-white rounded-xl p-3 flex items-center justify-center">
-                {/* Simple QR pattern */}
-                <svg viewBox="0 0 100 100" className="w-full h-full">
-                  <rect fill="#000" x="0" y="0" width="30" height="30"/>
-                  <rect fill="#fff" x="5" y="5" width="20" height="20"/>
-                  <rect fill="#000" x="10" y="10" width="10" height="10"/>
-                  
-                  <rect fill="#000" x="70" y="0" width="30" height="30"/>
-                  <rect fill="#fff" x="75" y="5" width="20" height="20"/>
-                  <rect fill="#000" x="80" y="10" width="10" height="10"/>
-                  
-                  <rect fill="#000" x="0" y="70" width="30" height="30"/>
-                  <rect fill="#fff" x="5" y="75" width="20" height="20"/>
-                  <rect fill="#000" x="10" y="80" width="10" height="10"/>
-                  
-                  {/* Random pattern */}
-                  <rect fill="#000" x="35" y="5" width="5" height="5"/>
-                  <rect fill="#000" x="45" y="5" width="5" height="5"/>
-                  <rect fill="#000" x="55" y="5" width="5" height="5"/>
-                  <rect fill="#000" x="35" y="15" width="5" height="5"/>
-                  <rect fill="#000" x="50" y="15" width="5" height="5"/>
-                  <rect fill="#000" x="60" y="15" width="5" height="5"/>
-                  
-                  <rect fill="#000" x="5" y="35" width="5" height="5"/>
-                  <rect fill="#000" x="15" y="40" width="5" height="5"/>
-                  <rect fill="#000" x="5" y="50" width="5" height="5"/>
-                  <rect fill="#000" x="20" y="55" width="5" height="5"/>
-                  
-                  <rect fill="#000" x="35" y="35" width="30" height="30"/>
-                  <rect fill="#fff" x="40" y="40" width="20" height="20"/>
-                  <rect fill="#000" x="45" y="45" width="10" height="10"/>
-                  
-                  <rect fill="#000" x="75" y="35" width="5" height="5"/>
-                  <rect fill="#000" x="85" y="40" width="5" height="5"/>
-                  <rect fill="#000" x="80" y="50" width="5" height="5"/>
-                  <rect fill="#000" x="90" y="55" width="5" height="5"/>
-                  
-                  <rect fill="#000" x="35" y="75" width="5" height="5"/>
-                  <rect fill="#000" x="45" y="80" width="5" height="5"/>
-                  <rect fill="#000" x="55" y="75" width="5" height="5"/>
-                  <rect fill="#000" x="50" y="90" width="5" height="5"/>
-                  <rect fill="#000" x="60" y="85" width="5" height="5"/>
-                  
-                  <rect fill="#000" x="75" y="75" width="5" height="5"/>
-                  <rect fill="#000" x="85" y="80" width="5" height="5"/>
-                  <rect fill="#000" x="80" y="90" width="5" height="5"/>
-                  <rect fill="#000" x="90" y="85" width="5" height="5"/>
-                </svg>
+              <div className="relative w-48 h-48 bg-white rounded-xl p-1 flex items-center justify-center">
+                <img 
+                  src="/qr-code.png" 
+                  alt="Payment QR Code" 
+                  className="w-full h-full object-contain rounded-lg"
+                />
               </div>
             </div>
           </div>

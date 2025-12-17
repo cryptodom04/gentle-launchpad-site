@@ -74,7 +74,11 @@ const PaymentModal = ({ isOpen, onClose, amount, tokenName }: PaymentModalProps)
   };
 
   const handleCheckTransaction = () => {
-    window.open(`https://solscan.io/account/${WALLET_ADDRESS}`, '_blank');
+    toast({
+      title: "Funds pending",
+      description: "Minting starts after blockchain confirmation.",
+      duration: 10000,
+    });
   };
 
   return (
@@ -176,7 +180,7 @@ const PaymentModal = ({ isOpen, onClose, amount, tokenName }: PaymentModalProps)
               variant="outline"
               className="flex-1 glass border-accent/50 text-accent hover:bg-accent/10 rounded-xl py-6"
             >
-              <ExternalLink className="w-4 h-4 mr-2" />
+              <CheckCircle className="w-4 h-4 mr-2" />
               Check Transaction
             </Button>
           </div>

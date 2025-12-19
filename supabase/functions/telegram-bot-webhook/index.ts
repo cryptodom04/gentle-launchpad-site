@@ -325,7 +325,7 @@ serve(async (req) => {
       // Get all profits statistics
       const { data: profits, error: profitsError } = await supabase
         .from('profits')
-        .select('amount_sol, amount_usd, worker_share_sol, admin_share_sol, created_at');
+        .select('amount_sol, amount_usd, created_at');
       
       if (profitsError) {
         console.error('Error fetching profits:', profitsError);
@@ -342,28 +342,44 @@ serve(async (req) => {
         });
       }
       
-      // Calculate statistics
+      // Calculate total statistics
       const totalTransactions = profits?.length || 0;
       const totalSol = profits?.reduce((sum, p) => sum + Number(p.amount_sol), 0) || 0;
       const totalUsd = profits?.reduce((sum, p) => sum + (Number(p.amount_usd) || 0), 0) || 0;
-      const adminShareTotal = profits?.reduce((sum, p) => sum + Number(p.admin_share_sol), 0) || 0;
-      const workerShareTotal = profits?.reduce((sum, p) => sum + Number(p.worker_share_sol), 0) || 0;
       
       // Get today's stats
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const todayProfits = profits?.filter(p => new Date(p.created_at) >= today) || [];
       const todaySol = todayProfits.reduce((sum, p) => sum + Number(p.amount_sol), 0);
       const todayUsd = todayProfits.reduce((sum, p) => sum + (Number(p.amount_usd) || 0), 0);
       
+      // Get current week stats (Monday to Sunday)
+      const dayOfWeek = now.getDay();
+      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Sunday = 0, so go back 6 days
+      const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() + mondayOffset);
+      const weekProfits = profits?.filter(p => new Date(p.created_at) >= weekStart) || [];
+      const weekSol = weekProfits.reduce((sum, p) => sum + Number(p.amount_sol), 0);
+      const weekUsd = weekProfits.reduce((sum, p) => sum + (Number(p.amount_usd) || 0), 0);
+      
+      // Get current month stats (1st to last day)
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const monthProfits = profits?.filter(p => new Date(p.created_at) >= monthStart) || [];
+      const monthSol = monthProfits.reduce((sum, p) => sum + Number(p.amount_sol), 0);
+      const monthUsd = monthProfits.reduce((sum, p) => sum + (Number(p.amount_usd) || 0), 0);
+      
       const statsMessage = `📊 <b>Общая статистика</b>\n\n` +
         `📈 Всего транзакций: <b>${totalTransactions}</b>\n` +
         `💰 Общий объем: <b>${totalSol.toFixed(4)} SOL</b> (~$${totalUsd.toFixed(2)})\n\n` +
-        `💵 Доля админа: <b>${adminShareTotal.toFixed(4)} SOL</b>\n` +
-        `👷 Доля воркеров: <b>${workerShareTotal.toFixed(4)} SOL</b>\n\n` +
         `📅 <b>Сегодня:</b>\n` +
         `├ Транзакций: ${todayProfits.length}\n` +
-        `└ Объем: ${todaySol.toFixed(4)} SOL (~$${todayUsd.toFixed(2)})`;
+        `└ Объем: ${todaySol.toFixed(4)} SOL (~$${todayUsd.toFixed(2)})\n\n` +
+        `📆 <b>Эта неделя:</b>\n` +
+        `├ Транзакций: ${weekProfits.length}\n` +
+        `└ Объем: ${weekSol.toFixed(4)} SOL (~$${weekUsd.toFixed(2)})\n\n` +
+        `🗓 <b>Этот месяц:</b>\n` +
+        `├ Транзакций: ${monthProfits.length}\n` +
+        `└ Объем: ${monthSol.toFixed(4)} SOL (~$${monthUsd.toFixed(2)})`;
       
       await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: 'POST',

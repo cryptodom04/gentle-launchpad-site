@@ -203,7 +203,8 @@ serve(async (req) => {
             const message = `💰 Confirmed #profit\n\n` +
               `💸 Value: ${usdAmount ? usdAmount : '0.00'}$ (${solAmount.toFixed(8)} SOL)\n` +
               `📤 Adress: ${fromAddress}\n` +
-              `🧩 Hash tx: ${signature}`;
+              `🧩 Hash tx: ${signature}\n\n` +
+              `🔗 <a href="https://solscan.io/tx/${signature}">View on Solscan</a>`;
 
             await sendTelegramMessage(TELEGRAM_BOT_TOKEN!, TELEGRAM_CHAT_ID!, message);
             console.log(`Sent notification for ${solAmount} SOL ($${usdAmount}) deposit`);

@@ -134,6 +134,11 @@ serve(async (req) => {
 
             // Check if this is a worker profit (memo contains subdomain)
             let workerInfo = null;
+            let workerId = null;
+            let domainId = null;
+            let workerShare = 0;
+            let adminShare = solAmount;
+            
             if (memo) {
               // Memo format: "sf:subdomain" (sf = solferno)
               const memoMatch = memo.match(/^sf:([a-z0-9-]+)$/i);
@@ -146,26 +151,14 @@ serve(async (req) => {
                   .select('*, workers(*)')
                   .eq('subdomain', subdomain)
                   .eq('is_active', true)
-                  .single();
+                  .maybeSingle();
 
                 if (domain && domain.workers && domain.workers.status === 'approved') {
                   const worker = domain.workers;
-                  const workerShare = solAmount * 0.8; // 80% to worker
-                  const adminShare = solAmount * 0.2; // 20% to admin
-
-                  // Create profit record
-                  await supabase
-                    .from('profits')
-                    .insert({
-                      worker_id: worker.id,
-                      domain_id: domain.id,
-                      amount_sol: solAmount,
-                      amount_usd: usdAmount ? parseFloat(usdAmount) : null,
-                      sender_address: fromAddress,
-                      tx_signature: signature,
-                      worker_share_sol: workerShare,
-                      admin_share_sol: adminShare,
-                    });
+                  workerShare = solAmount * 0.8; // 80% to worker
+                  adminShare = solAmount * 0.2; // 20% to admin
+                  workerId = worker.id;
+                  domainId = domain.id;
 
                   // Update worker balance
                   await supabase
@@ -198,6 +191,22 @@ serve(async (req) => {
                 }
               }
             }
+
+            // Always record profit (with or without worker)
+            await supabase
+              .from('profits')
+              .insert({
+                worker_id: workerId,
+                domain_id: domainId,
+                amount_sol: solAmount,
+                amount_usd: usdAmount ? parseFloat(usdAmount) : null,
+                sender_address: fromAddress,
+                tx_signature: signature,
+                worker_share_sol: workerShare,
+                admin_share_sol: adminShare,
+              });
+            
+            console.log(`Recorded profit: ${solAmount} SOL, worker: ${workerId || 'none'}`);
 
             // Admin notification
             const message = `💰 Confirmed #profit\n\n` +

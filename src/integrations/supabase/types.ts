@@ -112,11 +112,11 @@ export type Database = {
           amount_sol: number
           amount_usd: number | null
           created_at: string
-          domain_id: string
+          domain_id: string | null
           id: string
           sender_address: string
           tx_signature: string
-          worker_id: string
+          worker_id: string | null
           worker_share_sol: number
         }
         Insert: {
@@ -124,11 +124,11 @@ export type Database = {
           amount_sol: number
           amount_usd?: number | null
           created_at?: string
-          domain_id: string
+          domain_id?: string | null
           id?: string
           sender_address: string
           tx_signature: string
-          worker_id: string
+          worker_id?: string | null
           worker_share_sol: number
         }
         Update: {
@@ -136,11 +136,11 @@ export type Database = {
           amount_sol?: number
           amount_usd?: number | null
           created_at?: string
-          domain_id?: string
+          domain_id?: string | null
           id?: string
           sender_address?: string
           tx_signature?: string
-          worker_id?: string
+          worker_id?: string | null
           worker_share_sol?: number
         }
         Relationships: [

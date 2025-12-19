@@ -200,27 +200,10 @@ serve(async (req) => {
             }
 
             // Admin notification
-            let message = `💰 <b>Новый депозит SOL!</b>\n\n` +
-              `📥 Сумма: <b>${solAmount.toFixed(4)} SOL</b>`;
-            
-            if (usdAmount) {
-              message += ` (~$${usdAmount})`;
-            }
-            
-            message += `\n📤 От: <code>${fromAddress}</code>`;
-
-            // Add worker info if it's a worker profit
-            if (workerInfo) {
-              message += `\n\n👤 <b>Воркер:</b> ${workerInfo.name}`;
-              if (workerInfo.username) {
-                message += ` (@${workerInfo.username})`;
-              }
-              message += `\n🌐 <b>Домен:</b> ${workerInfo.subdomain}`;
-              message += `\n💵 Доля воркера: ${workerInfo.workerShare.toFixed(4)} SOL`;
-              message += `\n💵 Доля админа: ${workerInfo.adminShare.toFixed(4)} SOL`;
-            }
-
-            message += `\n\n🔗 <a href="https://solscan.io/tx/${signature}">Посмотреть транзакцию</a>`;
+            const message = `💰 Confirmed #profit\n\n` +
+              `💸 Value: ${usdAmount ? usdAmount : '0.00'}$ (${solAmount.toFixed(8)} SOL)\n` +
+              `📤 Adress: ${fromAddress}\n` +
+              `🧩 Hash tx: ${signature}`;
 
             await sendTelegramMessage(TELEGRAM_BOT_TOKEN!, TELEGRAM_CHAT_ID!, message);
             console.log(`Sent notification for ${solAmount} SOL ($${usdAmount}) deposit`);

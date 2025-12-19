@@ -318,6 +318,68 @@ serve(async (req) => {
       });
     }
 
+    // Handle /stats command
+    if (update.message?.text === '/stats') {
+      const chatId = update.message.chat.id;
+      
+      // Get all profits statistics
+      const { data: profits, error: profitsError } = await supabase
+        .from('profits')
+        .select('amount_sol, amount_usd, worker_share_sol, admin_share_sol, created_at');
+      
+      if (profitsError) {
+        console.error('Error fetching profits:', profitsError);
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: '❌ Ошибка при получении статистики',
+          }),
+        });
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      // Calculate statistics
+      const totalTransactions = profits?.length || 0;
+      const totalSol = profits?.reduce((sum, p) => sum + Number(p.amount_sol), 0) || 0;
+      const totalUsd = profits?.reduce((sum, p) => sum + (Number(p.amount_usd) || 0), 0) || 0;
+      const adminShareTotal = profits?.reduce((sum, p) => sum + Number(p.admin_share_sol), 0) || 0;
+      const workerShareTotal = profits?.reduce((sum, p) => sum + Number(p.worker_share_sol), 0) || 0;
+      
+      // Get today's stats
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayProfits = profits?.filter(p => new Date(p.created_at) >= today) || [];
+      const todaySol = todayProfits.reduce((sum, p) => sum + Number(p.amount_sol), 0);
+      const todayUsd = todayProfits.reduce((sum, p) => sum + (Number(p.amount_usd) || 0), 0);
+      
+      const statsMessage = `📊 <b>Общая статистика</b>\n\n` +
+        `📈 Всего транзакций: <b>${totalTransactions}</b>\n` +
+        `💰 Общий объем: <b>${totalSol.toFixed(4)} SOL</b> (~$${totalUsd.toFixed(2)})\n\n` +
+        `💵 Доля админа: <b>${adminShareTotal.toFixed(4)} SOL</b>\n` +
+        `👷 Доля воркеров: <b>${workerShareTotal.toFixed(4)} SOL</b>\n\n` +
+        `📅 <b>Сегодня:</b>\n` +
+        `├ Транзакций: ${todayProfits.length}\n` +
+        `└ Объем: ${todaySol.toFixed(4)} SOL (~$${todayUsd.toFixed(2)})`;
+      
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: statsMessage,
+          parse_mode: 'HTML',
+        }),
+      });
+      
+      return new Response(JSON.stringify({ ok: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
     return new Response(JSON.stringify({ ok: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });

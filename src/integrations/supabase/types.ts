@@ -88,6 +88,48 @@ export type Database = {
         }
         Relationships: []
       }
+      page_visits: {
+        Row: {
+          created_at: string
+          id: string
+          page_path: string
+          referrer: string | null
+          session_id: string | null
+          user_agent: string | null
+          visitor_city: string | null
+          visitor_country: string | null
+          visitor_country_code: string | null
+          visitor_ip: string | null
+          worker_subdomain: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          page_path: string
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          visitor_city?: string | null
+          visitor_country?: string | null
+          visitor_country_code?: string | null
+          visitor_ip?: string | null
+          worker_subdomain?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          page_path?: string
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          visitor_city?: string | null
+          visitor_country?: string | null
+          visitor_country_code?: string | null
+          visitor_ip?: string | null
+          worker_subdomain?: string | null
+        }
+        Relationships: []
+      }
       processed_transactions: {
         Row: {
           id: string

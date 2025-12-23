@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import ChatWidget from "./components/ChatWidget";
+import { useVisitTracker } from "./hooks/useVisitTracker";
 import Index from "./pages/Index";
 import CreateToken from "./pages/CreateToken";
 import Liquidity from "./pages/Liquidity";
@@ -27,6 +28,40 @@ const isConnectSubdomain = () => {
   return hostname === 'connect.solferno.run' || hostname.startsWith('connect.');
 };
 
+// Wrapper component to use hooks that require Router context
+const AppContent = () => {
+  useVisitTracker();
+  
+  return (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/create" element={<CreateToken />} />
+      <Route path="/liquidity" element={<Liquidity />} />
+      <Route path="/launched" element={<Launched />} />
+      <Route path="/api" element={<API />} />
+      <Route path="/docs" element={<Docs />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog/:slug" element={<BlogPost />} />
+      <Route path="/faq" element={<FAQ />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<TermsOfService />} />
+      <Route path="/connect" element={<Connect />} />
+      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
+const ConnectContent = () => {
+  useVisitTracker();
+  
+  return (
+    <Routes>
+      <Route path="*" element={<Connect />} />
+    </Routes>
+  );
+};
+
 const App = () => {
   // If on connect subdomain, only show Connect page
   if (isConnectSubdomain()) {
@@ -37,9 +72,7 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <Routes>
-                <Route path="*" element={<Connect />} />
-              </Routes>
+              <ConnectContent />
             </BrowserRouter>
           </TooltipProvider>
         </ThemeProvider>
@@ -55,22 +88,7 @@ const App = () => {
           <Sonner />
           <ChatWidget />
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/create" element={<CreateToken />} />
-              <Route path="/liquidity" element={<Liquidity />} />
-              <Route path="/launched" element={<Launched />} />
-              <Route path="/api" element={<API />} />
-              <Route path="/docs" element={<Docs />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<BlogPost />} />
-              <Route path="/faq" element={<FAQ />} />
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-              <Route path="/terms" element={<TermsOfService />} />
-              <Route path="/connect" element={<Connect />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <AppContent />
           </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>

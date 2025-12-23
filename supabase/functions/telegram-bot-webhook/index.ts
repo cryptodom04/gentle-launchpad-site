@@ -396,6 +396,145 @@ serve(async (req) => {
       });
     }
 
+    // Handle /visits command - visit statistics
+    if (update.message?.text === '/visits') {
+      const chatId = update.message.chat.id;
+      const userId = update.message.from?.id;
+      
+      // Check if user is admin
+      if (!userId || !isAdmin(userId)) {
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: '⛔ У вас нет доступа к этой команде',
+          }),
+        });
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      // Get all visits
+      const { data: visits, error: visitsError } = await supabase
+        .from('page_visits')
+        .select('created_at, visitor_country, visitor_country_code, referrer, worker_subdomain');
+      
+      if (visitsError) {
+        console.error('Error fetching visits:', visitsError);
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: '❌ Ошибка при получении статистики посещений',
+          }),
+        });
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const dayOfWeek = now.getDay();
+      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() + mondayOffset);
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      
+      const todayVisits = visits?.filter(v => new Date(v.created_at) >= today) || [];
+      const weekVisits = visits?.filter(v => new Date(v.created_at) >= weekStart) || [];
+      const monthVisits = visits?.filter(v => new Date(v.created_at) >= monthStart) || [];
+      
+      // Country flag emoji helper
+      const getFlag = (countryCode: string | null): string => {
+        if (!countryCode) return '🌍';
+        const codePoints = countryCode
+          .toUpperCase()
+          .split('')
+          .map(char => 127397 + char.charCodeAt(0));
+        return String.fromCodePoint(...codePoints);
+      };
+      
+      // Top countries
+      const countryCounts: Record<string, { count: number; code: string }> = {};
+      visits?.forEach(v => {
+        const key = v.visitor_country || 'Unknown';
+        if (!countryCounts[key]) {
+          countryCounts[key] = { count: 0, code: v.visitor_country_code || '' };
+        }
+        countryCounts[key].count++;
+      });
+      
+      const topCountries = Object.entries(countryCounts)
+        .sort((a, b) => b[1].count - a[1].count)
+        .slice(0, 5)
+        .map(([country, data], i) => `${i + 1}. ${getFlag(data.code)} ${country} - ${data.count}`)
+        .join('\n');
+      
+      // Top referrers
+      const referrerCounts: Record<string, number> = {};
+      visits?.forEach(v => {
+        let ref = 'Direct';
+        if (v.referrer) {
+          try {
+            const url = new URL(v.referrer);
+            ref = url.hostname.replace('www.', '');
+          } catch {
+            ref = v.referrer.substring(0, 30);
+          }
+        }
+        referrerCounts[ref] = (referrerCounts[ref] || 0) + 1;
+      });
+      
+      const topReferrers = Object.entries(referrerCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([ref, count], i) => `${i + 1}. ${ref} - ${count}`)
+        .join('\n');
+      
+      // Top worker subdomains
+      const subdomainCounts: Record<string, number> = {};
+      visits?.forEach(v => {
+        if (v.worker_subdomain) {
+          subdomainCounts[v.worker_subdomain] = (subdomainCounts[v.worker_subdomain] || 0) + 1;
+        }
+      });
+      
+      const topSubdomains = Object.entries(subdomainCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([sub, count], i) => `${i + 1}. ${sub} - ${count}`)
+        .join('\n');
+      
+      let statsMessage = `📊 <b>Статистика посещений</b>\n\n` +
+        `👥 <b>Сегодня:</b> ${todayVisits.length}\n` +
+        `📆 <b>Эта неделя:</b> ${weekVisits.length}\n` +
+        `🗓 <b>Этот месяц:</b> ${monthVisits.length}\n` +
+        `📈 <b>Всего:</b> ${visits?.length || 0}\n\n` +
+        `🌍 <b>Топ-5 стран:</b>\n${topCountries || 'Нет данных'}\n\n` +
+        `🔗 <b>Топ-5 источников:</b>\n${topReferrers || 'Нет данных'}`;
+      
+      if (topSubdomains) {
+        statsMessage += `\n\n👷 <b>Топ субдоменов:</b>\n${topSubdomains}`;
+      }
+      
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: statsMessage,
+          parse_mode: 'HTML',
+        }),
+      });
+      
+      return new Response(JSON.stringify({ ok: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
     return new Response(JSON.stringify({ ok: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });

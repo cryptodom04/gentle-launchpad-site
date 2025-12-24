@@ -128,18 +128,21 @@ serve(async (req) => {
           message += `\n👷 Subdomain: ${worker_subdomain}`;
         }
 
-        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        console.log('Sending to Telegram chat:', TELEGRAM_CHAT_ID);
+        
+        const tgResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             chat_id: TELEGRAM_CHAT_ID,
             text: message,
             parse_mode: 'HTML',
-            disable_notification: true, // Silent notification
+            disable_notification: true,
           }),
         });
-
-        console.log('Telegram notification sent');
+        
+        const tgResult = await tgResponse.json();
+        console.log('Telegram response:', JSON.stringify(tgResult));
       } catch (tgError) {
         console.error('Telegram notification error:', tgError);
         // Don't throw - notification failure shouldn't break tracking

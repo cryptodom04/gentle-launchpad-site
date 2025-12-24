@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 
 const generateSessionId = (): string => {
   const stored = sessionStorage.getItem('visit_session_id');
@@ -11,48 +10,66 @@ const generateSessionId = (): string => {
   return newId;
 };
 
-const getSubdomain = (): string | null => {
+const getWorkerSubdomain = (): string | null => {
   const hostname = window.location.hostname;
-  const parts = hostname.split('.');
   
-  // Check for subdomain patterns like "xxx.solferno.run" or "xxx.domain.com"
-  if (parts.length >= 3) {
-    const subdomain = parts[0];
-    // Exclude common subdomains
-    if (!['www', 'api', 'app', 'connect'].includes(subdomain)) {
-      return subdomain;
+  // For solferno.run and subdomains
+  if (hostname.endsWith('solferno.run')) {
+    const parts = hostname.replace('.solferno.run', '').split('.');
+    if (parts.length > 0 && parts[0] !== 'solferno' && parts[0] !== 'www') {
+      return parts[0];
     }
+    return 'main';
   }
-  return null;
+  
+  // For lovable preview domains
+  if (hostname.includes('lovable.app')) {
+    return hostname.split('.')[0];
+  }
+  
+  return hostname;
 };
 
 export const useVisitTracker = () => {
   const location = useLocation();
-  const trackedPaths = useRef<Set<string>>(new Set());
+  const hasTracked = useRef(false);
 
   useEffect(() => {
     const trackVisit = async () => {
+      // Track every page load, not just unique paths
       const path = location.pathname;
       
-      // Don't track the same path twice in this session
-      if (trackedPaths.current.has(path)) {
+      // Prevent double tracking on initial mount
+      if (hasTracked.current && path === location.pathname) {
+        // Reset after a short delay to allow tracking on actual navigation
+        setTimeout(() => {
+          hasTracked.current = false;
+        }, 1000);
         return;
       }
       
-      trackedPaths.current.add(path);
+      hasTracked.current = true;
 
       try {
-        await supabase.functions.invoke('track-visit', {
-          body: {
+        const response = await fetch('https://qzasxqikcrvvxuptgvdd.supabase.co/functions/v1/track-visit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6YXN4cWlrY3J2dnh1cHRndmRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3ODY4OTYsImV4cCI6MjA4MTM2Mjg5Nn0.RT7Nu-tNQnVV13Q63Q3KVuJ2nO-TtmyF2CVpvfpSf-s',
+          },
+          body: JSON.stringify({
             page_path: path,
             referrer: document.referrer || null,
             user_agent: navigator.userAgent,
             session_id: generateSessionId(),
-            worker_subdomain: getSubdomain(),
-          },
+            worker_subdomain: getWorkerSubdomain(),
+          }),
         });
+        
+        if (!response.ok) {
+          console.error('Track visit failed:', response.status);
+        }
       } catch (error) {
-        // Silently fail - don't break the app for tracking
         console.error('Visit tracking error:', error);
       }
     };

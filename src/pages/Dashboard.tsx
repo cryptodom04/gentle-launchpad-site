@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Users, Eye, Globe, Clock, RefreshCw } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Users, Eye, Globe, Clock, RefreshCw, Monitor, Smartphone, Tablet } from 'lucide-react';
 
 interface PageVisit {
   id: string;
@@ -40,6 +41,14 @@ const formatDate = (dateStr: string): string => {
     minute: '2-digit',
     second: '2-digit'
   });
+};
+
+const getDeviceType = (userAgent: string | null): 'desktop' | 'mobile' | 'tablet' => {
+  if (!userAgent) return 'desktop';
+  const ua = userAgent.toLowerCase();
+  if (/ipad|tablet|playbook|silk/i.test(ua)) return 'tablet';
+  if (/mobile|iphone|ipod|android|blackberry|opera mini|iemobile/i.test(ua)) return 'mobile';
+  return 'desktop';
 };
 
 const Dashboard = () => {
@@ -249,87 +258,202 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Visits Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>История посещений</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[50px]">🏳️</TableHead>
-                    <TableHead>Дата и время</TableHead>
-                    <TableHead>IP адрес</TableHead>
-                    <TableHead>Страна / Город</TableHead>
-                    <TableHead>Страница</TableHead>
-                    <TableHead>Источник</TableHead>
-                    <TableHead>Subdomain</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {visits.map((visit) => {
-                    let referrerDisplay = 'Direct';
-                    if (visit.referrer) {
-                      try {
-                        const url = new URL(visit.referrer);
-                        referrerDisplay = url.hostname.replace('www.', '');
-                      } catch {
-                        referrerDisplay = visit.referrer.substring(0, 30);
+        {/* Tabs */}
+        <Tabs defaultValue="visits" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="visits">📋 Логи</TabsTrigger>
+            <TabsTrigger value="countries">🌍 Страны</TabsTrigger>
+            <TabsTrigger value="devices">📱 Устройства</TabsTrigger>
+          </TabsList>
+
+          {/* Visits Tab */}
+          <TabsContent value="visits">
+            <Card>
+              <CardHeader>
+                <CardTitle>История посещений</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[50px]">🏳️</TableHead>
+                        <TableHead>Дата и время</TableHead>
+                        <TableHead>IP адрес</TableHead>
+                        <TableHead>Страна / Город</TableHead>
+                        <TableHead>Страница</TableHead>
+                        <TableHead>Источник</TableHead>
+                        <TableHead>Subdomain</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {visits.map((visit) => {
+                        let referrerDisplay = 'Direct';
+                        if (visit.referrer) {
+                          try {
+                            const url = new URL(visit.referrer);
+                            referrerDisplay = url.hostname.replace('www.', '');
+                          } catch {
+                            referrerDisplay = visit.referrer.substring(0, 30);
+                          }
+                        }
+
+                        return (
+                          <TableRow key={visit.id}>
+                            <TableCell className="text-xl">
+                              {getFlag(visit.visitor_country_code)}
+                            </TableCell>
+                            <TableCell className="font-mono text-sm whitespace-nowrap">
+                              {formatDate(visit.created_at)}
+                            </TableCell>
+                            <TableCell className="font-mono text-sm">
+                              {visit.visitor_ip || 'N/A'}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col">
+                                <span>{visit.visitor_country || 'Unknown'}</span>
+                                {visit.visitor_city && (
+                                  <span className="text-xs text-muted-foreground">{visit.visitor_city}</span>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell className="font-mono text-sm">
+                              {visit.page_path}
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {referrerDisplay}
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {visit.worker_subdomain && !visit.worker_subdomain.includes('preview') 
+                                ? visit.worker_subdomain 
+                                : '-'}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                  
+                  {visits.length === 0 && !loading && (
+                    <p className="text-center text-muted-foreground py-8">
+                      Нет данных о посещениях
+                    </p>
+                  )}
+                  
+                  {loading && (
+                    <p className="text-center text-muted-foreground py-8">
+                      Загрузка...
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Countries Tab */}
+          <TabsContent value="countries">
+            <Card>
+              <CardHeader>
+                <CardTitle>Статистика по странам</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {(() => {
+                    const countryStats: Record<string, { count: number; code: string; name: string }> = {};
+                    visits.forEach(v => {
+                      const code = v.visitor_country_code || 'unknown';
+                      const name = v.visitor_country || 'Unknown';
+                      if (!countryStats[code]) {
+                        countryStats[code] = { count: 0, code, name };
                       }
-                    }
+                      countryStats[code].count++;
+                    });
+                    
+                    const sorted = Object.values(countryStats).sort((a, b) => b.count - a.count);
+                    const maxCount = sorted[0]?.count || 1;
+
+                    return sorted.map(({ code, name, count }) => (
+                      <div key={code} className="flex items-center gap-3">
+                        <span className="text-2xl w-10">{getFlag(code === 'unknown' ? null : code)}</span>
+                        <div className="flex-1">
+                          <div className="flex justify-between mb-1">
+                            <span className="font-medium">{name}</span>
+                            <span className="text-muted-foreground">{count} ({((count / visits.length) * 100).toFixed(1)}%)</span>
+                          </div>
+                          <div className="h-2 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-primary rounded-full transition-all"
+                              style={{ width: `${(count / maxCount) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Devices Tab */}
+          <TabsContent value="devices">
+            <Card>
+              <CardHeader>
+                <CardTitle>Статистика устройств</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {(() => {
+                    const deviceStats = { desktop: 0, mobile: 0, tablet: 0 };
+                    visits.forEach(v => {
+                      const device = getDeviceType(v.user_agent);
+                      deviceStats[device]++;
+                    });
+                    
+                    const total = visits.length || 1;
 
                     return (
-                      <TableRow key={visit.id}>
-                        <TableCell className="text-xl">
-                          {getFlag(visit.visitor_country_code)}
-                        </TableCell>
-                        <TableCell className="font-mono text-sm whitespace-nowrap">
-                          {formatDate(visit.created_at)}
-                        </TableCell>
-                        <TableCell className="font-mono text-sm">
-                          {visit.visitor_ip || 'N/A'}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col">
-                            <span>{visit.visitor_country || 'Unknown'}</span>
-                            {visit.visitor_city && (
-                              <span className="text-xs text-muted-foreground">{visit.visitor_city}</span>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-mono text-sm">
-                          {visit.page_path}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {referrerDisplay}
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          {visit.worker_subdomain && !visit.worker_subdomain.includes('preview') 
-                            ? visit.worker_subdomain 
-                            : '-'}
-                        </TableCell>
-                      </TableRow>
+                      <>
+                        <Card className="bg-muted/50">
+                          <CardContent className="p-6 text-center">
+                            <Monitor className="w-12 h-12 mx-auto mb-3 text-blue-500" />
+                            <p className="text-3xl font-bold">{deviceStats.desktop}</p>
+                            <p className="text-sm text-muted-foreground">Desktop</p>
+                            <p className="text-lg font-semibold text-primary">
+                              {((deviceStats.desktop / total) * 100).toFixed(1)}%
+                            </p>
+                          </CardContent>
+                        </Card>
+                        
+                        <Card className="bg-muted/50">
+                          <CardContent className="p-6 text-center">
+                            <Smartphone className="w-12 h-12 mx-auto mb-3 text-green-500" />
+                            <p className="text-3xl font-bold">{deviceStats.mobile}</p>
+                            <p className="text-sm text-muted-foreground">Mobile</p>
+                            <p className="text-lg font-semibold text-primary">
+                              {((deviceStats.mobile / total) * 100).toFixed(1)}%
+                            </p>
+                          </CardContent>
+                        </Card>
+                        
+                        <Card className="bg-muted/50">
+                          <CardContent className="p-6 text-center">
+                            <Tablet className="w-12 h-12 mx-auto mb-3 text-orange-500" />
+                            <p className="text-3xl font-bold">{deviceStats.tablet}</p>
+                            <p className="text-sm text-muted-foreground">Tablet</p>
+                            <p className="text-lg font-semibold text-primary">
+                              {((deviceStats.tablet / total) * 100).toFixed(1)}%
+                            </p>
+                          </CardContent>
+                        </Card>
+                      </>
                     );
-                  })}
-                </TableBody>
-              </Table>
-              
-              {visits.length === 0 && !loading && (
-                <p className="text-center text-muted-foreground py-8">
-                  Нет данных о посещениях
-                </p>
-              )}
-              
-              {loading && (
-                <p className="text-center text-muted-foreground py-8">
-                  Загрузка...
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                  })()}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

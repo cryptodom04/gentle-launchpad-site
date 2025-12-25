@@ -89,65 +89,6 @@ serve(async (req) => {
 
     console.log('Visit tracked successfully');
 
-    // Send Telegram notification
-    if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID) {
-      try {
-        const flag = getFlag(geoData.countryCode);
-        const now = new Date();
-        const timeStr = now.toLocaleString('ru-RU', { 
-          timeZone: 'Europe/Kiev',
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        });
-
-        // Parse referrer for display
-        let referrerDisplay = 'Direct';
-        if (referrer) {
-          try {
-            const url = new URL(referrer);
-            referrerDisplay = url.hostname.replace('www.', '');
-          } catch {
-            referrerDisplay = referrer.substring(0, 50);
-          }
-        }
-
-        let message = `👁 <b>Новое посещение</b>\n\n`;
-        message += `${flag} ${geoData.country || 'Unknown'}`;
-        if (geoData.city) message += `, ${geoData.city}`;
-        message += `\n`;
-        message += `🕐 ${timeStr}\n`;
-        message += `📄 Страница: <code>${page_path}</code>\n`;
-        message += `🔗 Источник: ${referrerDisplay}\n`;
-        message += `🌐 IP: <code>${visitorIp}</code>`;
-        
-        if (worker_subdomain && !worker_subdomain.includes('preview')) {
-          message += `\n👷 Subdomain: ${worker_subdomain}`;
-        }
-
-        console.log('Sending to Telegram chat:', TELEGRAM_CHAT_ID);
-        
-        const tgResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: TELEGRAM_CHAT_ID,
-            text: message,
-            parse_mode: 'HTML',
-          }),
-        });
-        
-        const tgResult = await tgResponse.json();
-        console.log('Telegram response:', JSON.stringify(tgResult));
-      } catch (tgError) {
-        console.error('Telegram notification error:', tgError);
-        // Don't throw - notification failure shouldn't break tracking
-      }
-    }
-
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

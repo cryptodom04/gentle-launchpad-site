@@ -109,6 +109,47 @@ const Dashboard = () => {
   useEffect(() => {
     if (isAuthenticated) {
       fetchVisits();
+
+      // Subscribe to realtime updates
+      const channel = supabase
+        .channel('page_visits_realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'page_visits'
+          },
+          (payload) => {
+            console.log('New visit:', payload);
+            const newVisit = payload.new as PageVisit;
+            
+            setVisits((prev) => {
+              const updated = [newVisit, ...prev].slice(0, 500);
+              
+              // Update stats
+              const uniqueIPs = new Set(updated.map(v => v.visitor_ip).filter(Boolean));
+              const uniqueCountries = new Set(updated.map(v => v.visitor_country_code).filter(Boolean));
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              const todayVisits = updated.filter(v => new Date(v.created_at) >= today).length;
+
+              setStats({
+                totalVisits: updated.length,
+                uniqueIPs: uniqueIPs.size,
+                todayVisits,
+                countries: uniqueCountries.size
+              });
+
+              return updated;
+            });
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [isAuthenticated]);
 

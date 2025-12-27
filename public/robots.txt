@@ -1,5 +1,5 @@
 # SolFerno Robots.txt
-# https://solferno.com
+# https://solferno.run
 
 User-agent: Googlebot
 Allow: /
@@ -21,4 +21,4 @@ Disallow: /dashboard
 Disallow: /admin
 
 # Sitemap
-Sitemap: https://solferno.com/sitemap.xml
+Sitemap: https://solferno.run/sitemap.xml

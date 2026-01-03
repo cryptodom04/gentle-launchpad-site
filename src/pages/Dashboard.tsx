@@ -5,7 +5,23 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Eye, Globe, Clock, RefreshCw, Monitor, Smartphone, Tablet } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { 
+  Users, 
+  Eye, 
+  Globe, 
+  Clock, 
+  RefreshCw, 
+  Monitor, 
+  Smartphone, 
+  Tablet,
+  TrendingUp,
+  MapPin,
+  Activity,
+  Shield,
+  LogOut
+} from 'lucide-react';
 
 interface PageVisit {
   id: string;
@@ -43,12 +59,29 @@ const formatDate = (dateStr: string): string => {
   });
 };
 
+const formatTime = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  return date.toLocaleString('ru-RU', {
+    timeZone: 'Europe/Kiev',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
 const getDeviceType = (userAgent: string | null): 'desktop' | 'mobile' | 'tablet' => {
   if (!userAgent) return 'desktop';
   const ua = userAgent.toLowerCase();
   if (/ipad|tablet|playbook|silk/i.test(ua)) return 'tablet';
   if (/mobile|iphone|ipod|android|blackberry|opera mini|iemobile/i.test(ua)) return 'mobile';
   return 'desktop';
+};
+
+const getDeviceIcon = (type: 'desktop' | 'mobile' | 'tablet') => {
+  switch (type) {
+    case 'mobile': return <Smartphone className="w-4 h-4" />;
+    case 'tablet': return <Tablet className="w-4 h-4" />;
+    default: return <Monitor className="w-4 h-4" />;
+  }
 };
 
 const Dashboard = () => {
@@ -65,13 +98,19 @@ const Dashboard = () => {
   });
 
   const handleLogin = () => {
-    if (password === 'пидарасина') {
+    if (password === '1488') {
       setIsAuthenticated(true);
       setError('');
       sessionStorage.setItem('dashboard_auth', 'true');
     } else {
       setError('Неверный пароль');
     }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    sessionStorage.removeItem('dashboard_auth');
+    setPassword('');
   };
 
   useEffect(() => {
@@ -119,7 +158,6 @@ const Dashboard = () => {
     if (isAuthenticated) {
       fetchVisits();
 
-      // Subscribe to realtime updates
       const channel = supabase
         .channel('page_visits_realtime')
         .on(
@@ -136,7 +174,6 @@ const Dashboard = () => {
             setVisits((prev) => {
               const updated = [newVisit, ...prev].slice(0, 500);
               
-              // Update stats
               const uniqueIPs = new Set(updated.map(v => v.visitor_ip).filter(Boolean));
               const uniqueCountries = new Set(updated.map(v => v.visitor_country_code).filter(Boolean));
               const today = new Date();
@@ -164,23 +201,42 @@ const Dashboard = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">🔒 Dashboard Access</CardTitle>
+      <div className="min-h-screen bg-background aurora-bg flex items-center justify-center p-4">
+        <div className="absolute inset-0 grid-bg opacity-30" />
+        
+        <Card className="w-full max-w-md relative glass-strong border-border/50 shadow-2xl">
+          <div className="absolute inset-0 rounded-lg gradient-border" />
+          
+          <CardHeader className="text-center space-y-4 pt-8">
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center glow-primary">
+              <Shield className="w-8 h-8 text-primary-foreground" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl font-bold gradient-text">SolFerno CRM</CardTitle>
+              <p className="text-muted-foreground mt-2">Введите пароль для доступа</p>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Input
-              type="password"
-              placeholder="Введите пароль"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-              className="text-center"
-            />
-            {error && <p className="text-red-500 text-center text-sm">{error}</p>}
-            <Button onClick={handleLogin} className="w-full">
-              Войти
+          
+          <CardContent className="space-y-6 pb-8">
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="Пароль"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                className="h-12 text-center bg-secondary/50 border-border/50 focus:border-primary transition-colors"
+              />
+              {error && (
+                <p className="text-destructive text-center text-sm animate-fade-in">{error}</p>
+              )}
+            </div>
+            
+            <Button 
+              onClick={handleLogin} 
+              className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity font-semibold"
+            >
+              Войти в систему
             </Button>
           </CardContent>
         </Card>
@@ -189,105 +245,174 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-            📊 SolFerno CRM Dashboard
-          </h1>
-          <Button 
-            onClick={fetchVisits} 
-            disabled={loading}
-            variant="outline"
-            size="sm"
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Обновить
-          </Button>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                <Activity className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold gradient-text">SolFerno Analytics</h1>
+                <p className="text-xs text-muted-foreground">Real-time visitor tracking</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <Button 
+                onClick={fetchVisits} 
+                disabled={loading}
+                variant="outline"
+                size="sm"
+                className="border-border/50 hover:bg-secondary/50"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Обновить</span>
+              </Button>
+              
+              <Button 
+                onClick={handleLogout}
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-destructive"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="glass border-border/30 hover:border-primary/30 transition-colors group">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground font-medium">Всего визитов</p>
+                  <p className="text-3xl font-bold mt-1 gradient-text">{stats.totalVisits}</p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                  <Eye className="w-5 h-5 text-primary" />
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
+                <TrendingUp className="w-3.5 h-3.5 text-accent" />
+                <span>Последние 500 записей</span>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="glass border-border/30 hover:border-accent/30 transition-colors group">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground font-medium">Уникальных IP</p>
+                  <p className="text-3xl font-bold mt-1">{stats.uniqueIPs}</p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-accent/10 group-hover:bg-accent/20 transition-colors">
+                  <Users className="w-5 h-5 text-accent" />
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
+                <Activity className="w-3.5 h-3.5 text-accent" />
+                <span>Уникальные посетители</span>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="glass border-border/30 hover:border-primary/30 transition-colors group">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground font-medium">Сегодня</p>
+                  <p className="text-3xl font-bold mt-1">{stats.todayVisits}</p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                  <Clock className="w-5 h-5 text-primary" />
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
+                <TrendingUp className="w-3.5 h-3.5 text-accent" />
+                <span>За текущий день</span>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="glass border-border/30 hover:border-accent/30 transition-colors group">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground font-medium">Стран</p>
+                  <p className="text-3xl font-bold mt-1">{stats.countries}</p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-accent/10 group-hover:bg-accent/20 transition-colors">
+                  <Globe className="w-5 h-5 text-accent" />
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
+                <MapPin className="w-3.5 h-3.5 text-accent" />
+                <span>География аудитории</span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Eye className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Всего визитов</p>
-                <p className="text-2xl font-bold">{stats.totalVisits}</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 bg-green-500/10 rounded-lg">
-                <Users className="w-5 h-5 text-green-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Уникальных IP</p>
-                <p className="text-2xl font-bold">{stats.uniqueIPs}</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 bg-blue-500/10 rounded-lg">
-                <Clock className="w-5 h-5 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Сегодня</p>
-                <p className="text-2xl font-bold">{stats.todayVisits}</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 bg-orange-500/10 rounded-lg">
-                <Globe className="w-5 h-5 text-orange-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Стран</p>
-                <p className="text-2xl font-bold">{stats.countries}</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Tabs */}
+        {/* Tabs Section */}
         <Tabs defaultValue="visits" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="visits">📋 Логи</TabsTrigger>
-            <TabsTrigger value="countries">🌍 Страны</TabsTrigger>
-            <TabsTrigger value="devices">📱 Устройства</TabsTrigger>
+          <TabsList className="bg-secondary/50 border border-border/30 p-1 h-auto">
+            <TabsTrigger 
+              value="visits" 
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2"
+            >
+              <Activity className="w-4 h-4 mr-2" />
+              Логи посещений
+            </TabsTrigger>
+            <TabsTrigger 
+              value="countries"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2"
+            >
+              <Globe className="w-4 h-4 mr-2" />
+              По странам
+            </TabsTrigger>
+            <TabsTrigger 
+              value="devices"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2"
+            >
+              <Monitor className="w-4 h-4 mr-2" />
+              Устройства
+            </TabsTrigger>
           </TabsList>
 
           {/* Visits Tab */}
-          <TabsContent value="visits">
-            <Card>
-              <CardHeader>
-                <CardTitle>История посещений</CardTitle>
+          <TabsContent value="visits" className="mt-4">
+            <Card className="glass border-border/30">
+              <CardHeader className="border-b border-border/30 pb-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-semibold">История посещений</CardTitle>
+                  <Badge variant="secondary" className="font-mono">
+                    {visits.length} записей
+                  </Badge>
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
+              <CardContent className="p-0">
+                <ScrollArea className="h-[600px]">
                   <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[50px]">🏳️</TableHead>
-                        <TableHead>Дата и время</TableHead>
-                        <TableHead>IP адрес</TableHead>
-                        <TableHead>Страна / Город</TableHead>
-                        <TableHead>Страница</TableHead>
-                        <TableHead>Источник</TableHead>
-                        <TableHead>Subdomain</TableHead>
+                    <TableHeader className="sticky top-0 bg-card/95 backdrop-blur-sm z-10">
+                      <TableRow className="border-border/30 hover:bg-transparent">
+                        <TableHead className="w-[200px] font-semibold">Локация</TableHead>
+                        <TableHead className="font-semibold">Дата и время</TableHead>
+                        <TableHead className="font-semibold">IP адрес</TableHead>
+                        <TableHead className="font-semibold">Страница</TableHead>
+                        <TableHead className="font-semibold">Устройство</TableHead>
+                        <TableHead className="font-semibold">Источник</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {visits.map((visit) => {
+                      {visits.map((visit, index) => {
                         let referrerDisplay = 'Direct';
                         if (visit.referrer) {
                           try {
@@ -298,35 +423,59 @@ const Dashboard = () => {
                           }
                         }
 
+                        const deviceType = getDeviceType(visit.user_agent);
+
                         return (
-                          <TableRow key={visit.id}>
-                            <TableCell className="text-xl">
-                              {getFlag(visit.visitor_country_code)}
-                            </TableCell>
-                            <TableCell className="font-mono text-sm whitespace-nowrap">
-                              {formatDate(visit.created_at)}
-                            </TableCell>
-                            <TableCell className="font-mono text-sm">
-                              {visit.visitor_ip || 'N/A'}
+                          <TableRow 
+                            key={visit.id} 
+                            className="border-border/20 hover:bg-secondary/30 transition-colors"
+                            style={{ animationDelay: `${index * 20}ms` }}
+                          >
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <span className="text-2xl">{getFlag(visit.visitor_country_code)}</span>
+                                <div className="flex flex-col">
+                                  <span className="font-medium text-sm">
+                                    {visit.visitor_country || 'Unknown'}
+                                  </span>
+                                  {visit.visitor_city && (
+                                    <span className="text-xs text-muted-foreground">
+                                      {visit.visitor_city}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
                             </TableCell>
                             <TableCell>
                               <div className="flex flex-col">
-                                <span>{visit.visitor_country || 'Unknown'}</span>
-                                {visit.visitor_city && (
-                                  <span className="text-xs text-muted-foreground">{visit.visitor_city}</span>
-                                )}
+                                <span className="font-mono text-sm">
+                                  {formatDate(visit.created_at).split(',')[0]}
+                                </span>
+                                <span className="text-xs text-muted-foreground font-mono">
+                                  {formatTime(visit.created_at)}
+                                </span>
                               </div>
                             </TableCell>
-                            <TableCell className="font-mono text-sm">
-                              {visit.page_path}
+                            <TableCell>
+                              <code className="text-xs bg-secondary/50 px-2 py-1 rounded font-mono">
+                                {visit.visitor_ip || 'N/A'}
+                              </code>
                             </TableCell>
-                            <TableCell className="text-sm text-muted-foreground">
-                              {referrerDisplay}
+                            <TableCell>
+                              <Badge variant="outline" className="font-mono text-xs">
+                                {visit.page_path}
+                              </Badge>
                             </TableCell>
-                            <TableCell className="text-sm">
-                              {visit.worker_subdomain && !visit.worker_subdomain.includes('preview') 
-                                ? visit.worker_subdomain 
-                                : '-'}
+                            <TableCell>
+                              <div className="flex items-center gap-2 text-muted-foreground">
+                                {getDeviceIcon(deviceType)}
+                                <span className="text-xs capitalize">{deviceType}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <span className="text-sm text-muted-foreground">
+                                {referrerDisplay}
+                              </span>
                             </TableCell>
                           </TableRow>
                         );
@@ -335,29 +484,31 @@ const Dashboard = () => {
                   </Table>
                   
                   {visits.length === 0 && !loading && (
-                    <p className="text-center text-muted-foreground py-8">
-                      Нет данных о посещениях
-                    </p>
+                    <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                      <Activity className="w-12 h-12 mb-4 opacity-30" />
+                      <p>Нет данных о посещениях</p>
+                    </div>
                   )}
                   
                   {loading && (
-                    <p className="text-center text-muted-foreground py-8">
-                      Загрузка...
-                    </p>
+                    <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                      <RefreshCw className="w-8 h-8 animate-spin mb-4 opacity-50" />
+                      <p>Загрузка данных...</p>
+                    </div>
                   )}
-                </div>
+                </ScrollArea>
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Countries Tab */}
-          <TabsContent value="countries">
-            <Card>
-              <CardHeader>
-                <CardTitle>Статистика по странам</CardTitle>
+          <TabsContent value="countries" className="mt-4">
+            <Card className="glass border-border/30">
+              <CardHeader className="border-b border-border/30 pb-4">
+                <CardTitle className="text-lg font-semibold">Статистика по странам</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
+              <CardContent className="p-6">
+                <div className="space-y-4">
                   {(() => {
                     const countryStats: Record<string, { count: number; code: string; name: string }> = {};
                     visits.forEach(v => {
@@ -372,19 +523,34 @@ const Dashboard = () => {
                     const sorted = Object.values(countryStats).sort((a, b) => b.count - a.count);
                     const maxCount = sorted[0]?.count || 1;
 
-                    return sorted.map(({ code, name, count }) => (
-                      <div key={code} className="flex items-center gap-3">
-                        <span className="text-2xl w-10">{getFlag(code === 'unknown' ? null : code)}</span>
+                    return sorted.map(({ code, name, count }, index) => (
+                      <div 
+                        key={code} 
+                        className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-[180px]">
+                          <span className="text-2xl">{getFlag(code === 'unknown' ? null : code)}</span>
+                          <span className="font-medium">{name}</span>
+                        </div>
                         <div className="flex-1">
-                          <div className="flex justify-between mb-1">
-                            <span className="font-medium">{name}</span>
-                            <span className="text-muted-foreground">{count} ({((count / visits.length) * 100).toFixed(1)}%)</span>
-                          </div>
-                          <div className="h-2 bg-muted rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-primary rounded-full transition-all"
-                              style={{ width: `${(count / maxCount) * 100}%` }}
-                            />
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 h-2.5 bg-secondary rounded-full overflow-hidden">
+                              <div 
+                                className="h-full rounded-full transition-all duration-500"
+                                style={{ 
+                                  width: `${(count / maxCount) * 100}%`,
+                                  background: `linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)))`
+                                }}
+                              />
+                            </div>
+                            <div className="flex items-center gap-2 min-w-[100px] justify-end">
+                              <Badge variant="secondary" className="font-mono">
+                                {count}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground font-mono w-12 text-right">
+                                {((count / visits.length) * 100).toFixed(1)}%
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -396,65 +562,77 @@ const Dashboard = () => {
           </TabsContent>
 
           {/* Devices Tab */}
-          <TabsContent value="devices">
-            <Card>
-              <CardHeader>
-                <CardTitle>Статистика устройств</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {(() => {
-                    const deviceStats = { desktop: 0, mobile: 0, tablet: 0 };
-                    visits.forEach(v => {
-                      const device = getDeviceType(v.user_agent);
-                      deviceStats[device]++;
-                    });
-                    
-                    const total = visits.length || 1;
+          <TabsContent value="devices" className="mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {(() => {
+                const deviceStats = { desktop: 0, mobile: 0, tablet: 0 };
+                visits.forEach(v => {
+                  const device = getDeviceType(v.user_agent);
+                  deviceStats[device]++;
+                });
+                
+                const total = visits.length || 1;
+                const maxDevice = Math.max(...Object.values(deviceStats)) || 1;
 
-                    return (
-                      <>
-                        <Card className="bg-muted/50">
-                          <CardContent className="p-6 text-center">
-                            <Monitor className="w-12 h-12 mx-auto mb-3 text-blue-500" />
-                            <p className="text-3xl font-bold">{deviceStats.desktop}</p>
-                            <p className="text-sm text-muted-foreground">Desktop</p>
-                            <p className="text-lg font-semibold text-primary">
-                              {((deviceStats.desktop / total) * 100).toFixed(1)}%
-                            </p>
-                          </CardContent>
-                        </Card>
+                const devices = [
+                  { 
+                    key: 'desktop', 
+                    name: 'Desktop', 
+                    icon: Monitor, 
+                    count: deviceStats.desktop,
+                    color: 'primary'
+                  },
+                  { 
+                    key: 'mobile', 
+                    name: 'Mobile', 
+                    icon: Smartphone, 
+                    count: deviceStats.mobile,
+                    color: 'accent'
+                  },
+                  { 
+                    key: 'tablet', 
+                    name: 'Tablet', 
+                    icon: Tablet, 
+                    count: deviceStats.tablet,
+                    color: 'primary'
+                  }
+                ];
+
+                return devices.map(({ key, name, icon: Icon, count, color }) => (
+                  <Card key={key} className="glass border-border/30 hover:border-primary/30 transition-all group">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col items-center text-center">
+                        <div className={`p-4 rounded-2xl bg-${color}/10 group-hover:bg-${color}/20 transition-colors mb-4`}>
+                          <Icon className={`w-10 h-10 text-${color}`} />
+                        </div>
                         
-                        <Card className="bg-muted/50">
-                          <CardContent className="p-6 text-center">
-                            <Smartphone className="w-12 h-12 mx-auto mb-3 text-green-500" />
-                            <p className="text-3xl font-bold">{deviceStats.mobile}</p>
-                            <p className="text-sm text-muted-foreground">Mobile</p>
-                            <p className="text-lg font-semibold text-primary">
-                              {((deviceStats.mobile / total) * 100).toFixed(1)}%
-                            </p>
-                          </CardContent>
-                        </Card>
+                        <p className="text-4xl font-bold">{count}</p>
+                        <p className="text-muted-foreground font-medium mt-1">{name}</p>
                         
-                        <Card className="bg-muted/50">
-                          <CardContent className="p-6 text-center">
-                            <Tablet className="w-12 h-12 mx-auto mb-3 text-orange-500" />
-                            <p className="text-3xl font-bold">{deviceStats.tablet}</p>
-                            <p className="text-sm text-muted-foreground">Tablet</p>
-                            <p className="text-lg font-semibold text-primary">
-                              {((deviceStats.tablet / total) * 100).toFixed(1)}%
-                            </p>
-                          </CardContent>
-                        </Card>
-                      </>
-                    );
-                  })()}
-                </div>
-              </CardContent>
-            </Card>
+                        <div className="w-full mt-4">
+                          <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                            <div 
+                              className="h-full rounded-full transition-all duration-500"
+                              style={{ 
+                                width: `${(count / maxDevice) * 100}%`,
+                                background: `linear-gradient(90deg, hsl(var(--${color})), hsl(var(--${color}) / 0.6))`
+                              }}
+                            />
+                          </div>
+                        </div>
+                        
+                        <Badge className="mt-4 font-mono" variant="secondary">
+                          {((count / total) * 100).toFixed(1)}%
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ));
+              })()}
+            </div>
           </TabsContent>
         </Tabs>
-      </div>
+      </main>
     </div>
   );
 };

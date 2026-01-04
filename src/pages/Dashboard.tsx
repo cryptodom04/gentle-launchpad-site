@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import VisitsChart from '@/components/VisitsChart';
+import DepositsChart from '@/components/DepositsChart';
 import { 
   Users, 
   Eye, 
@@ -22,7 +23,8 @@ import {
   Activity,
   Shield,
   LogOut,
-  BarChart3
+  BarChart3,
+  Wallet
 } from 'lucide-react';
 
 interface PageVisit {
@@ -368,30 +370,37 @@ const Dashboard = () => {
           <TabsList className="bg-secondary/50 border border-border/30 p-1 h-auto flex-wrap">
             <TabsTrigger 
               value="chart" 
-              className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-3 sm:px-4 py-2"
             >
-              <BarChart3 className="w-4 h-4 mr-2" />
+              <BarChart3 className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">Статистика</span>
             </TabsTrigger>
             <TabsTrigger 
-              value="visits" 
-              className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2"
+              value="deposits" 
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-3 sm:px-4 py-2"
             >
-              <Activity className="w-4 h-4 mr-2" />
+              <Wallet className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Депозиты</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="visits" 
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-3 sm:px-4 py-2"
+            >
+              <Activity className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">Логи</span>
             </TabsTrigger>
             <TabsTrigger 
               value="countries"
-              className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-3 sm:px-4 py-2"
             >
-              <Globe className="w-4 h-4 mr-2" />
+              <Globe className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">Страны</span>
             </TabsTrigger>
             <TabsTrigger 
               value="devices"
-              className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-3 sm:px-4 py-2"
             >
-              <Monitor className="w-4 h-4 mr-2" />
+              <Monitor className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">Устройства</span>
             </TabsTrigger>
           </TabsList>
@@ -399,6 +408,11 @@ const Dashboard = () => {
           {/* Chart Tab */}
           <TabsContent value="chart" className="mt-4">
             <VisitsChart />
+          </TabsContent>
+
+          {/* Deposits Tab */}
+          <TabsContent value="deposits" className="mt-4">
+            <DepositsChart />
           </TabsContent>
 
           {/* Visits Tab */}

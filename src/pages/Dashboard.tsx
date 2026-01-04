@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import VisitsChart from '@/components/VisitsChart';
 import { 
   Users, 
   Eye, 
@@ -20,7 +21,8 @@ import {
   MapPin,
   Activity,
   Shield,
-  LogOut
+  LogOut,
+  BarChart3
 } from 'lucide-react';
 
 interface PageVisit {
@@ -362,30 +364,42 @@ const Dashboard = () => {
         </div>
 
         {/* Tabs Section */}
-        <Tabs defaultValue="visits" className="space-y-4">
-          <TabsList className="bg-secondary/50 border border-border/30 p-1 h-auto">
+        <Tabs defaultValue="chart" className="space-y-4">
+          <TabsList className="bg-secondary/50 border border-border/30 p-1 h-auto flex-wrap">
+            <TabsTrigger 
+              value="chart" 
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2"
+            >
+              <BarChart3 className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Статистика</span>
+            </TabsTrigger>
             <TabsTrigger 
               value="visits" 
               className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2"
             >
               <Activity className="w-4 h-4 mr-2" />
-              Логи посещений
+              <span className="hidden sm:inline">Логи</span>
             </TabsTrigger>
             <TabsTrigger 
               value="countries"
               className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2"
             >
               <Globe className="w-4 h-4 mr-2" />
-              По странам
+              <span className="hidden sm:inline">Страны</span>
             </TabsTrigger>
             <TabsTrigger 
               value="devices"
               className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2"
             >
               <Monitor className="w-4 h-4 mr-2" />
-              Устройства
+              <span className="hidden sm:inline">Устройства</span>
             </TabsTrigger>
           </TabsList>
+
+          {/* Chart Tab */}
+          <TabsContent value="chart" className="mt-4">
+            <VisitsChart />
+          </TabsContent>
 
           {/* Visits Tab */}
           <TabsContent value="visits" className="mt-4">

@@ -177,23 +177,23 @@ const DepositsChart = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Date Pickers */}
       <Card className="glass border-border/30">
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-wrap">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground whitespace-nowrap">От:</span>
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">От:</span>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-[140px] sm:w-[160px] justify-start text-left font-normal border-border/50",
+                      "w-[120px] sm:w-[160px] justify-start text-left font-normal border-border/50 text-xs sm:text-sm h-8 sm:h-10",
                       !dateFrom && "text-muted-foreground"
                     )}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <CalendarIcon className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     {dateFrom ? format(dateFrom, 'dd.MM.yyyy') : 'Выберите'}
                   </Button>
                 </PopoverTrigger>
@@ -210,18 +210,18 @@ const DepositsChart = () => {
               </Popover>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground whitespace-nowrap">До:</span>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">До:</span>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-[140px] sm:w-[160px] justify-start text-left font-normal border-border/50",
+                      "w-[120px] sm:w-[160px] justify-start text-left font-normal border-border/50 text-xs sm:text-sm h-8 sm:h-10",
                       !dateTo && "text-muted-foreground"
                     )}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <CalendarIcon className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     {dateTo ? format(dateTo, 'dd.MM.yyyy') : 'Выберите'}
                   </Button>
                 </PopoverTrigger>
@@ -243,10 +243,11 @@ const DepositsChart = () => {
               disabled={loading}
               variant="outline"
               size="sm"
-              className="border-border/50"
+              className="border-border/50 h-8 sm:h-10 text-xs sm:text-sm"
             >
-              <RefreshCw className={cn("w-4 h-4 mr-2", loading && "animate-spin")} />
-              Обновить
+              <RefreshCw className={cn("w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2", loading && "animate-spin")} />
+              <span className="hidden sm:inline">Обновить</span>
+              <span className="sm:hidden">↻</span>
             </Button>
           </div>
         </CardContent>
@@ -312,17 +313,17 @@ const DepositsChart = () => {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Daily Deposits Chart */}
         <Card className="glass border-border/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-primary" />
+          <CardHeader className="pb-2 px-3 sm:px-6">
+            <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               Депозиты по дням (SOL)
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
+          <CardContent className="px-2 sm:px-6">
+            <div className="h-[250px] sm:h-[300px]">
               {dailyStats.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={dailyStats}>
@@ -369,14 +370,14 @@ const DepositsChart = () => {
 
         {/* Deposits Count Chart */}
         <Card className="glass border-border/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <Wallet className="w-5 h-5 text-accent" />
+          <CardHeader className="pb-2 px-3 sm:px-6">
+            <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2">
+              <Wallet className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
               Количество депозитов
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
+          <CardContent className="px-2 sm:px-6">
+            <div className="h-[250px] sm:h-[300px]">
               {dailyStats.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={dailyStats}>
@@ -411,25 +412,50 @@ const DepositsChart = () => {
 
       {/* Recent Deposits Table */}
       <Card className="glass border-border/30">
-        <CardHeader className="border-b border-border/30 pb-4">
+        <CardHeader className="border-b border-border/30 pb-4 px-3 sm:px-6">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold">Последние депозиты</CardTitle>
-            <Badge variant="secondary" className="font-mono">
+            <CardTitle className="text-base sm:text-lg font-semibold">Последние депозиты</CardTitle>
+            <Badge variant="secondary" className="font-mono text-xs">
               {recentDeposits.length} записей
             </Badge>
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <ScrollArea className="h-[400px]">
-            <Table>
+          <ScrollArea className="h-[350px] sm:h-[400px]">
+            {/* Mobile Card View */}
+            <div className="block sm:hidden p-3 space-y-2">
+              {recentDeposits.map((deposit) => (
+                <div 
+                  key={deposit.id}
+                  className="p-2.5 rounded-lg bg-secondary/20 border border-border/20 space-y-1.5"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-primary text-sm">{Number(deposit.amount_sol).toFixed(4)} SOL</span>
+                    <span className="text-xs text-muted-foreground font-mono">{formatTime(deposit.created_at)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex gap-2">
+                      <span className="text-muted-foreground">A: {Number(deposit.admin_share_sol).toFixed(3)}</span>
+                      <span className="text-muted-foreground">W: {Number(deposit.worker_share_sol).toFixed(3)}</span>
+                    </div>
+                    <code className="bg-secondary/50 px-1.5 py-0.5 rounded font-mono text-xs">
+                      {shortenAddress(deposit.sender_address)}
+                    </code>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {/* Desktop Table View */}
+            <Table className="hidden sm:table">
               <TableHeader className="sticky top-0 bg-card/95 backdrop-blur-sm z-10">
                 <TableRow className="border-border/30 hover:bg-transparent">
-                  <TableHead className="font-semibold">Дата</TableHead>
-                  <TableHead className="font-semibold">Сумма SOL</TableHead>
-                  <TableHead className="font-semibold hidden sm:table-cell">Админ</TableHead>
-                  <TableHead className="font-semibold hidden sm:table-cell">Воркер</TableHead>
-                  <TableHead className="font-semibold">Отправитель</TableHead>
-                  <TableHead className="font-semibold hidden md:table-cell">TX</TableHead>
+                  <TableHead className="font-semibold text-xs md:text-sm">Дата</TableHead>
+                  <TableHead className="font-semibold text-xs md:text-sm">Сумма SOL</TableHead>
+                  <TableHead className="font-semibold hidden md:table-cell text-xs md:text-sm">Админ</TableHead>
+                  <TableHead className="font-semibold hidden md:table-cell text-xs md:text-sm">Воркер</TableHead>
+                  <TableHead className="font-semibold text-xs md:text-sm">Отправитель</TableHead>
+                  <TableHead className="font-semibold hidden lg:table-cell text-xs md:text-sm">TX</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -438,17 +464,17 @@ const DepositsChart = () => {
                     key={deposit.id} 
                     className="border-border/20 hover:bg-secondary/30 transition-colors"
                   >
-                    <TableCell className="text-sm">
+                    <TableCell className="text-xs md:text-sm font-mono">
                       {formatTime(deposit.created_at)}
                     </TableCell>
                     <TableCell>
-                      <span className="font-bold text-primary">{Number(deposit.amount_sol).toFixed(4)}</span>
+                      <span className="font-bold text-primary text-xs md:text-sm">{Number(deposit.amount_sol).toFixed(4)}</span>
                     </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      <span className="text-muted-foreground">{Number(deposit.admin_share_sol).toFixed(4)}</span>
+                    <TableCell className="hidden md:table-cell">
+                      <span className="text-muted-foreground text-xs md:text-sm">{Number(deposit.admin_share_sol).toFixed(4)}</span>
                     </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      <span className="text-muted-foreground">{Number(deposit.worker_share_sol).toFixed(4)}</span>
+                    <TableCell className="hidden md:table-cell">
+                      <span className="text-muted-foreground text-xs md:text-sm">{Number(deposit.worker_share_sol).toFixed(4)}</span>
                     </TableCell>
                     <TableCell>
                       <code className="text-xs bg-secondary/50 px-2 py-1 rounded">

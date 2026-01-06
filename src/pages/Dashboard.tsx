@@ -367,43 +367,45 @@ const Dashboard = () => {
 
         {/* Tabs Section */}
         <Tabs defaultValue="chart" className="space-y-4">
-          <TabsList className="bg-secondary/50 border border-border/30 p-1 h-auto flex-wrap">
-            <TabsTrigger 
-              value="chart" 
-              className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-3 sm:px-4 py-2"
-            >
-              <BarChart3 className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Статистика</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="deposits" 
-              className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-3 sm:px-4 py-2"
-            >
-              <Wallet className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Депозиты</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="visits" 
-              className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-3 sm:px-4 py-2"
-            >
-              <Activity className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Логи</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="countries"
-              className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-3 sm:px-4 py-2"
-            >
-              <Globe className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Страны</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="devices"
-              className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-3 sm:px-4 py-2"
-            >
-              <Monitor className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Устройства</span>
-            </TabsTrigger>
-          </TabsList>
+          <ScrollArea className="w-full">
+            <TabsList className="bg-secondary/50 border border-border/30 p-1 h-auto inline-flex w-auto min-w-full sm:w-full">
+              <TabsTrigger 
+                value="chart" 
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-2 text-xs sm:text-sm"
+              >
+                <BarChart3 className="w-4 h-4 mr-1 sm:mr-2" />
+                <span>Статистика</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="deposits" 
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-2 text-xs sm:text-sm"
+              >
+                <Wallet className="w-4 h-4 mr-1 sm:mr-2" />
+                <span>Депозиты</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="visits" 
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-2 text-xs sm:text-sm"
+              >
+                <Activity className="w-4 h-4 mr-1 sm:mr-2" />
+                <span>Логи</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="countries"
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-2 text-xs sm:text-sm"
+              >
+                <Globe className="w-4 h-4 mr-1 sm:mr-2" />
+                <span>Страны</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="devices"
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-2 text-xs sm:text-sm"
+              >
+                <Monitor className="w-4 h-4 mr-1 sm:mr-2" />
+                <span>Устройства</span>
+              </TabsTrigger>
+            </TabsList>
+          </ScrollArea>
 
           {/* Chart Tab */}
           <TabsContent value="chart" className="mt-4">
@@ -418,25 +420,77 @@ const Dashboard = () => {
           {/* Visits Tab */}
           <TabsContent value="visits" className="mt-4">
             <Card className="glass border-border/30">
-              <CardHeader className="border-b border-border/30 pb-4">
+              <CardHeader className="border-b border-border/30 pb-4 px-3 sm:px-6">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-semibold">История посещений</CardTitle>
-                  <Badge variant="secondary" className="font-mono">
+                  <CardTitle className="text-base sm:text-lg font-semibold">История посещений</CardTitle>
+                  <Badge variant="secondary" className="font-mono text-xs">
                     {visits.length} записей
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
-                <ScrollArea className="h-[600px]">
-                  <Table>
+                <ScrollArea className="h-[500px] sm:h-[600px]">
+                  {/* Mobile Card View */}
+                  <div className="block sm:hidden p-3 space-y-3">
+                    {visits.map((visit, index) => {
+                      let referrerDisplay = 'Direct';
+                      if (visit.referrer) {
+                        try {
+                          const url = new URL(visit.referrer);
+                          referrerDisplay = url.hostname.replace('www.', '');
+                        } catch {
+                          referrerDisplay = visit.referrer.substring(0, 20);
+                        }
+                      }
+                      const deviceType = getDeviceType(visit.user_agent);
+                      
+                      return (
+                        <div 
+                          key={visit.id}
+                          className="p-3 rounded-lg bg-secondary/20 border border-border/20 space-y-2"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl">{getFlag(visit.visitor_country_code)}</span>
+                              <div>
+                                <p className="text-sm font-medium">{visit.visitor_country || 'Unknown'}</p>
+                                {visit.visitor_city && (
+                                  <p className="text-xs text-muted-foreground">{visit.visitor_city}</p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-muted-foreground">
+                              {getDeviceIcon(deviceType)}
+                              <span className="text-xs">{deviceType}</span>
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2 text-xs">
+                            <code className="bg-secondary/50 px-1.5 py-0.5 rounded font-mono">
+                              {visit.visitor_ip || 'N/A'}
+                            </code>
+                            <Badge variant="outline" className="font-mono text-xs py-0">
+                              {visit.page_path}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span className="font-mono">{formatDate(visit.created_at)}</span>
+                            <span>{referrerDisplay}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  
+                  {/* Desktop Table View */}
+                  <Table className="hidden sm:table">
                     <TableHeader className="sticky top-0 bg-card/95 backdrop-blur-sm z-10">
                       <TableRow className="border-border/30 hover:bg-transparent">
-                        <TableHead className="w-[200px] font-semibold">Локация</TableHead>
-                        <TableHead className="font-semibold">Дата и время</TableHead>
-                        <TableHead className="font-semibold">IP адрес</TableHead>
+                        <TableHead className="w-[180px] font-semibold">Локация</TableHead>
+                        <TableHead className="font-semibold">Дата/время</TableHead>
+                        <TableHead className="font-semibold hidden md:table-cell">IP адрес</TableHead>
                         <TableHead className="font-semibold">Страница</TableHead>
-                        <TableHead className="font-semibold">Устройство</TableHead>
-                        <TableHead className="font-semibold">Источник</TableHead>
+                        <TableHead className="font-semibold hidden lg:table-cell">Устройство</TableHead>
+                        <TableHead className="font-semibold hidden lg:table-cell">Источник</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -460,8 +514,8 @@ const Dashboard = () => {
                             style={{ animationDelay: `${index * 20}ms` }}
                           >
                             <TableCell>
-                              <div className="flex items-center gap-3">
-                                <span className="text-2xl">{getFlag(visit.visitor_country_code)}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xl">{getFlag(visit.visitor_country_code)}</span>
                                 <div className="flex flex-col">
                                   <span className="font-medium text-sm">
                                     {visit.visitor_country || 'Unknown'}
@@ -476,7 +530,7 @@ const Dashboard = () => {
                             </TableCell>
                             <TableCell>
                               <div className="flex flex-col">
-                                <span className="font-mono text-sm">
+                                <span className="font-mono text-xs">
                                   {formatDate(visit.created_at).split(',')[0]}
                                 </span>
                                 <span className="text-xs text-muted-foreground font-mono">
@@ -484,24 +538,24 @@ const Dashboard = () => {
                                 </span>
                               </div>
                             </TableCell>
-                            <TableCell>
-                              <code className="text-xs bg-secondary/50 px-2 py-1 rounded font-mono">
+                            <TableCell className="hidden md:table-cell">
+                              <code className="text-xs bg-secondary/50 px-1.5 py-0.5 rounded font-mono">
                                 {visit.visitor_ip || 'N/A'}
                               </code>
                             </TableCell>
                             <TableCell>
-                              <Badge variant="outline" className="font-mono text-xs">
+                              <Badge variant="outline" className="font-mono text-xs py-0">
                                 {visit.page_path}
                               </Badge>
                             </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2 text-muted-foreground">
+                            <TableCell className="hidden lg:table-cell">
+                              <div className="flex items-center gap-1.5 text-muted-foreground">
                                 {getDeviceIcon(deviceType)}
                                 <span className="text-xs capitalize">{deviceType}</span>
                               </div>
                             </TableCell>
-                            <TableCell>
-                              <span className="text-sm text-muted-foreground">
+                            <TableCell className="hidden lg:table-cell">
+                              <span className="text-xs text-muted-foreground">
                                 {referrerDisplay}
                               </span>
                             </TableCell>
@@ -532,11 +586,11 @@ const Dashboard = () => {
           {/* Countries Tab */}
           <TabsContent value="countries" className="mt-4">
             <Card className="glass border-border/30">
-              <CardHeader className="border-b border-border/30 pb-4">
-                <CardTitle className="text-lg font-semibold">Статистика по странам</CardTitle>
+              <CardHeader className="border-b border-border/30 pb-4 px-3 sm:px-6">
+                <CardTitle className="text-base sm:text-lg font-semibold">Статистика по странам</CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-4">
+              <CardContent className="p-3 sm:p-6">
+                <div className="space-y-2 sm:space-y-4">
                   {(() => {
                     const countryStats: Record<string, { count: number; code: string; name: string }> = {};
                     visits.forEach(v => {
@@ -551,18 +605,28 @@ const Dashboard = () => {
                     const sorted = Object.values(countryStats).sort((a, b) => b.count - a.count);
                     const maxCount = sorted[0]?.count || 1;
 
-                    return sorted.map(({ code, name, count }, index) => (
+                    return sorted.map(({ code, name, count }) => (
                       <div 
                         key={code} 
-                        className="flex items-center gap-4 p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                        className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-2 sm:p-3 rounded-lg sm:rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors"
                       >
-                        <div className="flex items-center gap-3 min-w-[180px]">
-                          <span className="text-2xl">{getFlag(code === 'unknown' ? null : code)}</span>
-                          <span className="font-medium">{name}</span>
+                        <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3 sm:min-w-[140px] md:min-w-[180px]">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl sm:text-2xl">{getFlag(code === 'unknown' ? null : code)}</span>
+                            <span className="font-medium text-sm sm:text-base truncate max-w-[120px] sm:max-w-none">{name}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 sm:hidden">
+                            <Badge variant="secondary" className="font-mono text-xs">
+                              {count}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground font-mono">
+                              {((count / visits.length) * 100).toFixed(1)}%
+                            </span>
+                          </div>
                         </div>
                         <div className="flex-1">
-                          <div className="flex items-center gap-3">
-                            <div className="flex-1 h-2.5 bg-secondary rounded-full overflow-hidden">
+                          <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="flex-1 h-2 sm:h-2.5 bg-secondary rounded-full overflow-hidden">
                               <div 
                                 className="h-full rounded-full transition-all duration-500"
                                 style={{ 
@@ -571,11 +635,11 @@ const Dashboard = () => {
                                 }}
                               />
                             </div>
-                            <div className="flex items-center gap-2 min-w-[100px] justify-end">
-                              <Badge variant="secondary" className="font-mono">
+                            <div className="hidden sm:flex items-center gap-2 min-w-[80px] md:min-w-[100px] justify-end">
+                              <Badge variant="secondary" className="font-mono text-xs">
                                 {count}
                               </Badge>
-                              <span className="text-xs text-muted-foreground font-mono w-12 text-right">
+                              <span className="text-xs text-muted-foreground font-mono w-10 md:w-12 text-right">
                                 {((count / visits.length) * 100).toFixed(1)}%
                               </span>
                             </div>
@@ -591,7 +655,7 @@ const Dashboard = () => {
 
           {/* Devices Tab */}
           <TabsContent value="devices" className="mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
               {(() => {
                 const deviceStats = { desktop: 0, mobile: 0, tablet: 0 };
                 visits.forEach(v => {
@@ -628,17 +692,17 @@ const Dashboard = () => {
 
                 return devices.map(({ key, name, icon: Icon, count, color }) => (
                   <Card key={key} className="glass border-border/30 hover:border-primary/30 transition-all group">
-                    <CardContent className="p-6">
+                    <CardContent className="p-3 sm:p-6">
                       <div className="flex flex-col items-center text-center">
-                        <div className={`p-4 rounded-2xl bg-${color}/10 group-hover:bg-${color}/20 transition-colors mb-4`}>
-                          <Icon className={`w-10 h-10 text-${color}`} />
+                        <div className={`p-2 sm:p-4 rounded-xl sm:rounded-2xl bg-${color}/10 group-hover:bg-${color}/20 transition-colors mb-2 sm:mb-4`}>
+                          <Icon className={`w-6 h-6 sm:w-10 sm:h-10 text-${color}`} />
                         </div>
                         
-                        <p className="text-4xl font-bold">{count}</p>
-                        <p className="text-muted-foreground font-medium mt-1">{name}</p>
+                        <p className="text-2xl sm:text-4xl font-bold">{count}</p>
+                        <p className="text-xs sm:text-base text-muted-foreground font-medium mt-0.5 sm:mt-1">{name}</p>
                         
-                        <div className="w-full mt-4">
-                          <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                        <div className="w-full mt-2 sm:mt-4">
+                          <div className="h-1.5 sm:h-2 bg-secondary rounded-full overflow-hidden">
                             <div 
                               className="h-full rounded-full transition-all duration-500"
                               style={{ 
@@ -649,7 +713,7 @@ const Dashboard = () => {
                           </div>
                         </div>
                         
-                        <Badge className="mt-4 font-mono" variant="secondary">
+                        <Badge className="mt-2 sm:mt-4 font-mono text-xs" variant="secondary">
                           {((count / total) * 100).toFixed(1)}%
                         </Badge>
                       </div>

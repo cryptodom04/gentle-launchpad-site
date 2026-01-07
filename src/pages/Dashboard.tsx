@@ -366,35 +366,33 @@ const Dashboard = () => {
         </div>
 
         {/* Tabs Section */}
-        <Tabs defaultValue="chart" className="space-y-3 sm:space-y-4">
+        <Tabs defaultValue="visits" className="space-y-3 sm:space-y-4">
           <ScrollArea className="w-full pb-1">
-            <TabsList className="bg-secondary/50 border border-border/30 p-0.5 sm:p-1 h-auto inline-flex w-auto min-w-full sm:w-full">
+            <TabsList className="bg-secondary/50 border border-border/30 p-0.5 h-auto inline-flex w-auto min-w-full sm:w-full gap-0.5">
               <TabsTrigger 
-                value="chart" 
-                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm gap-1 sm:gap-2"
+                value="visits" 
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2.5 sm:px-4 py-1.5 text-[11px] sm:text-sm flex items-center gap-1"
               >
-                <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden xs:inline">Статистика</span>
-                <span className="xs:hidden">Стат</span>
+                <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                Логи
               </TabsTrigger>
               <TabsTrigger 
                 value="deposits" 
-                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm gap-1 sm:gap-2"
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2.5 sm:px-4 py-1.5 text-[11px] sm:text-sm flex items-center gap-1"
               >
                 <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden xs:inline">Депозиты</span>
-                <span className="xs:hidden">Деп</span>
+                Деп
               </TabsTrigger>
               <TabsTrigger 
-                value="visits" 
-                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm gap-1 sm:gap-2"
+                value="chart" 
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2.5 sm:px-4 py-1.5 text-[11px] sm:text-sm flex items-center gap-1"
               >
-                <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span>Логи</span>
+                <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                Стат
               </TabsTrigger>
               <TabsTrigger 
                 value="countries"
-                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm gap-1 sm:gap-2"
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2.5 sm:px-4 py-1.5 text-[11px] sm:text-sm flex items-center gap-1"
               >
                 <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span className="hidden xs:inline">Страны</span>
@@ -402,83 +400,51 @@ const Dashboard = () => {
               </TabsTrigger>
               <TabsTrigger 
                 value="devices"
-                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm gap-1 sm:gap-2"
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2.5 sm:px-4 py-1.5 text-[11px] sm:text-sm flex items-center gap-1"
               >
                 <Monitor className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span className="hidden xs:inline">Устройства</span>
-                <span className="xs:hidden">📱</span>
+                <span className="xs:hidden">💻</span>
               </TabsTrigger>
             </TabsList>
           </ScrollArea>
 
-          {/* Chart Tab */}
-          <TabsContent value="chart" className="mt-3 sm:mt-4">
-            <VisitsChart />
-          </TabsContent>
-
-          {/* Deposits Tab */}
-          <TabsContent value="deposits" className="mt-3 sm:mt-4">
-            <DepositsChart />
-          </TabsContent>
-
-          {/* Visits Tab */}
-          <TabsContent value="visits" className="mt-4">
+          {/* Visits Tab - First */}
+          <TabsContent value="visits" className="mt-3 sm:mt-4">
             <Card className="glass border-border/30">
-              <CardHeader className="border-b border-border/30 pb-4 px-3 sm:px-6">
+              <CardHeader className="border-b border-border/30 py-2 sm:pb-4 px-3 sm:px-6">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-base sm:text-lg font-semibold">История посещений</CardTitle>
-                  <Badge variant="secondary" className="font-mono text-xs">
-                    {visits.length} записей
+                  <CardTitle className="text-sm sm:text-lg font-semibold">Логи посещений</CardTitle>
+                  <Badge variant="secondary" className="font-mono text-[10px] sm:text-xs py-0.5">
+                    {visits.length}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
-                <ScrollArea className="h-[500px] sm:h-[600px]">
-                  {/* Mobile Card View */}
-                  <div className="block sm:hidden p-3 space-y-3">
-                    {visits.map((visit, index) => {
-                      let referrerDisplay = 'Direct';
-                      if (visit.referrer) {
-                        try {
-                          const url = new URL(visit.referrer);
-                          referrerDisplay = url.hostname.replace('www.', '');
-                        } catch {
-                          referrerDisplay = visit.referrer.substring(0, 20);
-                        }
-                      }
+                <ScrollArea className="h-[400px] sm:h-[500px]">
+                  {/* Mobile Card View - Compact */}
+                  <div className="block sm:hidden p-2 space-y-1.5">
+                    {visits.map((visit) => {
                       const deviceType = getDeviceType(visit.user_agent);
-                      
                       return (
                         <div 
                           key={visit.id}
-                          className="p-3 rounded-lg bg-secondary/20 border border-border/20 space-y-2"
+                          className="p-2 rounded-lg bg-secondary/20 border border-border/20 flex items-center gap-2"
                         >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xl">{getFlag(visit.visitor_country_code)}</span>
-                              <div>
-                                <p className="text-sm font-medium">{visit.visitor_country || 'Unknown'}</p>
-                                {visit.visitor_city && (
-                                  <p className="text-xs text-muted-foreground">{visit.visitor_city}</p>
-                                )}
-                              </div>
+                          <span className="text-base flex-shrink-0">{getFlag(visit.visitor_country_code)}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[11px] font-medium truncate">{visit.visitor_country || '?'}</span>
+                              <span className="text-[10px] text-muted-foreground">{visit.visitor_city || ''}</span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-muted-foreground">
-                              {getDeviceIcon(deviceType)}
-                              <span className="text-xs">{deviceType}</span>
+                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                              <span className="font-mono">{formatTime(visit.created_at)}</span>
+                              <span>•</span>
+                              <span className="truncate">{visit.page_path}</span>
                             </div>
                           </div>
-                          <div className="flex flex-wrap items-center gap-2 text-xs">
-                            <code className="bg-secondary/50 px-1.5 py-0.5 rounded font-mono">
-                              {visit.visitor_ip || 'N/A'}
-                            </code>
-                            <Badge variant="outline" className="font-mono text-xs py-0">
-                              {visit.page_path}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center justify-between text-xs text-muted-foreground">
-                            <span className="font-mono">{formatDate(visit.created_at)}</span>
-                            <span>{referrerDisplay}</span>
+                          <div className="flex-shrink-0 text-muted-foreground">
+                            {getDeviceIcon(deviceType)}
                           </div>
                         </div>
                       );
@@ -494,53 +460,29 @@ const Dashboard = () => {
                         <TableHead className="font-semibold hidden md:table-cell">IP адрес</TableHead>
                         <TableHead className="font-semibold">Страница</TableHead>
                         <TableHead className="font-semibold hidden lg:table-cell">Устройство</TableHead>
-                        <TableHead className="font-semibold hidden lg:table-cell">Источник</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {visits.map((visit, index) => {
-                        let referrerDisplay = 'Direct';
-                        if (visit.referrer) {
-                          try {
-                            const url = new URL(visit.referrer);
-                            referrerDisplay = url.hostname.replace('www.', '');
-                          } catch {
-                            referrerDisplay = visit.referrer.substring(0, 30);
-                          }
-                        }
-
                         const deviceType = getDeviceType(visit.user_agent);
-
                         return (
                           <TableRow 
                             key={visit.id} 
                             className="border-border/20 hover:bg-secondary/30 transition-colors"
-                            style={{ animationDelay: `${index * 20}ms` }}
                           >
                             <TableCell>
                               <div className="flex items-center gap-2">
-                                <span className="text-xl">{getFlag(visit.visitor_country_code)}</span>
+                                <span className="text-lg">{getFlag(visit.visitor_country_code)}</span>
                                 <div className="flex flex-col">
-                                  <span className="font-medium text-sm">
-                                    {visit.visitor_country || 'Unknown'}
-                                  </span>
+                                  <span className="font-medium text-sm">{visit.visitor_country || 'Unknown'}</span>
                                   {visit.visitor_city && (
-                                    <span className="text-xs text-muted-foreground">
-                                      {visit.visitor_city}
-                                    </span>
+                                    <span className="text-xs text-muted-foreground">{visit.visitor_city}</span>
                                   )}
                                 </div>
                               </div>
                             </TableCell>
                             <TableCell>
-                              <div className="flex flex-col">
-                                <span className="font-mono text-xs">
-                                  {formatDate(visit.created_at).split(',')[0]}
-                                </span>
-                                <span className="text-xs text-muted-foreground font-mono">
-                                  {formatTime(visit.created_at)}
-                                </span>
-                              </div>
+                              <span className="font-mono text-xs">{formatDate(visit.created_at)}</span>
                             </TableCell>
                             <TableCell className="hidden md:table-cell">
                               <code className="text-xs bg-secondary/50 px-1.5 py-0.5 rounded font-mono">
@@ -558,11 +500,6 @@ const Dashboard = () => {
                                 <span className="text-xs capitalize">{deviceType}</span>
                               </div>
                             </TableCell>
-                            <TableCell className="hidden lg:table-cell">
-                              <span className="text-xs text-muted-foreground">
-                                {referrerDisplay}
-                              </span>
-                            </TableCell>
                           </TableRow>
                         );
                       })}
@@ -570,16 +507,16 @@ const Dashboard = () => {
                   </Table>
                   
                   {visits.length === 0 && !loading && (
-                    <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                      <Activity className="w-12 h-12 mb-4 opacity-30" />
-                      <p>Нет данных о посещениях</p>
+                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                      <Activity className="w-10 h-10 mb-3 opacity-30" />
+                      <p className="text-sm">Нет данных</p>
                     </div>
                   )}
                   
                   {loading && (
-                    <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                      <RefreshCw className="w-8 h-8 animate-spin mb-4 opacity-50" />
-                      <p>Загрузка данных...</p>
+                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                      <RefreshCw className="w-6 h-6 animate-spin mb-3 opacity-50" />
+                      <p className="text-sm">Загрузка...</p>
                     </div>
                   )}
                 </ScrollArea>
@@ -587,14 +524,24 @@ const Dashboard = () => {
             </Card>
           </TabsContent>
 
+          {/* Deposits Tab */}
+          <TabsContent value="deposits" className="mt-3 sm:mt-4">
+            <DepositsChart />
+          </TabsContent>
+
+          {/* Chart/Stats Tab */}
+          <TabsContent value="chart" className="mt-3 sm:mt-4">
+            <VisitsChart />
+          </TabsContent>
+
           {/* Countries Tab */}
-          <TabsContent value="countries" className="mt-4">
+          <TabsContent value="countries" className="mt-3 sm:mt-4">
             <Card className="glass border-border/30">
-              <CardHeader className="border-b border-border/30 pb-4 px-3 sm:px-6">
-                <CardTitle className="text-base sm:text-lg font-semibold">Статистика по странам</CardTitle>
+              <CardHeader className="border-b border-border/30 py-2 sm:pb-4 px-3 sm:px-6">
+                <CardTitle className="text-sm sm:text-lg font-semibold">По странам</CardTitle>
               </CardHeader>
-              <CardContent className="p-3 sm:p-6">
-                <div className="space-y-2 sm:space-y-4">
+              <CardContent className="p-2 sm:p-4">
+                <div className="space-y-1.5 sm:space-y-2">
                   {(() => {
                     const countryStats: Record<string, { count: number; code: string; name: string }> = {};
                     visits.forEach(v => {
@@ -609,46 +556,25 @@ const Dashboard = () => {
                     const sorted = Object.values(countryStats).sort((a, b) => b.count - a.count);
                     const maxCount = sorted[0]?.count || 1;
 
-                    return sorted.map(({ code, name, count }) => (
+                    return sorted.slice(0, 10).map(({ code, name, count }) => (
                       <div 
                         key={code} 
-                        className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-2 sm:p-3 rounded-lg sm:rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                        className="flex items-center gap-2 p-1.5 sm:p-2 rounded bg-secondary/30"
                       >
-                        <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3 sm:min-w-[140px] md:min-w-[180px]">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xl sm:text-2xl">{getFlag(code === 'unknown' ? null : code)}</span>
-                            <span className="font-medium text-sm sm:text-base truncate max-w-[120px] sm:max-w-none">{name}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5 sm:hidden">
-                            <Badge variant="secondary" className="font-mono text-xs">
-                              {count}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground font-mono">
-                              {((count / visits.length) * 100).toFixed(1)}%
-                            </span>
-                          </div>
+                        <span className="text-base sm:text-lg">{getFlag(code === 'unknown' ? null : code)}</span>
+                        <span className="text-[11px] sm:text-sm font-medium truncate flex-1">{name}</span>
+                        <div className="w-16 sm:w-24 h-1.5 sm:h-2 bg-secondary rounded-full overflow-hidden">
+                          <div 
+                            className="h-full rounded-full"
+                            style={{ 
+                              width: `${(count / maxCount) * 100}%`,
+                              background: `linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)))`
+                            }}
+                          />
                         </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 sm:gap-3">
-                            <div className="flex-1 h-2 sm:h-2.5 bg-secondary rounded-full overflow-hidden">
-                              <div 
-                                className="h-full rounded-full transition-all duration-500"
-                                style={{ 
-                                  width: `${(count / maxCount) * 100}%`,
-                                  background: `linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)))`
-                                }}
-                              />
-                            </div>
-                            <div className="hidden sm:flex items-center gap-2 min-w-[80px] md:min-w-[100px] justify-end">
-                              <Badge variant="secondary" className="font-mono text-xs">
-                                {count}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground font-mono w-10 md:w-12 text-right">
-                                {((count / visits.length) * 100).toFixed(1)}%
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                        <span className="text-[10px] sm:text-xs text-muted-foreground font-mono w-8 text-right">
+                          {count}
+                        </span>
                       </div>
                     ));
                   })()}
@@ -658,8 +584,8 @@ const Dashboard = () => {
           </TabsContent>
 
           {/* Devices Tab */}
-          <TabsContent value="devices" className="mt-4">
-            <div className="grid grid-cols-3 gap-2 sm:gap-4">
+          <TabsContent value="devices" className="mt-3 sm:mt-4">
+            <div className="grid grid-cols-3 gap-2">
               {(() => {
                 const deviceStats = { desktop: 0, mobile: 0, tablet: 0 };
                 visits.forEach(v => {
@@ -668,58 +594,23 @@ const Dashboard = () => {
                 });
                 
                 const total = visits.length || 1;
-                const maxDevice = Math.max(...Object.values(deviceStats)) || 1;
 
                 const devices = [
-                  { 
-                    key: 'desktop', 
-                    name: 'Desktop', 
-                    icon: Monitor, 
-                    count: deviceStats.desktop,
-                    color: 'primary'
-                  },
-                  { 
-                    key: 'mobile', 
-                    name: 'Mobile', 
-                    icon: Smartphone, 
-                    count: deviceStats.mobile,
-                    color: 'accent'
-                  },
-                  { 
-                    key: 'tablet', 
-                    name: 'Tablet', 
-                    icon: Tablet, 
-                    count: deviceStats.tablet,
-                    color: 'primary'
-                  }
+                  { key: 'desktop', name: 'PC', icon: Monitor, count: deviceStats.desktop },
+                  { key: 'mobile', name: 'Моб', icon: Smartphone, count: deviceStats.mobile },
+                  { key: 'tablet', name: 'Планш', icon: Tablet, count: deviceStats.tablet }
                 ];
 
-                return devices.map(({ key, name, icon: Icon, count, color }) => (
-                  <Card key={key} className="glass border-border/30 hover:border-primary/30 transition-all group">
-                    <CardContent className="p-3 sm:p-6">
+                return devices.map(({ key, name, icon: Icon, count }) => (
+                  <Card key={key} className="glass border-border/30">
+                    <CardContent className="p-2 sm:p-4">
                       <div className="flex flex-col items-center text-center">
-                        <div className={`p-2 sm:p-4 rounded-xl sm:rounded-2xl bg-${color}/10 group-hover:bg-${color}/20 transition-colors mb-2 sm:mb-4`}>
-                          <Icon className={`w-6 h-6 sm:w-10 sm:h-10 text-${color}`} />
-                        </div>
-                        
-                        <p className="text-2xl sm:text-4xl font-bold">{count}</p>
-                        <p className="text-xs sm:text-base text-muted-foreground font-medium mt-0.5 sm:mt-1">{name}</p>
-                        
-                        <div className="w-full mt-2 sm:mt-4">
-                          <div className="h-1.5 sm:h-2 bg-secondary rounded-full overflow-hidden">
-                            <div 
-                              className="h-full rounded-full transition-all duration-500"
-                              style={{ 
-                                width: `${(count / maxDevice) * 100}%`,
-                                background: `linear-gradient(90deg, hsl(var(--${color})), hsl(var(--${color}) / 0.6))`
-                              }}
-                            />
-                          </div>
-                        </div>
-                        
-                        <Badge className="mt-2 sm:mt-4 font-mono text-xs" variant="secondary">
-                          {((count / total) * 100).toFixed(1)}%
-                        </Badge>
+                        <Icon className="w-5 h-5 sm:w-8 sm:h-8 text-primary mb-1 sm:mb-2" />
+                        <p className="text-lg sm:text-2xl font-bold">{count}</p>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground">{name}</p>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground font-mono mt-0.5">
+                          {((count / total) * 100).toFixed(0)}%
+                        </p>
                       </div>
                     </CardContent>
                   </Card>

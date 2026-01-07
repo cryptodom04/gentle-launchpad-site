@@ -252,58 +252,58 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Activity className="w-5 h-5 text-primary-foreground" />
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-xl font-bold gradient-text">SolFerno Analytics</h1>
-                <p className="text-xs text-muted-foreground">Real-time visitor tracking</p>
+                <h1 className="text-base sm:text-xl font-bold gradient-text">SolFerno Analytics</h1>
+                <p className="text-[10px] sm:text-xs text-muted-foreground hidden xs:block">Real-time visitor tracking</p>
               </div>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3">
               <Button 
                 onClick={fetchVisits} 
                 disabled={loading}
                 variant="outline"
                 size="sm"
-                className="border-border/50 hover:bg-secondary/50"
+                className="border-border/50 hover:bg-secondary/50 h-8 sm:h-9 px-2 sm:px-3"
               >
-                <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">Обновить</span>
+                <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${loading ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline ml-2">Обновить</span>
               </Button>
               
               <Button 
                 onClick={handleLogout}
                 variant="ghost"
                 size="sm"
-                className="text-muted-foreground hover:text-destructive"
+                className="text-muted-foreground hover:text-destructive h-8 sm:h-9 px-2"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
           <Card className="glass border-border/30 hover:border-primary/30 transition-colors group">
-            <CardContent className="p-5">
+            <CardContent className="p-3 sm:p-5">
               <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground font-medium">Всего визитов</p>
-                  <p className="text-3xl font-bold mt-1 gradient-text">{stats.totalVisits}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground font-medium truncate">Всего визитов</p>
+                  <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1 gradient-text">{stats.totalVisits}</p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                  <Eye className="w-5 h-5 text-primary" />
+                <div className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors flex-shrink-0">
+                  <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
+              <div className="hidden sm:flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
                 <TrendingUp className="w-3.5 h-3.5 text-accent" />
                 <span>Последние 500 записей</span>
               </div>
@@ -311,17 +311,17 @@ const Dashboard = () => {
           </Card>
           
           <Card className="glass border-border/30 hover:border-accent/30 transition-colors group">
-            <CardContent className="p-5">
+            <CardContent className="p-3 sm:p-5">
               <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground font-medium">Уникальных IP</p>
-                  <p className="text-3xl font-bold mt-1">{stats.uniqueIPs}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground font-medium truncate">Уникальных IP</p>
+                  <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">{stats.uniqueIPs}</p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-accent/10 group-hover:bg-accent/20 transition-colors">
-                  <Users className="w-5 h-5 text-accent" />
+                <div className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-accent/10 group-hover:bg-accent/20 transition-colors flex-shrink-0">
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
+              <div className="hidden sm:flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
                 <Activity className="w-3.5 h-3.5 text-accent" />
                 <span>Уникальные посетители</span>
               </div>
@@ -329,17 +329,17 @@ const Dashboard = () => {
           </Card>
           
           <Card className="glass border-border/30 hover:border-primary/30 transition-colors group">
-            <CardContent className="p-5">
+            <CardContent className="p-3 sm:p-5">
               <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground font-medium">Сегодня</p>
-                  <p className="text-3xl font-bold mt-1">{stats.todayVisits}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground font-medium">Сегодня</p>
+                  <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">{stats.todayVisits}</p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                  <Clock className="w-5 h-5 text-primary" />
+                <div className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors flex-shrink-0">
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
+              <div className="hidden sm:flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
                 <TrendingUp className="w-3.5 h-3.5 text-accent" />
                 <span>За текущий день</span>
               </div>
@@ -347,17 +347,17 @@ const Dashboard = () => {
           </Card>
           
           <Card className="glass border-border/30 hover:border-accent/30 transition-colors group">
-            <CardContent className="p-5">
+            <CardContent className="p-3 sm:p-5">
               <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground font-medium">Стран</p>
-                  <p className="text-3xl font-bold mt-1">{stats.countries}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground font-medium">Стран</p>
+                  <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">{stats.countries}</p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-accent/10 group-hover:bg-accent/20 transition-colors">
-                  <Globe className="w-5 h-5 text-accent" />
+                <div className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-accent/10 group-hover:bg-accent/20 transition-colors flex-shrink-0">
+                  <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
+              <div className="hidden sm:flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
                 <MapPin className="w-3.5 h-3.5 text-accent" />
                 <span>География аудитории</span>
               </div>
@@ -366,54 +366,58 @@ const Dashboard = () => {
         </div>
 
         {/* Tabs Section */}
-        <Tabs defaultValue="chart" className="space-y-4">
-          <ScrollArea className="w-full">
-            <TabsList className="bg-secondary/50 border border-border/30 p-1 h-auto inline-flex w-auto min-w-full sm:w-full">
+        <Tabs defaultValue="chart" className="space-y-3 sm:space-y-4">
+          <ScrollArea className="w-full pb-1">
+            <TabsList className="bg-secondary/50 border border-border/30 p-0.5 sm:p-1 h-auto inline-flex w-auto min-w-full sm:w-full">
               <TabsTrigger 
                 value="chart" 
-                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-2 text-xs sm:text-sm"
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm gap-1 sm:gap-2"
               >
-                <BarChart3 className="w-4 h-4 mr-1 sm:mr-2" />
-                <span>Статистика</span>
+                <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline">Статистика</span>
+                <span className="xs:hidden">Стат</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="deposits" 
-                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-2 text-xs sm:text-sm"
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm gap-1 sm:gap-2"
               >
-                <Wallet className="w-4 h-4 mr-1 sm:mr-2" />
-                <span>Депозиты</span>
+                <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline">Депозиты</span>
+                <span className="xs:hidden">Деп</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="visits" 
-                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-2 text-xs sm:text-sm"
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm gap-1 sm:gap-2"
               >
-                <Activity className="w-4 h-4 mr-1 sm:mr-2" />
+                <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span>Логи</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="countries"
-                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-2 text-xs sm:text-sm"
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm gap-1 sm:gap-2"
               >
-                <Globe className="w-4 h-4 mr-1 sm:mr-2" />
-                <span>Страны</span>
+                <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline">Страны</span>
+                <span className="xs:hidden">🌍</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="devices"
-                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-2 text-xs sm:text-sm"
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm gap-1 sm:gap-2"
               >
-                <Monitor className="w-4 h-4 mr-1 sm:mr-2" />
-                <span>Устройства</span>
+                <Monitor className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline">Устройства</span>
+                <span className="xs:hidden">📱</span>
               </TabsTrigger>
             </TabsList>
           </ScrollArea>
 
           {/* Chart Tab */}
-          <TabsContent value="chart" className="mt-4">
+          <TabsContent value="chart" className="mt-3 sm:mt-4">
             <VisitsChart />
           </TabsContent>
 
           {/* Deposits Tab */}
-          <TabsContent value="deposits" className="mt-4">
+          <TabsContent value="deposits" className="mt-3 sm:mt-4">
             <DepositsChart />
           </TabsContent>
 

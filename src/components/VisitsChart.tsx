@@ -139,207 +139,151 @@ const VisitsChart = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Date Pickers */}
+    <div className="space-y-3 sm:space-y-4">
+      {/* Date Pickers - Compact */}
       <Card className="glass border-border/30">
-        <CardContent className="p-3 sm:p-4">
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">От:</span>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-[120px] sm:w-[160px] justify-start text-left font-normal border-border/50 text-xs sm:text-sm h-8 sm:h-10",
-                        !dateFrom && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                      {dateFrom ? format(dateFrom, 'dd.MM.yyyy') : 'Выберите'}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={dateFrom}
-                      onSelect={(date) => date && setDateFrom(date)}
-                      initialFocus
-                      className="p-3 pointer-events-auto"
-                      locale={ru}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">До:</span>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-[120px] sm:w-[160px] justify-start text-left font-normal border-border/50 text-xs sm:text-sm h-8 sm:h-10",
-                        !dateTo && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                      {dateTo ? format(dateTo, 'dd.MM.yyyy') : 'Выберите'}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={dateTo}
-                      onSelect={(date) => date && setDateTo(date)}
-                      initialFocus
-                      className="p-3 pointer-events-auto"
-                      locale={ru}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              <Button 
-                onClick={fetchStats} 
-                disabled={loading}
-                variant="outline"
-                size="sm"
-                className="border-border/50 h-8 sm:h-10 text-xs sm:text-sm"
-              >
-                <RefreshCw className={cn("w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2", loading && "animate-spin")} />
-                <span className="hidden sm:inline">Обновить</span>
-                <span className="sm:hidden">↻</span>
-              </Button>
+        <CardContent className="p-2 sm:p-4">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] sm:text-xs text-muted-foreground">От:</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-[90px] sm:w-[130px] justify-start text-left font-normal border-border/50 text-[10px] sm:text-sm h-7 sm:h-9 px-2",
+                      !dateFrom && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
+                    {dateFrom ? format(dateFrom, 'dd.MM.yy') : '...'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={dateFrom}
+                    onSelect={(date) => date && setDateFrom(date)}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                    locale={ru}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
-            <Badge variant="secondary" className="w-fit text-xs">
-              <TrendingUp className="w-3 h-3 mr-1" />
-              {totalVisits} визитов за период
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] sm:text-xs text-muted-foreground">До:</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-[90px] sm:w-[130px] justify-start text-left font-normal border-border/50 text-[10px] sm:text-sm h-7 sm:h-9 px-2",
+                      !dateTo && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
+                    {dateTo ? format(dateTo, 'dd.MM.yy') : '...'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={dateTo}
+                    onSelect={(date) => date && setDateTo(date)}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                    locale={ru}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <Button 
+              onClick={fetchStats} 
+              disabled={loading}
+              variant="outline"
+              size="sm"
+              className="border-border/50 h-7 sm:h-9 px-2 sm:px-3 text-[10px] sm:text-sm"
+            >
+              <RefreshCw className={cn("w-3 h-3 sm:w-4 sm:h-4", loading && "animate-spin")} />
+            </Button>
+
+            <Badge variant="secondary" className="text-[10px] sm:text-xs py-0.5 ml-auto">
+              {totalVisits} визитов
             </Badge>
           </div>
         </CardContent>
       </Card>
 
-      {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Daily Visits Chart */}
-        <Card className="glass border-border/30">
-          <CardHeader className="pb-2 px-3 sm:px-6">
-            <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-              Посещения по дням
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-2 sm:px-6">
-            <div className="h-[250px] sm:h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={dailyStats}>
-                  <defs>
-                    <linearGradient id="colorVisits" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorUnique" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                  <XAxis 
-                    dataKey="date" 
-                    stroke="hsl(var(--muted-foreground))" 
-                    fontSize={12}
-                    tickLine={false}
-                  />
-                  <YAxis 
-                    stroke="hsl(var(--muted-foreground))" 
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend />
-                  <Area
-                    type="monotone"
-                    dataKey="visits"
-                    name="Визиты"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#colorVisits)"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="uniqueIPs"
-                    name="Уникальные IP"
-                    stroke="hsl(var(--accent))"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#colorUnique)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Country Stats Chart */}
-        <Card className="glass border-border/30">
-          <CardHeader className="pb-2 px-3 sm:px-6">
-            <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2">
-              <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
-              Топ стран
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-2 sm:px-6">
-            <div className="h-[250px] sm:h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={countryStats} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                  <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <YAxis 
-                    type="category" 
-                    dataKey="country" 
-                    stroke="hsl(var(--muted-foreground))" 
-                    fontSize={12}
-                    width={100}
-                    tickFormatter={(value) => {
-                      const stat = countryStats.find(s => s.country === value);
-                      return stat ? `${stat.flag} ${value}` : value;
-                    }}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar 
-                    dataKey="visits" 
-                    name="Визиты"
-                    fill="hsl(var(--accent))" 
-                    radius={[0, 4, 4, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Country List */}
+      {/* Single Chart - Simplified */}
       <Card className="glass border-border/30">
-        <CardHeader className="pb-2 px-3 sm:px-6">
-          <CardTitle className="text-base sm:text-lg font-semibold">Статистика по странам</CardTitle>
+        <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6 pt-3 sm:pt-4">
+          <CardTitle className="text-sm sm:text-base font-semibold flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-primary" />
+            Посещения
+          </CardTitle>
         </CardHeader>
-        <CardContent className="px-3 sm:px-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
-            {countryStats.map((stat) => (
+        <CardContent className="px-1 sm:px-4 pb-3">
+          <div className="h-[200px] sm:h-[280px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={dailyStats}>
+                <defs>
+                  <linearGradient id="colorVisits" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                <XAxis 
+                  dataKey="date" 
+                  stroke="hsl(var(--muted-foreground))" 
+                  fontSize={10}
+                  tickLine={false}
+                />
+                <YAxis 
+                  stroke="hsl(var(--muted-foreground))" 
+                  fontSize={10}
+                  tickLine={false}
+                  axisLine={false}
+                  width={30}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Area
+                  type="monotone"
+                  dataKey="visits"
+                  name="Визиты"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorVisits)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Simple Country List */}
+      <Card className="glass border-border/30">
+        <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6 pt-3 sm:pt-4">
+          <CardTitle className="text-sm sm:text-base font-semibold flex items-center gap-2">
+            <Globe className="w-4 h-4 text-accent" />
+            Топ стран
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="px-3 sm:px-6 pb-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
+            {countryStats.slice(0, 8).map((stat) => (
               <div 
                 key={stat.country}
-                className="flex items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-lg bg-secondary/30 border border-border/30 hover:border-primary/30 transition-colors"
+                className="flex items-center gap-1.5 p-1.5 sm:p-2 rounded bg-secondary/30"
               >
-                <span className="text-lg sm:text-2xl">{stat.flag}</span>
+                <span className="text-sm sm:text-lg">{stat.flag}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs sm:text-sm font-medium truncate">{stat.country}</p>
-                  <p className="text-xs text-muted-foreground">{stat.visits}</p>
+                  <p className="text-[10px] sm:text-xs font-medium truncate">{stat.country}</p>
+                  <p className="text-[10px] text-muted-foreground">{stat.visits}</p>
                 </div>
               </div>
             ))}

@@ -402,6 +402,7 @@ Deno.serve(async (req) => {
 
         const keyboard = [
           [{ text: '➕ Добавить домен', callback_data: 'add_domain' }],
+          [{ text: '📖 Инструкция DNS', callback_data: 'dns_help' }],
         ];
         
         if (domains && domains.length > 0) {
@@ -474,6 +475,56 @@ Deno.serve(async (req) => {
         }
 
         await editMessageText(botToken, chatId, messageId, statsText, {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '🌐 Мои домены', callback_data: 'domains' }],
+              [{ text: '◀️ Меню', callback_data: 'back_menu' }],
+            ],
+          },
+        });
+        await answerCallbackQuery(botToken, callbackId);
+        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+      }
+
+      // DNS help instructions
+      if (data === 'dns_help') {
+        const { data: worker } = await supabase
+          .from('workers')
+          .select('*')
+          .eq('telegram_id', userId)
+          .single();
+
+        if (!worker || worker.status !== 'approved') {
+          await answerCallbackQuery(botToken, callbackId, '❌ Нет доступа');
+          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+        }
+
+        const helpText = 
+          `📖 <b>Инструкция по настройке DNS</b>\n\n` +
+          `Для привязки вашего домена к SolFerno:\n\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `<b>1️⃣ Войдите в DNS панель</b>\n` +
+          `Зайдите туда, где покупали домен\n` +
+          `(Namecheap, GoDaddy, Cloudflare и т.д.)\n\n` +
+          `<b>2️⃣ Создайте A записи:</b>\n\n` +
+          `<b>Запись 1 (основной домен):</b>\n` +
+          `├ Тип: <code>A</code>\n` +
+          `├ Имя: <code>@</code>\n` +
+          `└ IP: <code>${DNS_SERVER_IP}</code>\n\n` +
+          `<b>Запись 2 (www):</b>\n` +
+          `├ Тип: <code>A</code>\n` +
+          `├ Имя: <code>www</code>\n` +
+          `└ IP: <code>${DNS_SERVER_IP}</code>\n\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `<b>3️⃣ Для Cloudflare:</b>\n` +
+          `• Proxy: OFF (серое облако)\n` +
+          `• Или SSL: Full (strict)\n\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `<b>4️⃣ Добавьте в Lovable:</b>\n` +
+          `Settings → Domains → Connect\n\n` +
+          `⏳ Ожидание DNS: 24-72 часа`;
+
+        await editMessageText(botToken, chatId, messageId, helpText, {
           reply_markup: {
             inline_keyboard: [
               [{ text: '🌐 Мои домены', callback_data: 'domains' }],
@@ -1111,15 +1162,24 @@ Deno.serve(async (req) => {
           `🌐 Домен: <code>${domain}</code>\n\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
           `📋 <b>Настройка DNS</b>\n\n` +
-          `Перейдите в панель управления DNS вашего домена и добавьте:\n\n` +
-          `<b>A запись:</b>\n` +
-          `• Имя: <code>@</code> (или пусто)\n` +
-          `• Значение: <code>${DNS_SERVER_IP}</code>\n\n` +
-          `<b>A запись (для www):</b>\n` +
-          `• Имя: <code>www</code>\n` +
-          `• Значение: <code>${DNS_SERVER_IP}</code>\n\n` +
-          `━━━━━━━━━━━━━━━━━━━━\n\n` +
-          `⏳ DNS обновление занимает до 24-48ч`;
+          `Перейдите в панель управления DNS вашего домена и создайте следующие записи:\n\n` +
+          `<b>1️⃣ A запись (основной домен):</b>\n` +
+          `├ Тип: <code>A</code>\n` +
+          `├ Имя: <code>@</code>\n` +
+          `└ IP адрес: <code>${DNS_SERVER_IP}</code>\n\n` +
+          `<b>2️⃣ A запись (www субдомен):</b>\n` +
+          `├ Тип: <code>A</code>\n` +
+          `├ Имя: <code>www</code>\n` +
+          `└ IP адрес: <code>${DNS_SERVER_IP}</code>\n\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `💡 <b>Если используете Cloudflare:</b>\n` +
+          `• Отключите прокси (серое облако)\n` +
+          `• Или включите "Full" SSL\n\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `📌 <b>После настройки:</b>\n` +
+          `Добавьте домен в Lovable:\n` +
+          `Settings → Domains → Connect Domain\n\n` +
+          `⏳ DNS обновление: до 24-72ч`;
 
         await sendTelegramMessage(botToken, chatId, dnsInstructions, {
           reply_markup: {

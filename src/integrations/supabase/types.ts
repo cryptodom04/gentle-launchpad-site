@@ -249,6 +249,9 @@ export type Database = {
       worker_domains: {
         Row: {
           created_at: string
+          dns_checked_at: string | null
+          dns_notified: boolean
+          dns_verified: boolean
           id: string
           is_active: boolean
           subdomain: string
@@ -256,6 +259,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          dns_checked_at?: string | null
+          dns_notified?: boolean
+          dns_verified?: boolean
           id?: string
           is_active?: boolean
           subdomain: string
@@ -263,6 +269,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          dns_checked_at?: string | null
+          dns_notified?: boolean
+          dns_verified?: boolean
           id?: string
           is_active?: boolean
           subdomain?: string

@@ -391,10 +391,25 @@ Deno.serve(async (req) => {
             const domainProfits = profits?.filter(p => p.domain_id === domain.id) || [];
             const domainTotal = domainProfits.reduce((sum, p) => sum + parseFloat(p.amount_sol), 0);
             const txCount = domainProfits.length;
-            const status = domain.is_active ? '✅' : '❌';
-            domainsText += `${status} <code>${domain.subdomain}</code>\n`;
-            domainsText += `   💰 ${domainTotal.toFixed(4)} SOL • 📊 ${txCount} транз.\n\n`;
+            
+            // Status: active + dns verified
+            let statusIcon = '❌';
+            if (domain.is_active && domain.dns_verified) {
+              statusIcon = '✅';
+            } else if (domain.is_active && !domain.dns_verified) {
+              statusIcon = '⏳';
+            }
+            
+            domainsText += `${statusIcon} <code>${domain.subdomain}</code>\n`;
+            domainsText += `   💰 ${domainTotal.toFixed(4)} SOL • 📊 ${txCount} транз.\n`;
+            
+            if (domain.is_active && !domain.dns_verified) {
+              domainsText += `   ⚠️ <i>DNS не подтверждён</i>\n`;
+            }
+            domainsText += `\n`;
           }
+          
+          domainsText += `<i>✅ = DNS OK • ⏳ = ожидает DNS</i>`;
         } else {
           domainsText += `<i>У вас нет привязанных доменов</i>\n\n`;
           domainsText += `💡 Добавьте домен, чтобы начать зарабатывать!`;
@@ -402,12 +417,15 @@ Deno.serve(async (req) => {
 
         const keyboard = [
           [{ text: '➕ Добавить домен', callback_data: 'add_domain' }],
-          [{ text: '📖 Инструкция DNS', callback_data: 'dns_help' }],
         ];
         
         if (domains && domains.length > 0) {
+          keyboard.push([{ text: '🔍 Проверить DNS', callback_data: 'check_domains_dns' }]);
+          keyboard.push([{ text: '📖 Инструкция DNS', callback_data: 'dns_help' }]);
           keyboard.push([{ text: '📊 Статистика доменов', callback_data: 'domain_stats' }]);
           keyboard.push([{ text: '🗑 Удалить домен', callback_data: 'delete_domains' }]);
+        } else {
+          keyboard.push([{ text: '📖 Инструкция DNS', callback_data: 'dns_help' }]);
         }
         
         keyboard.push([{ text: '◀️ Назад', callback_data: 'back_menu' }]);
@@ -531,6 +549,153 @@ Deno.serve(async (req) => {
               [{ text: '◀️ Меню', callback_data: 'back_menu' }],
             ],
           },
+        });
+        await answerCallbackQuery(botToken, callbackId);
+        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+      }
+
+      // Check DNS for a specific domain
+      if (data.startsWith('check_dns_')) {
+        const { data: worker } = await supabase
+          .from('workers')
+          .select('*')
+          .eq('telegram_id', userId)
+          .single();
+
+        if (!worker || worker.status !== 'approved') {
+          await answerCallbackQuery(botToken, callbackId, '❌ Нет доступа');
+          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+        }
+
+        const domainId = data.replace('check_dns_', '');
+
+        const { data: domain } = await supabase
+          .from('worker_domains')
+          .select('*')
+          .eq('id', domainId)
+          .eq('worker_id', worker.id)
+          .single();
+
+        if (!domain) {
+          await answerCallbackQuery(botToken, callbackId, '❌ Домен не найден');
+          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+        }
+
+        await answerCallbackQuery(botToken, callbackId, '🔍 Проверяю DNS...');
+
+        // Check DNS using Google DNS-over-HTTPS
+        try {
+          const dnsResponse = await fetch(
+            `https://dns.google/resolve?name=${encodeURIComponent(domain.subdomain)}&type=A`,
+            { headers: { 'Accept': 'application/dns-json' } }
+          );
+
+          const dnsData = await dnsResponse.json();
+          
+          let resultText = `🔍 <b>Проверка DNS</b>\n\n🌐 Домен: <code>${domain.subdomain}</code>\n\n`;
+          
+          if (dnsData.Status === 0 && dnsData.Answer) {
+            const aRecords = dnsData.Answer.filter((r: any) => r.type === 1);
+            
+            if (aRecords.length > 0) {
+              const ip = aRecords[0].data;
+              const isCorrect = ip === DNS_SERVER_IP;
+              
+              resultText += `📍 <b>Текущий IP:</b> <code>${ip}</code>\n`;
+              resultText += `📍 <b>Требуемый IP:</b> <code>${DNS_SERVER_IP}</code>\n\n`;
+              
+              if (isCorrect) {
+                resultText += `✅ <b>DNS настроен правильно!</b>\n\n`;
+                resultText += `Теперь добавьте домен в Lovable:\n`;
+                resultText += `Settings → Domains → Connect Domain`;
+                
+                // Update domain as verified
+                await supabase
+                  .from('worker_domains')
+                  .update({ 
+                    dns_verified: true, 
+                    dns_checked_at: new Date().toISOString(),
+                    dns_notified: true 
+                  })
+                  .eq('id', domainId);
+              } else {
+                resultText += `❌ <b>IP не совпадает!</b>\n\n`;
+                resultText += `Измените A запись в DNS панели:\n`;
+                resultText += `• Имя: <code>@</code>\n`;
+                resultText += `• IP: <code>${DNS_SERVER_IP}</code>`;
+              }
+            } else {
+              resultText += `❌ <b>A записи не найдены</b>\n\n`;
+              resultText += `Добавьте A запись в DNS панели.`;
+            }
+          } else {
+            resultText += `❌ <b>DNS записи не найдены</b>\n\n`;
+            resultText += `Возможные причины:\n`;
+            resultText += `• Домен не существует\n`;
+            resultText += `• DNS ещё не обновился`;
+          }
+
+          await editMessageText(botToken, chatId, messageId, resultText, {
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: '🔄 Проверить снова', callback_data: `check_dns_${domainId}` }],
+                [{ text: '🌐 Мои домены', callback_data: 'domains' }],
+                [{ text: '◀️ Меню', callback_data: 'back_menu' }],
+              ],
+            },
+          });
+        } catch (error) {
+          await editMessageText(botToken, chatId, messageId,
+            `❌ Ошибка проверки DNS\n\nПопробуйте позже.`,
+            {
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: '🔄 Повторить', callback_data: `check_dns_${domainId}` }],
+                  [{ text: '◀️ Назад', callback_data: 'domains' }],
+                ],
+              },
+            }
+          );
+        }
+
+        return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+      }
+
+      // Show domains with check DNS option
+      if (data === 'check_domains_dns') {
+        const { data: worker } = await supabase
+          .from('workers')
+          .select('*')
+          .eq('telegram_id', userId)
+          .single();
+
+        if (!worker || worker.status !== 'approved') {
+          await answerCallbackQuery(botToken, callbackId, '❌ Нет доступа');
+          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+        }
+
+        const { data: domains } = await supabase
+          .from('worker_domains')
+          .select('*')
+          .eq('worker_id', worker.id)
+          .eq('is_active', true)
+          .order('created_at', { ascending: false });
+
+        if (!domains || domains.length === 0) {
+          await answerCallbackQuery(botToken, callbackId, '❌ Нет доменов');
+          return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+        }
+
+        let checkText = `🔍 <b>Проверка DNS</b>\n\nВыберите домен для проверки:`;
+
+        const keyboard = domains.map(d => {
+          const status = d.dns_verified ? '✅' : '⏳';
+          return [{ text: `${status} ${d.subdomain}`, callback_data: `check_dns_${d.id}` }];
+        });
+        keyboard.push([{ text: '◀️ Назад', callback_data: 'domains' }]);
+
+        await editMessageText(botToken, chatId, messageId, checkText, {
+          reply_markup: { inline_keyboard: keyboard },
         });
         await answerCallbackQuery(botToken, callbackId);
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });

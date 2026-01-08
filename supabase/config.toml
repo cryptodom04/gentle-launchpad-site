@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.track-visit]
 verify_jwt = false
+
+[functions.check-dns]
+verify_jwt = false

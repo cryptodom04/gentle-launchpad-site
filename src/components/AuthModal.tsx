@@ -35,14 +35,14 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'login' }: AuthModalProps) =
         const { error } = await signIn(email, password);
         if (error) {
           toast({
-            title: 'Ошибка входа',
+            title: 'Login Error',
             description: error.message,
             variant: 'destructive',
           });
         } else {
           toast({
-            title: 'Успешный вход',
-            description: 'Добро пожаловать!',
+            title: 'Login Successful',
+            description: 'Welcome back!',
           });
           onClose();
           resetForm();
@@ -51,14 +51,14 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'login' }: AuthModalProps) =
         const { error } = await signUp(email, password);
         if (error) {
           toast({
-            title: 'Ошибка регистрации',
+            title: 'Registration Error',
             description: error.message,
             variant: 'destructive',
           });
         } else {
           toast({
-            title: 'Регистрация успешна',
-            description: 'Аккаунт создан!',
+            title: 'Registration Successful',
+            description: 'Account created!',
           });
           onClose();
           resetForm();
@@ -83,8 +83,8 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'login' }: AuthModalProps) =
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md glass-strong border-border/50">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center">
-            {mode === 'login' ? 'Вход' : 'Регистрация'}
+        <DialogTitle className="text-2xl font-bold text-center">
+            {mode === 'login' ? 'Login' : 'Sign Up'}
           </DialogTitle>
         </DialogHeader>
 
@@ -109,7 +109,7 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'login' }: AuthModalProps) =
 
           <div className="space-y-2">
             <Label htmlFor="password" className="text-sm font-medium">
-              Пароль
+              Password
             </Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -138,7 +138,7 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'login' }: AuthModalProps) =
             ) : (
               <UserPlus className="w-4 h-4 mr-2" />
             )}
-            {mode === 'login' ? 'Войти' : 'Создать аккаунт'}
+            {mode === 'login' ? 'Login' : 'Create Account'}
           </Button>
         </form>
 
@@ -150,13 +150,13 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'login' }: AuthModalProps) =
           >
             {mode === 'login' ? (
               <>
-                Нет аккаунта?{' '}
-                <span className="text-primary font-medium">Зарегистрироваться</span>
+                Don't have an account?{' '}
+                <span className="text-primary font-medium">Sign Up</span>
               </>
             ) : (
               <>
-                Уже есть аккаунт?{' '}
-                <span className="text-primary font-medium">Войти</span>
+                Already have an account?{' '}
+                <span className="text-primary font-medium">Login</span>
               </>
             )}
           </button>

@@ -136,7 +136,7 @@ const Header = () => {
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl glass hover:bg-secondary/80 transition-colors text-sm font-medium text-muted-foreground hover:text-foreground"
                 >
                   <LogOut className="w-4 h-4" />
-                  Выйти
+                  Logout
                 </button>
               ) : (
                 <button
@@ -144,7 +144,7 @@ const Header = () => {
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary via-pink-500 to-accent hover:opacity-90 transition-all text-sm font-medium text-white"
                 >
                   <LogIn className="w-4 h-4" />
-                  Войти
+                  Login
                 </button>
               )}
             </nav>

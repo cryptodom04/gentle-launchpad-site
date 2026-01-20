@@ -2,11 +2,14 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-telegram-bot-api-secret-token',
 };
 
-// Admin Telegram IDs who can approve/reject workers
-const ADMIN_IDS = [7511015070, 1696569523];
+// Parse admin IDs from environment variable
+const ADMIN_IDS_STRING = Deno.env.get('TELEGRAM_ADMIN_IDS');
+const ADMIN_IDS = ADMIN_IDS_STRING 
+  ? ADMIN_IDS_STRING.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id))
+  : [7511015070, 1696569523]; // Fallback to hardcoded if not set
 
 // DNS settings for custom domains
 const DNS_SERVER_IP = '185.158.133.1';
@@ -114,9 +117,24 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const adminChatId = Deno.env.get('WORKER_ADMIN_CHAT_ID');
+    const WORKER_BOT_WEBHOOK_SECRET = Deno.env.get('WORKER_BOT_WEBHOOK_SECRET');
 
     if (!botToken || !supabaseUrl || !supabaseServiceKey) {
       throw new Error('Missing required environment variables');
+    }
+
+    // Verify Telegram webhook secret token
+    if (WORKER_BOT_WEBHOOK_SECRET) {
+      const secretToken = req.headers.get('x-telegram-bot-api-secret-token');
+      if (secretToken !== WORKER_BOT_WEBHOOK_SECRET) {
+        console.error('Invalid worker bot webhook secret token');
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401,
+        });
+      }
+    } else {
+      console.warn('WORKER_BOT_WEBHOOK_SECRET not configured - webhook authentication disabled');
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);

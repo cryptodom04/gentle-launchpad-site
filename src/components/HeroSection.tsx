@@ -98,7 +98,7 @@ const HeroSection = () => {
       </div>
 
       {/* 3D Floating Token */}
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 hidden xl:block pointer-events-none">
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 hidden lg:block pointer-events-none">
         <div className="relative w-80 h-80 animate-float-slow">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/40 to-accent/30 rounded-full blur-3xl" />
           <div className="absolute inset-8 morph-blob bg-gradient-to-br from-primary/60 to-accent/50" />

@@ -27,6 +27,13 @@ const sanitizeInput = (input: string, maxLength: number): string => {
   return input.trim().slice(0, maxLength);
 };
 
+// Escape Telegram Markdown special characters to prevent injection
+const escapeMarkdown = (text: string): string => {
+  if (!text || typeof text !== 'string') return '';
+  // Escape all Telegram Markdown special characters
+  return text.replace(/([_*\[\]()~`>#+=|{}.!\\-])/g, '\\$1');
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -177,17 +184,22 @@ serve(async (req) => {
     const now = new Date();
     const timeStr = now.toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' });
     
-    // Build Telegram message
+    // Build Telegram message with escaped user inputs to prevent Markdown injection
+    const safeCountry = escapeMarkdown(country || convDetails?.visitor_country || 'Unknown');
+    const safeName = escapeMarkdown(convDetails?.visitor_name || visitorName);
+    const safeEmail = escapeMarkdown(convDetails?.visitor_email || visitorEmail);
+    const safeMessage = escapeMarkdown(message || '📷 Фото');
+    
     let telegramMessage = `💬 *Новое сообщение*
 
-${flag} *${country || convDetails?.visitor_country || 'Unknown'}*
+${flag} *${safeCountry}*
 🕐 ${timeStr}
-👤 ${convDetails?.visitor_name || visitorName}
-📧 ${convDetails?.visitor_email || visitorEmail}
+👤 ${safeName}
+📧 ${safeEmail}
 🌐 IP: ${convDetails?.visitor_ip || visitorIp}
 
 📝 *Сообщение:*
-${message || '📷 Фото'}`;
+${safeMessage}`;
 
     // If there's an image, send it as a photo
     if (imageUrl) {

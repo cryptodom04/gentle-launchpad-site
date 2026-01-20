@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.check-dns]
 verify_jwt = false
+
+[functions.chat-upload-image]
+verify_jwt = false

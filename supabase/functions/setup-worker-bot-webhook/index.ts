@@ -11,6 +11,7 @@ Deno.serve(async (req) => {
   try {
     const botToken = Deno.env.get('WORKER_BOT_TOKEN');
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const WORKER_BOT_WEBHOOK_SECRET = Deno.env.get('WORKER_BOT_WEBHOOK_SECRET');
 
     if (!botToken) {
       throw new Error('WORKER_BOT_TOKEN is not set');
@@ -32,16 +33,27 @@ Deno.serve(async (req) => {
     const deleteResult = await deleteResponse.json();
     console.log('Delete webhook result:', deleteResult);
 
+    // Build webhook configuration
+    const webhookConfig: Record<string, any> = {
+      url: webhookUrl,
+      allowed_updates: ['message', 'callback_query'],
+    };
+
+    // Add secret_token if configured for secure webhook verification
+    if (WORKER_BOT_WEBHOOK_SECRET) {
+      webhookConfig.secret_token = WORKER_BOT_WEBHOOK_SECRET;
+      console.log('Setting webhook with secret token authentication');
+    } else {
+      console.warn('WORKER_BOT_WEBHOOK_SECRET not set - webhook will accept unauthenticated requests');
+    }
+
     // Set new webhook
     const setResponse = await fetch(
       `https://api.telegram.org/bot${botToken}/setWebhook`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          url: webhookUrl,
-          allowed_updates: ['message', 'callback_query'],
-        }),
+        body: JSON.stringify(webhookConfig),
       }
     );
     const setResult = await setResponse.json();
@@ -60,6 +72,7 @@ Deno.serve(async (req) => {
         delete: deleteResult,
         set: setResult,
         info: infoResult,
+        secretConfigured: !!WORKER_BOT_WEBHOOK_SECRET,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

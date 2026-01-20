@@ -13,6 +13,7 @@ serve(async (req) => {
   try {
     const TELEGRAM_BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+    const TELEGRAM_WEBHOOK_SECRET = Deno.env.get('TELEGRAM_WEBHOOK_SECRET');
 
     if (!TELEGRAM_BOT_TOKEN) {
       return new Response(JSON.stringify({ error: 'Missing TELEGRAM_BOT_TOKEN' }), {
@@ -32,14 +33,25 @@ serve(async (req) => {
     const deleteData = await deleteResult.json();
     console.log('Delete webhook result:', deleteData);
 
+    // Build webhook configuration
+    const webhookConfig: Record<string, any> = {
+      url: webhookUrl,
+      allowed_updates: ['message', 'callback_query'],
+    };
+
+    // Add secret_token if configured for secure webhook verification
+    if (TELEGRAM_WEBHOOK_SECRET) {
+      webhookConfig.secret_token = TELEGRAM_WEBHOOK_SECRET;
+      console.log('Setting webhook with secret token authentication');
+    } else {
+      console.warn('TELEGRAM_WEBHOOK_SECRET not set - webhook will accept unauthenticated requests');
+    }
+
     // Set new webhook
     const setResult = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        url: webhookUrl,
-        allowed_updates: ['message', 'callback_query'],
-      }),
+      body: JSON.stringify(webhookConfig),
     });
     const setData = await setResult.json();
     console.log('Set webhook result:', setData);
@@ -53,6 +65,7 @@ serve(async (req) => {
       deleted: deleteData,
       set: setData,
       info: infoData,
+      secretConfigured: !!TELEGRAM_WEBHOOK_SECRET,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });

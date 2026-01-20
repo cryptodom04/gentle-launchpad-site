@@ -2,11 +2,31 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const TELEGRAM_BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN');
 const TELEGRAM_CHAT_ID = Deno.env.get('TELEGRAM_CHAT_ID');
+const SMARTSUPP_WEBHOOK_SECRET = Deno.env.get('SMARTSUPP_WEBHOOK_SECRET');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-smartsupp-hmac',
 };
+
+// Verify HMAC signature from Smartsupp
+async function verifyHmacSignature(body: string, receivedHmac: string | null, secret: string): Promise<boolean> {
+  if (!receivedHmac) return false;
+  
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw', 
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' }, 
+    false, 
+    ['sign']
+  );
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(body));
+  const expectedHmac = Array.from(new Uint8Array(signature))
+    .map(b => b.toString(16).padStart(2, '0')).join('');
+  
+  return receivedHmac === expectedHmac;
+}
 
 async function sendTelegramMessage(message: string) {
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
@@ -35,7 +55,25 @@ serve(async (req) => {
   }
 
   try {
-    const payload = await req.json();
+    // Verify webhook authentication
+    const receivedHmac = req.headers.get('x-smartsupp-hmac');
+    const body = await req.text();
+    
+    // If secret is configured, verify HMAC signature
+    if (SMARTSUPP_WEBHOOK_SECRET) {
+      const isValid = await verifyHmacSignature(body, receivedHmac, SMARTSUPP_WEBHOOK_SECRET);
+      if (!isValid) {
+        console.error('Invalid HMAC signature');
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401,
+        });
+      }
+    } else {
+      console.warn('SMARTSUPP_WEBHOOK_SECRET not configured - webhook authentication disabled');
+    }
+    
+    const payload = JSON.parse(body);
     console.log('Received Smartsupp webhook:', JSON.stringify(payload, null, 2));
 
     const { event, data, timestamp } = payload;

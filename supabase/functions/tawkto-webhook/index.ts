@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-tawkto-signature',
 };
 
 serve(async (req) => {
@@ -14,6 +14,7 @@ serve(async (req) => {
   try {
     const TELEGRAM_BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN');
     const TELEGRAM_CHAT_ID = Deno.env.get('TELEGRAM_CHAT_ID');
+    const TAWKTO_WEBHOOK_SECRET = Deno.env.get('TAWKTO_WEBHOOK_SECRET');
 
     if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
       console.error('Missing Telegram credentials');
@@ -21,6 +22,20 @@ serve(async (req) => {
         JSON.stringify({ error: 'Missing Telegram credentials' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // Verify webhook authentication using shared secret
+    const authHeader = req.headers.get('authorization') || req.headers.get('x-tawkto-signature');
+    if (TAWKTO_WEBHOOK_SECRET) {
+      if (authHeader !== TAWKTO_WEBHOOK_SECRET && authHeader !== `Bearer ${TAWKTO_WEBHOOK_SECRET}`) {
+        console.error('Invalid webhook authentication');
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    } else {
+      console.warn('TAWKTO_WEBHOOK_SECRET not configured - webhook authentication disabled');
     }
 
     const payload = await req.json();

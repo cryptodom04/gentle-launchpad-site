@@ -3,11 +3,14 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-telegram-bot-api-secret-token',
 };
 
-// Admin user IDs who can reply to messages
-const ADMIN_IDS = [7511015070, 1696569523];
+// Parse admin IDs from environment variable
+const ADMIN_IDS_STRING = Deno.env.get('TELEGRAM_ADMIN_IDS');
+const ADMIN_IDS = ADMIN_IDS_STRING 
+  ? ADMIN_IDS_STRING.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id))
+  : [7511015070, 1696569523]; // Fallback to hardcoded if not set
 
 const isAdmin = (userId: number): boolean => {
   return ADMIN_IDS.includes(userId);
@@ -72,10 +75,25 @@ serve(async (req) => {
     const TELEGRAM_BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const TELEGRAM_WEBHOOK_SECRET = Deno.env.get('TELEGRAM_WEBHOOK_SECRET');
 
     if (!TELEGRAM_BOT_TOKEN) {
       console.error('Missing TELEGRAM_BOT_TOKEN');
       return new Response(JSON.stringify({ error: 'Missing bot token' }), { status: 500 });
+    }
+
+    // Verify Telegram webhook secret token
+    if (TELEGRAM_WEBHOOK_SECRET) {
+      const secretToken = req.headers.get('x-telegram-bot-api-secret-token');
+      if (secretToken !== TELEGRAM_WEBHOOK_SECRET) {
+        console.error('Invalid Telegram webhook secret token');
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401,
+        });
+      }
+    } else {
+      console.warn('TELEGRAM_WEBHOOK_SECRET not configured - webhook authentication disabled');
     }
 
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);

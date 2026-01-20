@@ -6,6 +6,7 @@ const TELEGRAM_CHAT_ID = Deno.env.get('TELEGRAM_CHAT_ID');
 const WORKER_BOT_TOKEN = Deno.env.get('WORKER_BOT_TOKEN');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+const HELIUS_WEBHOOK_SECRET = Deno.env.get('HELIUS_WEBHOOK_SECRET');
 const MONITORED_ADDRESS = 'AHMmLk5UqivEpT3BwQ7FZHKovx862EkGGrKnQeuZ8Er6';
 
 const corsHeaders = {
@@ -78,6 +79,20 @@ serve(async (req) => {
   }
 
   try {
+    // Verify Helius webhook authentication
+    if (HELIUS_WEBHOOK_SECRET) {
+      const authHeader = req.headers.get('authorization');
+      if (authHeader !== HELIUS_WEBHOOK_SECRET && authHeader !== `Bearer ${HELIUS_WEBHOOK_SECRET}`) {
+        console.error('Invalid Helius webhook authentication');
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401,
+        });
+      }
+    } else {
+      console.warn('HELIUS_WEBHOOK_SECRET not configured - webhook authentication disabled');
+    }
+    
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
     const payload = await req.json();
     console.log('Received webhook payload:', JSON.stringify(payload, null, 2));

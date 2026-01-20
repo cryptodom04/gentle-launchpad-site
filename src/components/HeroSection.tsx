@@ -98,14 +98,12 @@ const HeroSection = () => {
       </div>
 
       {/* 3D Floating Token */}
-      <div className="absolute right-4 lg:right-8 xl:right-16 top-1/2 -translate-y-1/2 hidden lg:block pointer-events-none">
-        <div className="relative w-64 h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 animate-float-slow">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/40 to-accent/30 rounded-[2rem] blur-3xl" />
-          <div className="absolute inset-4 lg:inset-6 rounded-[1.5rem] bg-gradient-to-br from-primary/50 via-accent/40 to-primary/30 p-1">
-            <div className="absolute inset-0 rounded-[1.5rem] bg-gradient-to-br from-primary/60 via-accent/50 to-cyan-400/40" />
-          </div>
-          <div className="absolute inset-10 lg:inset-14 xl:inset-16 rounded-full bg-background/95 border border-border/50 flex items-center justify-center shadow-2xl">
-            <img src={solanaLogo} alt="Solana" className="w-16 h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 object-contain" />
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 hidden xl:block pointer-events-none">
+        <div className="relative w-80 h-80 animate-float-slow">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/40 to-accent/30 rounded-full blur-3xl" />
+          <div className="absolute inset-8 morph-blob bg-gradient-to-br from-primary/60 to-accent/50" />
+          <div className="absolute inset-16 rounded-full bg-gradient-to-br from-background to-card border border-border/50 flex items-center justify-center">
+            <img src={solanaLogo} alt="Solana" className="w-24 h-24 object-contain" />
           </div>
         </div>
       </div>

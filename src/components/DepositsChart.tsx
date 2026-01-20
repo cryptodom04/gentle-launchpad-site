@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -23,6 +22,7 @@ import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { CalendarIcon, TrendingUp, Wallet, RefreshCw, DollarSign, ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface DailyDeposits {
   date: string;
@@ -43,7 +43,11 @@ interface Profit {
   tx_signature: string;
 }
 
-const DepositsChart = () => {
+interface DepositsChartProps {
+  password: string;
+}
+
+const DepositsChart = ({ password }: DepositsChartProps) => {
   const [dateFrom, setDateFrom] = useState<Date>(subDays(new Date(), 7));
   const [dateTo, setDateTo] = useState<Date>(new Date());
   const [dailyStats, setDailyStats] = useState<DailyDeposits[]>([]);
@@ -58,60 +62,67 @@ const DepositsChart = () => {
   });
 
   const fetchStats = async () => {
+    if (!password) return;
+    
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('profits')
-        .select('*')
-        .gte('created_at', startOfDay(dateFrom).toISOString())
-        .lte('created_at', endOfDay(dateTo).toISOString())
-        .order('created_at', { ascending: false });
+      // Use edge function to fetch data securely
+      const response = await supabase.functions.invoke('dashboard-api', {
+        body: { password, action: 'get_profits', limit: 100 },
+      });
 
-      if (error) throw error;
+      if (response.error) throw response.error;
+      if (response.data?.error) throw new Error(response.data.error);
 
-      if (data) {
-        setRecentDeposits(data.slice(0, 50));
+      const allData = response.data?.data as Profit[] || [];
+      
+      // Filter by date range
+      const data = allData.filter((deposit: Profit) => {
+        const depositDate = new Date(deposit.created_at);
+        return depositDate >= startOfDay(dateFrom) && depositDate <= endOfDay(dateTo);
+      });
 
-        // Calculate totals
-        const totalSol = data.reduce((sum, d) => sum + Number(d.amount_sol), 0);
-        const totalUsd = data.reduce((sum, d) => sum + (Number(d.amount_usd) || 0), 0);
-        const adminShare = data.reduce((sum, d) => sum + Number(d.admin_share_sol), 0);
-        const workerShare = data.reduce((sum, d) => sum + Number(d.worker_share_sol), 0);
+      setRecentDeposits(data.slice(0, 50));
 
-        setTotals({
-          totalSol,
-          totalUsd,
-          count: data.length,
-          adminShare,
-          workerShare
-        });
+      // Calculate totals
+      const totalSol = data.reduce((sum: number, d: Profit) => sum + Number(d.amount_sol), 0);
+      const totalUsd = data.reduce((sum: number, d: Profit) => sum + (Number(d.amount_usd) || 0), 0);
+      const adminShare = data.reduce((sum: number, d: Profit) => sum + Number(d.admin_share_sol), 0);
+      const workerShare = data.reduce((sum: number, d: Profit) => sum + Number(d.worker_share_sol), 0);
 
-        // Group by date
-        const dateMap = new Map<string, DailyDeposits>();
+      setTotals({
+        totalSol,
+        totalUsd,
+        count: data.length,
+        adminShare,
+        workerShare
+      });
 
-        data.forEach(deposit => {
-          const dateKey = format(new Date(deposit.created_at), 'dd.MM');
-          
-          if (!dateMap.has(dateKey)) {
-            dateMap.set(dateKey, { 
-              date: dateKey, 
-              totalSol: 0, 
-              count: 0,
-              adminShare: 0,
-              workerShare: 0
-            });
-          }
-          const entry = dateMap.get(dateKey)!;
-          entry.totalSol += Number(deposit.amount_sol);
-          entry.adminShare += Number(deposit.admin_share_sol);
-          entry.workerShare += Number(deposit.worker_share_sol);
-          entry.count++;
-        });
+      // Group by date
+      const dateMap = new Map<string, DailyDeposits>();
 
-        // Convert to array and sort by date
-        const dailyArray = Array.from(dateMap.values()).reverse();
-        setDailyStats(dailyArray);
-      }
+      data.forEach((deposit: Profit) => {
+        const dateKey = format(new Date(deposit.created_at), 'dd.MM');
+        
+        if (!dateMap.has(dateKey)) {
+          dateMap.set(dateKey, { 
+            date: dateKey, 
+            totalSol: 0, 
+            count: 0,
+            adminShare: 0,
+            workerShare: 0
+          });
+        }
+        const entry = dateMap.get(dateKey)!;
+        entry.totalSol += Number(deposit.amount_sol);
+        entry.adminShare += Number(deposit.admin_share_sol);
+        entry.workerShare += Number(deposit.worker_share_sol);
+        entry.count++;
+      });
+
+      // Convert to array and sort by date
+      const dailyArray = Array.from(dateMap.values()).reverse();
+      setDailyStats(dailyArray);
     } catch (err) {
       console.error('Error fetching deposits:', err);
     } finally {
@@ -121,29 +132,7 @@ const DepositsChart = () => {
 
   useEffect(() => {
     fetchStats();
-  }, [dateFrom, dateTo]);
-
-  // Realtime subscription for new deposits
-  useEffect(() => {
-    const channel = supabase
-      .channel('profits_realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'profits'
-        },
-        () => {
-          fetchStats();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [dateFrom, dateTo]);
+  }, [dateFrom, dateTo, password]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -448,58 +437,48 @@ const DepositsChart = () => {
             
             {/* Desktop Table View */}
             <Table className="hidden sm:table">
-              <TableHeader className="sticky top-0 bg-card/95 backdrop-blur-sm z-10">
-                <TableRow className="border-border/30 hover:bg-transparent">
-                  <TableHead className="font-semibold text-xs md:text-sm">Дата</TableHead>
-                  <TableHead className="font-semibold text-xs md:text-sm">Сумма SOL</TableHead>
-                  <TableHead className="font-semibold hidden md:table-cell text-xs md:text-sm">Админ</TableHead>
-                  <TableHead className="font-semibold hidden md:table-cell text-xs md:text-sm">Воркер</TableHead>
-                  <TableHead className="font-semibold text-xs md:text-sm">Отправитель</TableHead>
-                  <TableHead className="font-semibold hidden lg:table-cell text-xs md:text-sm">TX</TableHead>
+              <TableHeader className="sticky top-0 bg-card/95 backdrop-blur-sm">
+                <TableRow className="border-border/30">
+                  <TableHead className="text-xs font-semibold">Время</TableHead>
+                  <TableHead className="text-xs font-semibold">Сумма SOL</TableHead>
+                  <TableHead className="text-xs font-semibold">Админ</TableHead>
+                  <TableHead className="text-xs font-semibold">Воркер</TableHead>
+                  <TableHead className="text-xs font-semibold">Отправитель</TableHead>
+                  <TableHead className="text-xs font-semibold">TX</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {recentDeposits.map((deposit) => (
-                  <TableRow 
-                    key={deposit.id} 
-                    className="border-border/20 hover:bg-secondary/30 transition-colors"
-                  >
-                    <TableCell className="text-xs md:text-sm font-mono">
+                  <TableRow key={deposit.id} className="border-border/20">
+                    <TableCell className="text-xs font-mono text-muted-foreground">
                       {formatTime(deposit.created_at)}
                     </TableCell>
+                    <TableCell className="font-bold text-primary">
+                      {Number(deposit.amount_sol).toFixed(4)}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {Number(deposit.admin_share_sol).toFixed(4)}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {Number(deposit.worker_share_sol).toFixed(4)}
+                    </TableCell>
                     <TableCell>
-                      <span className="font-bold text-primary text-xs md:text-sm">{Number(deposit.amount_sol).toFixed(4)}</span>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <span className="text-muted-foreground text-xs md:text-sm">{Number(deposit.admin_share_sol).toFixed(4)}</span>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <span className="text-muted-foreground text-xs md:text-sm">{Number(deposit.worker_share_sol).toFixed(4)}</span>
-                    </TableCell>
-                    <TableCell>
-                      <code className="text-xs bg-secondary/50 px-2 py-1 rounded">
+                      <code className="bg-secondary/50 px-2 py-1 rounded text-xs font-mono">
                         {shortenAddress(deposit.sender_address)}
                       </code>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">
+                    <TableCell>
                       <a 
                         href={`https://solscan.io/tx/${deposit.tx_signature}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-primary hover:underline"
+                        className="text-primary hover:underline text-xs"
                       >
-                        {shortenAddress(deposit.tx_signature)}
+                        Открыть ↗
                       </a>
                     </TableCell>
                   </TableRow>
                 ))}
-                {recentDeposits.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                      Нет депозитов за выбранный период
-                    </TableCell>
-                  </TableRow>
-                )}
               </TableBody>
             </Table>
           </ScrollArea>

@@ -38,3 +38,6 @@ verify_jwt = false
 
 [functions.chat-upload-image]
 verify_jwt = false
+
+[functions.dashboard-api]
+verify_jwt = false

@@ -91,6 +91,7 @@ const getDeviceIcon = (type: 'desktop' | 'mobile' | 'tablet') => {
 const Dashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
+  const [storedPassword, setStoredPassword] = useState('');
   const [error, setError] = useState('');
   const [visits, setVisits] = useState<PageVisit[]>([]);
   const [loading, setLoading] = useState(false);
@@ -101,48 +102,73 @@ const Dashboard = () => {
     countries: 0
   });
 
-  const handleLogin = () => {
-    if (password === '1488') {
+  const handleLogin = async () => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      // Verify password via edge function (server-side validation)
+      const response = await supabase.functions.invoke('dashboard-api', {
+        body: { password, action: 'get_stats' },
+      });
+
+      if (response.error || response.data?.error) {
+        setError('Неверный пароль');
+        return;
+      }
+
       setIsAuthenticated(true);
-      setError('');
+      setStoredPassword(password);
       sessionStorage.setItem('dashboard_auth', 'true');
-    } else {
-      setError('Неверный пароль');
+      sessionStorage.setItem('dashboard_pwd', password);
+    } catch (err) {
+      setError('Ошибка подключения');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     sessionStorage.removeItem('dashboard_auth');
+    sessionStorage.removeItem('dashboard_pwd');
     setPassword('');
+    setStoredPassword('');
   };
 
   useEffect(() => {
-    if (sessionStorage.getItem('dashboard_auth') === 'true') {
+    const authStatus = sessionStorage.getItem('dashboard_auth');
+    const savedPwd = sessionStorage.getItem('dashboard_pwd');
+    if (authStatus === 'true' && savedPwd) {
       setIsAuthenticated(true);
+      setStoredPassword(savedPwd);
     }
   }, []);
 
   const fetchVisits = async () => {
+    if (!storedPassword) return;
+    
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('page_visits')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(500);
+      // Use edge function to fetch data (server-side with service_role)
+      const response = await supabase.functions.invoke('dashboard-api', {
+        body: { password: storedPassword, action: 'get_visits', limit: 500 },
+      });
 
-      if (error) throw error;
+      if (response.error) throw response.error;
+      if (response.data?.error) throw new Error(response.data.error);
+
+      const data = response.data?.data;
 
       if (data) {
         setVisits(data);
         
-        const uniqueIPs = new Set(data.map(v => v.visitor_ip).filter(Boolean));
-        const uniqueCountries = new Set(data.map(v => v.visitor_country_code).filter(Boolean));
+        const uniqueIPs = new Set(data.map((v: PageVisit) => v.visitor_ip).filter(Boolean));
+        const uniqueCountries = new Set(data.map((v: PageVisit) => v.visitor_country_code).filter(Boolean));
         
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const todayVisits = data.filter(v => new Date(v.created_at) >= today).length;
+        const todayVisits = data.filter((v: PageVisit) => new Date(v.created_at) >= today).length;
 
         setStats({
           totalVisits: data.length,
@@ -158,50 +184,21 @@ const Dashboard = () => {
     }
   };
 
+  // Polling for updates instead of realtime (since RLS blocks direct access)
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && storedPassword) {
       fetchVisits();
 
-      const channel = supabase
-        .channel('page_visits_realtime')
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'page_visits'
-          },
-          (payload) => {
-            console.log('New visit:', payload);
-            const newVisit = payload.new as PageVisit;
-            
-            setVisits((prev) => {
-              const updated = [newVisit, ...prev].slice(0, 500);
-              
-              const uniqueIPs = new Set(updated.map(v => v.visitor_ip).filter(Boolean));
-              const uniqueCountries = new Set(updated.map(v => v.visitor_country_code).filter(Boolean));
-              const today = new Date();
-              today.setHours(0, 0, 0, 0);
-              const todayVisits = updated.filter(v => new Date(v.created_at) >= today).length;
-
-              setStats({
-                totalVisits: updated.length,
-                uniqueIPs: uniqueIPs.size,
-                todayVisits,
-                countries: uniqueCountries.size
-              });
-
-              return updated;
-            });
-          }
-        )
-        .subscribe();
+      // Poll for updates every 10 seconds
+      const pollInterval = setInterval(() => {
+        fetchVisits();
+      }, 10000);
 
       return () => {
-        supabase.removeChannel(channel);
+        clearInterval(pollInterval);
       };
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, storedPassword]);
 
   if (!isAuthenticated) {
     return (
@@ -526,12 +523,12 @@ const Dashboard = () => {
 
           {/* Deposits Tab */}
           <TabsContent value="deposits" className="mt-3 sm:mt-4">
-            <DepositsChart />
+            <DepositsChart password={storedPassword} />
           </TabsContent>
 
           {/* Chart/Stats Tab */}
           <TabsContent value="chart" className="mt-3 sm:mt-4">
-            <VisitsChart />
+            <VisitsChart password={storedPassword} />
           </TabsContent>
 
           {/* Countries Tab */}

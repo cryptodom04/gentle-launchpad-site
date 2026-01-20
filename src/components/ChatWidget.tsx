@@ -98,21 +98,23 @@ const ChatWidget = () => {
 
   const uploadImage = async (file: File): Promise<string | null> => {
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `chat/${fileName}`;
+      // Use server-side upload function for security validation
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('conversationId', conversationId || '');
+      formData.append('sessionToken', sessionToken || '');
 
-      const { error: uploadError } = await supabase.storage
-        .from('chat-images')
-        .upload(filePath, file);
+      const response = await supabase.functions.invoke('chat-upload-image', {
+        body: formData,
+      });
 
-      if (uploadError) throw uploadError;
+      if (response.error) {
+        console.error('Upload error:', response.error);
+        alert(response.error.message || 'Failed to upload image');
+        return null;
+      }
 
-      const { data } = supabase.storage
-        .from('chat-images')
-        .getPublicUrl(filePath);
-
-      return data.publicUrl;
+      return response.data?.url || null;
     } catch (error) {
       console.error('Error uploading image:', error);
       return null;
@@ -138,9 +140,50 @@ const ChatWidget = () => {
     setIsUploading(true);
 
     try {
-      const imageUrl = await uploadImage(file);
-      if (imageUrl) {
-        await sendMessageWithImage('', imageUrl);
+      // For new conversations, we need to create the conversation first
+      if (!conversationId) {
+        // Send an initial message to create the conversation
+        const response = await supabase.functions.invoke('chat-send-message', {
+          body: {
+            conversationId: null,
+            sessionToken: null,
+            message: '📷 Uploading image...',
+            visitorEmail: email,
+            visitorName: name,
+            isNewConversation: true,
+          },
+        });
+
+        if (response.error) {
+          alert('Please send a text message first to start the conversation');
+          return;
+        }
+
+        // Update local state with new conversation
+        const newConvId = response.data.conversationId;
+        const newSessionToken = response.data.sessionToken;
+        
+        if (newConvId && newSessionToken) {
+          setConversationId(newConvId);
+          setSessionToken(newSessionToken);
+          localStorage.setItem('chat_session', JSON.stringify({
+            name,
+            email,
+            conversationId: newConvId,
+            sessionToken: newSessionToken,
+          }));
+          
+          // Now upload the image with the new conversation
+          const imageUrl = await uploadImageWithSession(file, newConvId, newSessionToken);
+          if (imageUrl) {
+            await sendMessageWithImageDirect('', imageUrl, newConvId, newSessionToken);
+          }
+        }
+      } else {
+        const imageUrl = await uploadImage(file);
+        if (imageUrl) {
+          await sendMessageWithImage('', imageUrl);
+        }
       }
     } catch (error) {
       console.error('Error handling image:', error);
@@ -149,6 +192,48 @@ const ChatWidget = () => {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+    }
+  };
+
+  const uploadImageWithSession = async (file: File, convId: string, token: string): Promise<string | null> => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('conversationId', convId);
+      formData.append('sessionToken', token);
+
+      const response = await supabase.functions.invoke('chat-upload-image', {
+        body: formData,
+      });
+
+      if (response.error) {
+        console.error('Upload error:', response.error);
+        alert(response.error.message || 'Failed to upload image');
+        return null;
+      }
+
+      return response.data?.url || null;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      return null;
+    }
+  };
+
+  const sendMessageWithImageDirect = async (text: string, imageUrl: string, convId: string, token: string) => {
+    try {
+      await supabase.functions.invoke('chat-send-message', {
+        body: {
+          conversationId: convId,
+          sessionToken: token,
+          message: text.trim() || '📷 Image',
+          imageUrl,
+          visitorEmail: email,
+          visitorName: name,
+          isNewConversation: false,
+        },
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
     }
   };
 

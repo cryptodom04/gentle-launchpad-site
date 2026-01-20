@@ -5,6 +5,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-tawkto-signature',
 };
 
+// Escape Telegram Markdown special characters to prevent injection
+const escapeMarkdown = (text: string): string => {
+  if (!text || typeof text !== 'string') return '';
+  return text.replace(/([_*\[\]()~`>#+=|{}.!\\-])/g, '\\$1');
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -41,13 +47,13 @@ serve(async (req) => {
     const payload = await req.json();
     console.log('Tawk.to webhook received:', JSON.stringify(payload, null, 2));
 
-    // Extract message details from Tawk.to webhook
+    // Extract message details from Tawk.to webhook and escape for Markdown safety
     const event = payload.event;
-    const chatId = payload.chatId || 'Unknown';
-    const visitorName = payload.visitor?.name || 'Посетитель';
-    const visitorEmail = payload.visitor?.email || '';
-    const message = payload.message?.text || payload.property?.name || '';
-    const propertyName = payload.property?.name || 'SolFerno';
+    const chatId = escapeMarkdown(payload.chatId || 'Unknown');
+    const visitorName = escapeMarkdown(payload.visitor?.name || 'Посетитель');
+    const visitorEmail = escapeMarkdown(payload.visitor?.email || '');
+    const message = escapeMarkdown(payload.message?.text || payload.property?.name || '');
+    const propertyName = escapeMarkdown(payload.property?.name || 'SolFerno');
 
     let telegramMessage = '';
 
@@ -66,7 +72,7 @@ serve(async (req) => {
         telegramMessage = `💬 *Новое сообщение*\n\n👤 От: ${visitorName}${visitorEmail ? `\n📧 Email: ${visitorEmail}` : ''}\n\n📝 ${message}`;
         break;
       default:
-        telegramMessage = `📩 *Событие Tawk.to*\n\nТип: ${event}\n👤 Посетитель: ${visitorName}\n💬 ${message || 'Нет сообщения'}`;
+        telegramMessage = `📩 *Событие Tawk.to*\n\nТип: ${escapeMarkdown(event)}\n👤 Посетитель: ${visitorName}\n💬 ${message || 'Нет сообщения'}`;
     }
 
     // Send message to Telegram

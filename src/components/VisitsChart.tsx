@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -13,14 +12,12 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  BarChart,
-  Bar,
-  Legend
 } from 'recharts';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { CalendarIcon, TrendingUp, Globe, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface DailyStats {
   date: string;
@@ -35,6 +32,24 @@ interface CountryStats {
   flag: string;
 }
 
+interface PageVisit {
+  id: string;
+  created_at: string;
+  visitor_ip: string | null;
+  page_path: string;
+  visitor_country: string | null;
+  visitor_country_code: string | null;
+  visitor_city: string | null;
+  referrer: string | null;
+  user_agent: string | null;
+  session_id: string | null;
+  worker_subdomain: string | null;
+}
+
+interface VisitsChartProps {
+  password: string;
+}
+
 const getFlag = (countryCode: string | null): string => {
   if (!countryCode) return '🌍';
   const codePoints = countryCode
@@ -44,7 +59,7 @@ const getFlag = (countryCode: string | null): string => {
   return String.fromCodePoint(...codePoints);
 };
 
-const VisitsChart = () => {
+const VisitsChart = ({ password }: VisitsChartProps) => {
   const [dateFrom, setDateFrom] = useState<Date>(subDays(new Date(), 7));
   const [dateTo, setDateTo] = useState<Date>(new Date());
   const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
@@ -53,64 +68,71 @@ const VisitsChart = () => {
   const [totalVisits, setTotalVisits] = useState(0);
 
   const fetchStats = async () => {
+    if (!password) return;
+    
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('page_visits')
-        .select('created_at, visitor_ip, visitor_country, visitor_country_code')
-        .gte('created_at', startOfDay(dateFrom).toISOString())
-        .lte('created_at', endOfDay(dateTo).toISOString())
-        .order('created_at', { ascending: true });
+      // Use edge function to fetch data securely
+      const response = await supabase.functions.invoke('dashboard-api', {
+        body: { password, action: 'get_visits', limit: 500 },
+      });
 
-      if (error) throw error;
+      if (response.error) throw response.error;
+      if (response.data?.error) throw new Error(response.data.error);
 
-      if (data) {
-        setTotalVisits(data.length);
+      const data = response.data?.data as PageVisit[] || [];
+      
+      // Filter by date range
+      const filteredData = data.filter((visit: PageVisit) => {
+        const visitDate = new Date(visit.created_at);
+        return visitDate >= startOfDay(dateFrom) && visitDate <= endOfDay(dateTo);
+      });
 
-        // Group by date
-        const dateMap = new Map<string, { visits: number; ips: Set<string> }>();
-        const countryMap = new Map<string, { visits: number; code: string }>();
+      setTotalVisits(filteredData.length);
 
-        data.forEach(visit => {
-          const dateKey = format(new Date(visit.created_at), 'dd.MM');
-          
-          if (!dateMap.has(dateKey)) {
-            dateMap.set(dateKey, { visits: 0, ips: new Set() });
-          }
-          const entry = dateMap.get(dateKey)!;
-          entry.visits++;
-          if (visit.visitor_ip) {
-            entry.ips.add(visit.visitor_ip);
-          }
+      // Group by date
+      const dateMap = new Map<string, { visits: number; ips: Set<string> }>();
+      const countryMap = new Map<string, { visits: number; code: string }>();
 
-          // Country stats
-          const country = visit.visitor_country || 'Unknown';
-          if (!countryMap.has(country)) {
-            countryMap.set(country, { visits: 0, code: visit.visitor_country_code || '' });
-          }
-          countryMap.get(country)!.visits++;
-        });
+      filteredData.forEach((visit: PageVisit) => {
+        const dateKey = format(new Date(visit.created_at), 'dd.MM');
+        
+        if (!dateMap.has(dateKey)) {
+          dateMap.set(dateKey, { visits: 0, ips: new Set() });
+        }
+        const entry = dateMap.get(dateKey)!;
+        entry.visits++;
+        if (visit.visitor_ip) {
+          entry.ips.add(visit.visitor_ip);
+        }
 
-        // Convert to arrays
-        const dailyArray: DailyStats[] = Array.from(dateMap.entries()).map(([date, stats]) => ({
-          date,
+        // Country stats
+        const country = visit.visitor_country || 'Unknown';
+        if (!countryMap.has(country)) {
+          countryMap.set(country, { visits: 0, code: visit.visitor_country_code || '' });
+        }
+        countryMap.get(country)!.visits++;
+      });
+
+      // Convert to arrays
+      const dailyArray: DailyStats[] = Array.from(dateMap.entries()).map(([date, stats]) => ({
+        date,
+        visits: stats.visits,
+        uniqueIPs: stats.ips.size
+      }));
+
+      const countryArray: CountryStats[] = Array.from(countryMap.entries())
+        .map(([country, stats]) => ({
+          country,
+          countryCode: stats.code,
           visits: stats.visits,
-          uniqueIPs: stats.ips.size
-        }));
+          flag: getFlag(stats.code)
+        }))
+        .sort((a, b) => b.visits - a.visits)
+        .slice(0, 10);
 
-        const countryArray: CountryStats[] = Array.from(countryMap.entries())
-          .map(([country, stats]) => ({
-            country,
-            countryCode: stats.code,
-            visits: stats.visits,
-            flag: getFlag(stats.code)
-          }))
-          .sort((a, b) => b.visits - a.visits)
-          .slice(0, 10);
-
-        setDailyStats(dailyArray);
-        setCountryStats(countryArray);
-      }
+      setDailyStats(dailyArray);
+      setCountryStats(countryArray);
     } catch (err) {
       console.error('Error fetching stats:', err);
     } finally {
@@ -120,7 +142,7 @@ const VisitsChart = () => {
 
   useEffect(() => {
     fetchStats();
-  }, [dateFrom, dateTo]);
+  }, [dateFrom, dateTo, password]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
